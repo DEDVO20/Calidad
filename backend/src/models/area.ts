@@ -68,3 +68,5 @@ class Area
     Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
   }
 }
+
+export default Area;
