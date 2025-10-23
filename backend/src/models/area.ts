@@ -28,7 +28,7 @@ class Area
       {
         id: {
           type: DataTypes.UUID,
-          defaultValue: DataTypes,
+          defaultValue: DataTypes.UUIDV4, // ✅ CORREGIDO
           primaryKey: true,
         },
         codigo: {
@@ -57,9 +57,9 @@ class Area
       {
         sequelize,
         tableName: "areas",
-        timestamps: false,
+        timestamps: false, // si usas "creadoEn" y "actualizadoEn" manuales
         underscored: true,
-      },
+      }
     );
   }
 
@@ -68,3 +68,5 @@ class Area
     Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
   }
 }
+
+export default Area;

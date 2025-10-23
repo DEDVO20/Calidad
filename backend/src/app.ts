@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config/env";
+import areaRoutes from "./routes/area.routes"; // 👈 Importa tu nueva ruta
 
 const app: Application = express();
 
@@ -26,10 +27,8 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Api esta Corriendo" });
 });
 
-// Routes
-// import authRoutes from './routes/auth.routes';
-// app.use("/api/auth", authRoutes); // TODO: Descomentar cuando se cree el archivo
-// TODO: Agregar más rutas
+// 📌 Aquí registramos las rutas
+app.use("/api/areas", areaRoutes); // 👈 Nueva ruta de áreas
 
 // Error handling
 app.use(
