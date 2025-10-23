@@ -23,16 +23,16 @@ export const config = {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   },
 
-  upload: {
-    maxSize: Number(process.env.MAX_FILE_SIZE) || 10485760, // 10MB
-    path: process.env.UPLOAD_PATH || "./uploads",
-  },
+  // upload: {
+  //   maxSize: Number(process.env.MAX_FILE_SIZE) || 10485760, // 10MB
+  //   path: process.env.UPLOAD_PATH || "./uploads",
+  // },
 
-  email: {
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT) || 587,
-    user: process.env.SMTP_USER || "",
-    password: process.env.SMTP_PASSWORD || "",
-    from: process.env.EMAIL_FROM || "noreply@sgc.com",
-  },
+  // email: {
+  //   host: process.env.SMTP_HOST || "smtp.gmail.com",
+  //   port: Number(process.env.SMTP_PORT) || 587,
+  //   user: process.env.SMTP_USER || "",
+  //   password: process.env.SMTP_PASSWORD || "",
+  //   from: process.env.EMAIL_FROM || "noreply@sgc.com",
+  // },
 };

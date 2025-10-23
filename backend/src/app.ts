@@ -23,7 +23,7 @@ app.use("/uploads", express.static("uploads"));
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", message: "SGC ISO 9001 API is running" });
+  res.json({ status: "OK", message: "Api esta Corriendo" });
 });
 
 // Routes
