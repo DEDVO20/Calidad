@@ -1,5 +1,4 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
-import Proceso from "./procesos";
 
 interface AreaAttributes {
   id: string;
@@ -29,13 +28,12 @@ class Area
       {
         id: {
           type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV4,
+          defaultValue: DataTypes,
           primaryKey: true,
         },
         codigo: {
-          type: DataTypes.STRING(50),
+          type: DataTypes.STRING,
           allowNull: false,
-          unique: true,
         },
         nombre: {
           type: DataTypes.STRING,
@@ -49,7 +47,6 @@ class Area
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
-          field: "creado_en",
         },
         actualizadoEn: {
           type: DataTypes.DATE,
@@ -67,9 +64,7 @@ class Area
   }
 
   public static associate(models: any): void {
-    Area.hasMany(models.usuarios, { foreignKey: "areaId", as: "usuarios" });
-    Area.hasMany(models.procesos, { foreignKey: "areaId", as: "procesos" });
+    Area.hasMany(models.Usuario, { foreignKey: "areaId", as: "usuarios" });
+    Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
   }
 }
-
-export default Area;

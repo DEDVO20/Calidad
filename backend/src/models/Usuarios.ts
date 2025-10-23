@@ -1,4 +1,11 @@
-import { DataTypes, Model, Optional, Sequelize } from "sequelize";
+import { publicDecrypt } from "node:crypto";
+import {
+  AssociationError,
+  DataTypes,
+  Model,
+  Optional,
+  Sequelize,
+} from "sequelize";
 
 interface UsuarioAttributes {
   id: string;
@@ -9,7 +16,7 @@ interface UsuarioAttributes {
   segundoApellido?: string;
   correoElectronico: string;
   nombreUsuario: string;
-  contrasenaHash: string;
+  contraseñaHash: string;
   areaId: string;
   activo: boolean;
   creadoEn: Date;
@@ -19,13 +26,7 @@ interface UsuarioAttributes {
 interface UsuarioCreationAttributes
   extends Optional<
     UsuarioAttributes,
-    | "id"
-    | "segundoNombre"
-    | "segundoApellido"
-    | "areaId"
-    | "activo"
-    | "creadoEn"
-    | "actualizadoEn"
+    "id" | "activo" | "creadoEn" | "actualizadoEn"
   > {}
 
 class Usuario
@@ -40,7 +41,7 @@ class Usuario
   public segundoApellido?: string;
   public correoElectronico!: string;
   public nombreUsuario!: string;
-  public contrasenaHash!: string;
+  public contraseñaHash!: string;
   public areaId!: string;
   public activo!: boolean;
   public readonly creadoEn!: Date;
@@ -51,53 +52,44 @@ class Usuario
       {
         id: {
           type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV4,
+          defaultValue: DataTypes,
           primaryKey: true,
         },
         documento: {
           type: DataTypes.INTEGER,
           allowNull: false,
-          unique: true,
         },
         nombre: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING,
           allowNull: false,
         },
         segundoNombre: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING,
           allowNull: true,
-          field: "segundo_nombre",
         },
         primerApellido: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING,
           allowNull: false,
-          field: "primer_apellido",
         },
         segundoApellido: {
-          type: DataTypes.STRING(100),
+          type: DataTypes.STRING,
           allowNull: true,
-          field: "segundo_apellido",
         },
         correoElectronico: {
-          type: DataTypes.STRING(254),
+          type: DataTypes.STRING,
           allowNull: false,
-          field: "correo_electronico",
         },
         nombreUsuario: {
-          type: DataTypes.STRING(150),
+          type: DataTypes.STRING,
           allowNull: false,
-          field: "nombre_usuario",
-          unique: true,
         },
-        contrasenaHash: {
-          type: DataTypes.TEXT,
+        contraseñaHash: {
+          type: DataTypes.STRING,
           allowNull: false,
-          field: "contrasena_hash",
         },
         areaId: {
           type: DataTypes.UUID,
-          allowNull: true,
-          field: "area_id",
+          allowNull: false,
         },
         activo: {
           type: DataTypes.BOOLEAN,
@@ -108,19 +100,16 @@ class Usuario
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
-          field: "creado_en",
         },
         actualizadoEn: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
-          field: "actualizado_en",
         },
       },
       {
         sequelize,
         tableName: "usuarios",
-        modelName: "usuario",
         timestamps: false,
         underscored: true,
       },
