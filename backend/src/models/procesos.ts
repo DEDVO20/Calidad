@@ -69,6 +69,7 @@ class Proceso
         areaId: {
           type: DataTypes.UUID,
           allowNull: true,
+          field: "area_id",
         },
         objetivo: {
           type: DataTypes.TEXT,
@@ -81,6 +82,7 @@ class Proceso
         etapaPhva: {
           type: DataTypes.STRING(50),
           allowNull: true,
+          field: "etapa_phva",
           validate: {
             isIn: [["planear", "hacer", "verificar", "actuar"]],
           },
@@ -92,19 +94,23 @@ class Proceso
         creadoPor: {
           type: DataTypes.UUID,
           allowNull: true,
+          field: "creado_por",
         },
         creadoEn: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
+          field: "creado_en",
         },
         actualizadoEn: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
+          field: "actualizado_en",
         },
         // Nuevos campos ISO 9001
         tipoProceso: {
           type: DataTypes.STRING(50),
           allowNull: true,
+          field: "tipo_proceso",
           validate: {
             isIn: [["estrategico", "operativo", "apoyo"]],
           },
@@ -112,9 +118,11 @@ class Proceso
         responsableId: {
           type: DataTypes.UUID,
           allowNull: true,
+          field: "responsable_id",
         },
         estado: {
           type: DataTypes.STRING(50),
+          allowNull: false,
           defaultValue: "activo",
           validate: {
             isIn: [["activo", "inactivo", "revision", "obsoleto"]],
@@ -127,15 +135,18 @@ class Proceso
         fechaAprobacion: {
           type: DataTypes.DATEONLY,
           allowNull: true,
+          field: "fecha_aprobacion",
         },
         proximaRevision: {
           type: DataTypes.DATEONLY,
           allowNull: true,
+          field: "proxima_revision",
         },
       },
       {
         sequelize,
         tableName: "procesos",
+        modelName: "Proceso",
         timestamps: false,
         underscored: true,
       },
