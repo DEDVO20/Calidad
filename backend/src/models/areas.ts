@@ -60,7 +60,8 @@ class Area
       {
         sequelize,
         tableName: "areas",
-        timestamps: false,
+        modelName: "Area",
+        timestamps: false, // si usas "creadoEn" y "actualizadoEn" manuales
         underscored: true,
       },
     );
