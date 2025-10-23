@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Area from "../models/areas";
+import Area from "../models/area.model";
 
 /** Crear Área */
 export const createArea = async (req: Request, res: Response) => {

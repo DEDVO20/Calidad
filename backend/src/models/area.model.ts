@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
-import Proceso from "./procesos";
+import Proceso from "./proceso.model";
 
 interface AreaAttributes {
   id: string;
