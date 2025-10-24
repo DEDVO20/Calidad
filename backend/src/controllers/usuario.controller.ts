@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Usuario from "../models/Usuarios";
+import Usuario from "../models/usuario.model";
 import bcrypt from "bcrypt";
 
 /** Crear usuario */
@@ -18,20 +18,32 @@ export const createUsuario = async (req: Request, res: Response) => {
       activo,
     } = req.body;
 
-    if (!documento || !nombre || !primerApellido || !correoElectronico || !nombreUsuario || !contrasena) {
+    if (
+      !documento ||
+      !nombre ||
+      !primerApellido ||
+      !correoElectronico ||
+      !nombreUsuario ||
+      !contrasena
+    ) {
       return res.status(400).json({
-        message: "Los campos 'documento', 'nombre', 'primerApellido', 'correoElectronico', 'nombreUsuario' y 'contrasena' son obligatorios.",
+        message:
+          "Los campos 'documento', 'nombre', 'primerApellido', 'correoElectronico', 'nombreUsuario' y 'contrasena' son obligatorios.",
       });
     }
 
     const nombreExiste = await Usuario.findOne({ where: { nombreUsuario } });
     if (nombreExiste) {
-      return res.status(409).json({ message: "Ya existe un usuario con ese nombre de usuario." });
+      return res
+        .status(409)
+        .json({ message: "Ya existe un usuario con ese nombre de usuario." });
     }
 
     const documentoExiste = await Usuario.findOne({ where: { documento } });
     if (documentoExiste) {
-      return res.status(409).json({ message: "Ya existe un usuario con ese documento." });
+      return res
+        .status(409)
+        .json({ message: "Ya existe un usuario con ese documento." });
     }
 
     const saltRounds = 10;
@@ -53,7 +65,9 @@ export const createUsuario = async (req: Request, res: Response) => {
     const { contrasenaHash: _, ...usuarioSinHash } = usuario.toJSON();
     return res.status(201).json(usuarioSinHash);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al crear el usuario", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al crear el usuario", error: error.message });
   }
 };
 
@@ -66,7 +80,9 @@ export const getUsuarios = async (_req: Request, res: Response) => {
     });
     return res.json(usuarios);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener usuarios", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener usuarios", error: error.message });
   }
 };
 
@@ -81,7 +97,9 @@ export const getUsuarioById = async (req: Request, res: Response) => {
     }
     return res.json(usuario);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener el usuario", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el usuario", error: error.message });
   }
 };
 
@@ -109,14 +127,18 @@ export const updateUsuario = async (req: Request, res: Response) => {
     if (nombreUsuario && nombreUsuario !== usuario.nombreUsuario) {
       const nombreExiste = await Usuario.findOne({ where: { nombreUsuario } });
       if (nombreExiste) {
-        return res.status(409).json({ message: "Ya existe un usuario con ese nombre de usuario." });
+        return res
+          .status(409)
+          .json({ message: "Ya existe un usuario con ese nombre de usuario." });
       }
     }
 
     if (documento && documento !== usuario.documento) {
       const documentoExiste = await Usuario.findOne({ where: { documento } });
       if (documentoExiste) {
-        return res.status(409).json({ message: "Ya existe un usuario con ese documento." });
+        return res
+          .status(409)
+          .json({ message: "Ya existe un usuario con ese documento." });
       }
     }
 
@@ -134,7 +156,10 @@ export const updateUsuario = async (req: Request, res: Response) => {
 
     if (contrasena) {
       const saltRounds = 10;
-      datosActualizacion.contrasenaHash = await bcrypt.hash(contrasena, saltRounds);
+      datosActualizacion.contrasenaHash = await bcrypt.hash(
+        contrasena,
+        saltRounds,
+      );
     }
 
     await usuario.update(datosActualizacion);
@@ -145,6 +170,11 @@ export const updateUsuario = async (req: Request, res: Response) => {
 
     return res.json(usuarioActualizado);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al actualizar el usuario", error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error al actualizar el usuario",
+        error: error.message,
+      });
   }
 };
