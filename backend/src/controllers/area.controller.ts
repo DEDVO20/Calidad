@@ -28,7 +28,7 @@ export const createArea = async (req: Request, res: Response) => {
 };
 
 /** Listar todas las Áreas */
-export const getAreas = async (_req: Request, res: Response) => {
+export const getAreas = async (req: Request, res: Response) => {
   try {
     const areas = await Area.findAll({ order: [["creadoEn", "DESC"]] });
     return res.json(areas);
