@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config/env";
 import areaRoutes from "./routes/area.routes"; // 👈 Importa tu nueva ruta
+import auditoriaRoutes from "./routes/auditoria.routes"; // 👈 ruta auditoria.routes
 
 const app: Application = express();
 
@@ -28,7 +29,8 @@ app.get("/health", (req, res) => {
 });
 
 // 📌 Aquí registramos las rutas
-app.use("/api/areas", areaRoutes); // 👈 Nueva ruta de áreas
+app.use("/api/areas", areaRoutes);// 👈 Nueva ruta de áreas
+app.use('/api/auditorias', auditoriaRoutes); // 👈Nueva ruta de áreas (auditorias)
 
 // Error handling
 app.use(
