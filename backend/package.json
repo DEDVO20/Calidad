@@ -25,7 +25,10 @@
     "seeder:create": "sequelize-cli seed:generate --name",
     "db:auto-migrate": "node scripts/run-migrations.js migrate",
     "db:auto-status": "node scripts/run-migrations.js status",
-    "db:auto-reset": "node scripts/run-migrations.js reset"
+    "db:auto-reset": "node scripts/run-migrations.js reset",
+    "test:auth": "node scripts/test-auth.js",
+    "test:db": "node scripts/test-auth.js database",
+    "test:db-connection": "node scripts/test-db-connection.js"
   },
   "keywords": [],
   "author": "",
@@ -54,6 +57,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^24.9.1",
     "@types/nodemailer": "^7.0.2",
+    "axios": "^1.12.2",
     "nodemon": "^3.1.10",
     "sequelize-cli": "^6.6.3",
     "ts-node-dev": "^2.0.0",

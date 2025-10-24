@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { config } from "./config/env";
 
 // Importar rutas
+import authRoutes from "./routes/auth.routes";
 import areaRoutes from "./routes/area.routes";
 import notificacionRoutes from "./routes/notificacion.routes";
 import configuracionRoutes from "./routes/configuracion.routes";
@@ -36,6 +37,7 @@ app.get("/health", (req, res) => {
 });
 
 // Registro de rutas principales
+app.use("/api/auth", authRoutes);
 app.use("/api/areas", areaRoutes);
 app.use("/api/notificaciones", notificacionRoutes);
 app.use("/api/configuraciones", configuracionRoutes);
