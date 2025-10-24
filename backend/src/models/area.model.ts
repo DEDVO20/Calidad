@@ -23,17 +23,18 @@ class Area
   public creadoEn!: Date;
   public actualizadoEn!: Date;
 
-  public static initModel(sequelize: Sequelize): typeof Area {
+  static initModel(sequelize: Sequelize): typeof Area {
     return Area.init(
       {
         id: {
           type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV4, // ✅ CORREGIDO
+          defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
         codigo: {
-          type: DataTypes.STRING,
+          type: DataTypes.STRING(50),
           allowNull: false,
+          unique: true,
         },
         nombre: {
           type: DataTypes.STRING,
@@ -47,23 +48,26 @@ class Area
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
+          field: "creado_en",
         },
         actualizadoEn: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
+          field: "actualizado_en",
         },
       },
       {
         sequelize,
         tableName: "areas",
-        timestamps: false, // si usas "creadoEn" y "actualizadoEn" manuales
+        timestamps: false, // usamos campos manuales
         underscored: true,
       }
     );
   }
 
-  public static associate(models: any): void {
+  static associate(models: any): void {
+    // Ajusta los nombres según existan en tu proyecto:
     Area.hasMany(models.Usuario, { foreignKey: "areaId", as: "usuarios" });
     Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
   }

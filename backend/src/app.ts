@@ -4,13 +4,12 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config/env";
 
-// 📦 Importar las rutas
 import areaRoutes from "./routes/area.routes";
 import notificacionRoutes from "./routes/notificacion.routes";
 
 const app: Application = express();
 
-// 🔒 Middlewares de seguridad y configuración
+// Middlewares
 app.use(helmet());
 app.use(
   cors({
@@ -22,19 +21,19 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📂 Archivos estáticos
+// Static files
 app.use("/uploads", express.static("uploads"));
 
-// 💓 Ruta de verificación de salud
+// Health check
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Api esta Corriendo" });
 });
 
-// 🚀 Registro de rutas principales
+// Rutas
 app.use("/api/areas", areaRoutes);
 app.use("/api/notificaciones", notificacionRoutes);
 
-// ⚠️ Manejador global de errores
+// Error handling
 app.use(
   (
     err: any,
