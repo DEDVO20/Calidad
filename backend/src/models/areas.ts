@@ -1,8 +1,6 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
-import Proceso from "./procesos";
-========
+
 import Proceso from "./proceso.model";
->>>>>>>> 96d73413f61024eabe6a1906778ce7cf54387cc8:backend/src/models/area.model.ts
 
 interface AreaAttributes {
   id: string;
