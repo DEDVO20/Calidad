@@ -4,8 +4,14 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config/env";
 
+// Importar rutas
 import areaRoutes from "./routes/area.routes";
 import notificacionRoutes from "./routes/notificacion.routes";
+import configuracionRoutes from "./routes/configuracion.routes";
+import documentoRoutes from "./routes/documento.routes";
+import rolRoutes from "./routes/rol.routes";
+import rolPermisoRoutes from "./routes/rolPermiso.routes";
+import usuarioRoutes from "./routes/usuario.routes";
 
 const app: Application = express();
 
@@ -21,19 +27,24 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files
+// Archivos estáticos
 app.use("/uploads", express.static("uploads"));
 
-// Health check
+// Ruta de verificación de salud
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", message: "Api esta Corriendo" });
+  res.json({ status: "OK", message: "API en funcionamiento" });
 });
 
-// Rutas
+// Registro de rutas principales
 app.use("/api/areas", areaRoutes);
 app.use("/api/notificaciones", notificacionRoutes);
+app.use("/api/configuraciones", configuracionRoutes);
+app.use("/api/documentos", documentoRoutes);
+app.use("/api/roles", rolRoutes);
+app.use("/api/roles-permisos", rolPermisoRoutes);
+app.use("/api/usuarios", usuarioRoutes);
 
-// Error handling
+// Manejador global de errores
 app.use(
   (
     err: any,
