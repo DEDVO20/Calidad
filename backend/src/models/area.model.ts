@@ -1,4 +1,5 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
+<<<<<<<< HEAD:backend/src/models/areas.ts
 import Proceso from "./procesos";
 ========
 import Proceso from "./proceso.model";
