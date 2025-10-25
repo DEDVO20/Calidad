@@ -317,6 +317,204 @@ const swaggerOptions: swaggerJsdoc.Options = {
             },
           },
         },
+        Riesgo: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              description: "ID único del riesgo",
+            },
+            codigo: {
+              type: "string",
+              description: "Código único del riesgo",
+              example: "R-001",
+            },
+            descripcion: {
+              type: "string",
+              description: "Descripción del riesgo",
+            },
+            categoria: {
+              type: "string",
+              enum: ["operacional", "financiero", "legal", "reputacional", "estrategico"],
+              description: "Categoría del riesgo",
+            },
+            probabilidad: {
+              type: "string",
+              enum: ["muy_baja", "baja", "media", "alta", "muy_alta"],
+              description: "Probabilidad de ocurrencia",
+            },
+            impacto: {
+              type: "string",
+              enum: ["muy_bajo", "bajo", "medio", "alto", "muy_alto"],
+              description: "Impacto si ocurre",
+            },
+            nivelRiesgo: {
+              type: "string",
+              enum: ["bajo", "medio", "alto", "critico"],
+              description: "Nivel de riesgo calculado",
+            },
+            estado: {
+              type: "string",
+              enum: ["identificado", "en_tratamiento", "mitigado", "aceptado"],
+              description: "Estado del riesgo",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+            },
+          },
+        },
+        ControlRiesgo: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              description: "ID único del control",
+            },
+            riesgoId: {
+              type: "integer",
+              description: "ID del riesgo asociado",
+            },
+            descripcion: {
+              type: "string",
+              description: "Descripción del control",
+            },
+            tipo: {
+              type: "string",
+              enum: ["preventivo", "correctivo", "detectivo"],
+              description: "Tipo de control",
+            },
+            frecuencia: {
+              type: "string",
+              enum: ["continuo", "diario", "semanal", "mensual", "trimestral", "anual"],
+              description: "Frecuencia de aplicación",
+            },
+            responsable: {
+              type: "string",
+              description: "Responsable del control",
+            },
+            efectividad: {
+              type: "string",
+              enum: ["baja", "media", "alta"],
+              description: "Efectividad del control",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+            },
+          },
+        },
+        Auditoria: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              description: "ID único de la auditoría",
+            },
+            codigo: {
+              type: "string",
+              description: "Código de la auditoría",
+              example: "AUD-2024-001",
+            },
+            tipo: {
+              type: "string",
+              enum: ["interna", "externa", "certificacion"],
+              description: "Tipo de auditoría",
+            },
+            estado: {
+              type: "string",
+              enum: ["planificada", "en_curso", "completada", "cancelada"],
+              description: "Estado actual de la auditoría",
+            },
+            fechaInicio: {
+              type: "string",
+              format: "date-time",
+              description: "Fecha de inicio programada",
+            },
+            fechaFin: {
+              type: "string",
+              format: "date-time",
+              description: "Fecha de fin programada",
+            },
+            alcance: {
+              type: "string",
+              description: "Alcance de la auditoría",
+            },
+            criterios: {
+              type: "string",
+              description: "Criterios de auditoría",
+            },
+            equipo: {
+              type: "string",
+              description: "Equipo auditor",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+            },
+          },
+        },
+        HallazgoAuditoria: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              description: "ID único del hallazgo",
+            },
+            auditoriaId: {
+              type: "integer",
+              description: "ID de la auditoría asociada",
+            },
+            descripcion: {
+              type: "string",
+              description: "Descripción del hallazgo",
+            },
+            tipo: {
+              type: "string",
+              enum: ["no_conformidad_mayor", "no_conformidad_menor", "observacion", "oportunidad_mejora"],
+              description: "Tipo de hallazgo",
+            },
+            severidad: {
+              type: "string",
+              enum: ["baja", "media", "alta", "critica"],
+              description: "Severidad del hallazgo",
+            },
+            estado: {
+              type: "string",
+              enum: ["abierto", "en_tratamiento", "cerrado", "verificado"],
+              description: "Estado del hallazgo",
+            },
+            evidencia: {
+              type: "string",
+              description: "Evidencia del hallazgo",
+            },
+            fechaDeteccion: {
+              type: "string",
+              format: "date-time",
+              description: "Fecha de detección",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+            },
+          },
+        },
       },
     },
     tags: [
@@ -355,6 +553,22 @@ const swaggerOptions: swaggerJsdoc.Options = {
       {
         name: "Configuración",
         description: "Configuración del sistema",
+      },
+      {
+        name: "Riesgos",
+        description: "Gestión de riesgos y su identificación",
+      },
+      {
+        name: "Controles de Riesgo",
+        description: "Gestión de controles para mitigar riesgos",
+      },
+      {
+        name: "Auditorías",
+        description: "Gestión de auditorías internas y externas",
+      },
+      {
+        name: "Hallazgos de Auditoría",
+        description: "Gestión de hallazgos detectados en auditorías",
       },
     ],
   },
