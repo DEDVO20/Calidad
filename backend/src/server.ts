@@ -36,6 +36,7 @@ async function startServer() {
       console.log(`🌍 Entorno: ${config.nodeEnv}`);
       console.log(`🔗 API URL: http://localhost:${PORT}`);
       console.log(`📋 Health Check: http://localhost:${PORT}/health`);
+      console.log(`📖 API Docs (Swagger): http://localhost:${PORT}/api-docs`);
       console.log(`🔐 Login: POST http://localhost:${PORT}/api/auth/login`);
       console.log("🚀 ===================================");
     });
