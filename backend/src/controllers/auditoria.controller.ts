@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AuditoriaModel from '../models/Auditoria.model';
+import AuditoriaModel from '../models/auditoria.model';
 
 // Crear
 export const crearAuditoria = async (req: Request, res: Response) => {
