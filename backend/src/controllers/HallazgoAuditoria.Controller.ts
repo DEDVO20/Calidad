@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import HallazgoAuditoria from "../models/hallazgoAuditoria.model";
+import hallazgoAuditoria from "../models/hallazgoAuditoria.model";
 
 /** Crear Hallazgo de Auditoría */
-export const createHallazgoAuditoria = async (req: Request, res: Response) => {
+export const createhallazgoAuditoria = async (req: Request, res: Response) => {
   try {
     const payload = req.body ?? {};
 
@@ -12,7 +12,7 @@ export const createHallazgoAuditoria = async (req: Request, res: Response) => {
         .json({ message: "El campo 'auditoriaId' es obligatorio." });
     }
 
-    const hallazgo = await HallazgoAuditoria.create(payload);
+    const hallazgo = await hallazgoAuditoria.create(payload);
     return res.status(201).json(hallazgo);
   } catch (error: any) {
     console.error(error);
@@ -23,9 +23,9 @@ export const createHallazgoAuditoria = async (req: Request, res: Response) => {
 };
 
 /** Listar todos los Hallazgos de Auditoría */
-export const getHallazgosAuditoria = async (_req: Request, res: Response) => {
+export const gethallazgosAuditoria = async (_req: Request, res: Response) => {
   try {
-    const hallazgos = await HallazgoAuditoria.findAll({
+    const hallazgos = await hallazgoAuditoria.findAll({
       order: [["creadoEn", "DESC"]],
     });
     return res.json(hallazgos);
@@ -38,9 +38,9 @@ export const getHallazgosAuditoria = async (_req: Request, res: Response) => {
 };
 
 /** Obtener Hallazgo de Auditoría por ID */
-export const getHallazgoAuditoriaById = async (req: Request, res: Response) => {
+export const gethallazgoAuditoriaById = async (req: Request, res: Response) => {
   try {
-    const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
+    const hallazgo = await hallazgoAuditoria.findByPk(req.params.id);
     if (!hallazgo)
       return res.status(404).json({ message: "Hallazgo no encontrado" });
     return res.json(hallazgo);
@@ -53,9 +53,9 @@ export const getHallazgoAuditoriaById = async (req: Request, res: Response) => {
 };
 
 /** Actualizar Hallazgo de Auditoría por ID */
-export const updateHallazgoAuditoria = async (req: Request, res: Response) => {
+export const updatehallazgoAuditoria = async (req: Request, res: Response) => {
   try {
-    const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
+    const hallazgo = await hallazgoAuditoria.findByPk(req.params.id);
     if (!hallazgo)
       return res.status(404).json({ message: "Hallazgo no encontrado" });
 
@@ -64,19 +64,17 @@ export const updateHallazgoAuditoria = async (req: Request, res: Response) => {
     return res.json(hallazgo);
   } catch (error: any) {
     console.error(error);
-    return res
-      .status(500)
-      .json({
-        message: "Error al actualizar el hallazgo",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Error al actualizar el hallazgo",
+      error: error.message,
+    });
   }
 };
 
 /** Eliminar Hallazgo de Auditoría por ID */
-export const deleteHallazgoAuditoria = async (req: Request, res: Response) => {
+export const deletehallazgoAuditoria = async (req: Request, res: Response) => {
   try {
-    const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
+    const hallazgo = await hallazgoAuditoria.findByPk(req.params.id);
     if (!hallazgo)
       return res.status(404).json({ message: "Hallazgo no encontrado" });
 

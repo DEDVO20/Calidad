@@ -1,19 +1,19 @@
 import { Router } from "express";
 import {
-  createHallazgoAuditoria,
-  getHallazgosAuditoria,
-  getHallazgoAuditoriaById,
-  updateHallazgoAuditoria,
-  deleteHallazgoAuditoria,
-} from "../controllers/hallazgoAuditoria.controller";
+  createhallazgoAuditoria,
+  gethallazgosAuditoria,
+  gethallazgoAuditoriaById,
+  updatehallazgoAuditoria,
+  deletehallazgoAuditoria,
+} from "../controllers/HallazgoAuditoria.Controller";
 
 const router = Router();
 
 /** Rutas para Hallazgos de Auditoría */
-router.post("/", createHallazgoAuditoria);
-router.get("/", getHallazgosAuditoria);
-router.get("/:id", getHallazgoAuditoriaById);
-router.put("/:id", updateHallazgoAuditoria);
-router.delete("/:id", deleteHallazgoAuditoria);
+router.post("/", createhallazgoAuditoria);
+router.get("/", gethallazgosAuditoria);
+router.get("/:id", gethallazgoAuditoriaById);
+router.put("/:id", updatehallazgoAuditoria);
+router.delete("/:id", deletehallazgoAuditoria);
 
 export default router;
