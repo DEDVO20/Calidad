@@ -7,14 +7,18 @@ export const createHallazgoAuditoria = async (req: Request, res: Response) => {
     const payload = req.body ?? {};
 
     if (!payload.auditoriaId) {
-      return res.status(400).json({ message: "El campo 'auditoriaId' es obligatorio." });
+      return res
+        .status(400)
+        .json({ message: "El campo 'auditoriaId' es obligatorio." });
     }
 
     const hallazgo = await HallazgoAuditoria.create(payload);
     return res.status(201).json(hallazgo);
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: "Error al crear el hallazgo", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al crear el hallazgo", error: error.message });
   }
 };
 
@@ -27,7 +31,9 @@ export const getHallazgosAuditoria = async (_req: Request, res: Response) => {
     return res.json(hallazgos);
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: "Error al obtener hallazgos", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener hallazgos", error: error.message });
   }
 };
 
@@ -35,11 +41,14 @@ export const getHallazgosAuditoria = async (_req: Request, res: Response) => {
 export const getHallazgoAuditoriaById = async (req: Request, res: Response) => {
   try {
     const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
-    if (!hallazgo) return res.status(404).json({ message: "Hallazgo no encontrado" });
+    if (!hallazgo)
+      return res.status(404).json({ message: "Hallazgo no encontrado" });
     return res.json(hallazgo);
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: "Error al obtener el hallazgo", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el hallazgo", error: error.message });
   }
 };
 
@@ -47,14 +56,20 @@ export const getHallazgoAuditoriaById = async (req: Request, res: Response) => {
 export const updateHallazgoAuditoria = async (req: Request, res: Response) => {
   try {
     const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
-    if (!hallazgo) return res.status(404).json({ message: "Hallazgo no encontrado" });
+    if (!hallazgo)
+      return res.status(404).json({ message: "Hallazgo no encontrado" });
 
     const payload = req.body ?? {};
     await hallazgo.update(payload);
     return res.json(hallazgo);
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: "Error al actualizar el hallazgo", error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Error al actualizar el hallazgo",
+        error: error.message,
+      });
   }
 };
 
@@ -62,12 +77,15 @@ export const updateHallazgoAuditoria = async (req: Request, res: Response) => {
 export const deleteHallazgoAuditoria = async (req: Request, res: Response) => {
   try {
     const hallazgo = await HallazgoAuditoria.findByPk(req.params.id);
-    if (!hallazgo) return res.status(404).json({ message: "Hallazgo no encontrado" });
+    if (!hallazgo)
+      return res.status(404).json({ message: "Hallazgo no encontrado" });
 
     await hallazgo.destroy();
     return res.status(204).send();
   } catch (error: any) {
     console.error(error);
-    return res.status(500).json({ message: "Error al eliminar el hallazgo", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al eliminar el hallazgo", error: error.message });
   }
 };
