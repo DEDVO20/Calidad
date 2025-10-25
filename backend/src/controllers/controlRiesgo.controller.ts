@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import ControlRiesgo from "../models/ControlRiesgo.model";
+import ControlRiesgo from "../models/controlRiesgo.model";
 
 /** Crear Control de Riesgo */
 export const createControlRiesgo = async (req: Request, res: Response) => {

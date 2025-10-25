@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import Notificacion from "../models/notificaciones";
+import Notificacion from "../models/notificacion.model";
 
 /** Crear notificación */
 export const createNotificacion = async (req: Request, res: Response) => {
   try {
-    const { usuario_id, tipo, contenido } = req.body;
+    const { usuarioId, tipo, contenido } = req.body;
 
-    if (!usuario_id || !tipo) {
+    if (!usuarioId || !tipo) {
       return res.status(400).json({ message: "usuario_id y tipo son obligatorios." });
     }
 
     const notif = await Notificacion.create({
-      usuario_id,
+      usuarioId,
       tipo,
       contenido,
       entregado: false,
@@ -26,9 +26,9 @@ export const createNotificacion = async (req: Request, res: Response) => {
 /** Listar notificaciones (opcionalmente por usuario_id) */
 export const getNotificaciones = async (req: Request, res: Response) => {
   try {
-    const { usuario_id } = req.query;
+    const { usuarioId } = req.query;
     const where: any = {};
-    if (usuario_id) where.usuario_id = usuario_id;
+    if (usuarioId) where.usuarioId = usuarioId;
 
     const notifs = await Notificacion.findAll({
       where,
@@ -55,7 +55,7 @@ export const getNotificacionById = async (req: Request, res: Response) => {
 /** Actualizar notificación (título, contenido, entregado, etc.) */
 export const updateNotificacion = async (req: Request, res: Response) => {
   try {
-    const { tipo, contenido, entregado, entregado_en } = req.body;
+    const { tipo, contenido, entregado, entregadoEn } = req.body;
     const notif = await Notificacion.findByPk(req.params.id);
     if (!notif) return res.status(404).json({ message: "Notificación no encontrada" });
 
@@ -63,7 +63,7 @@ export const updateNotificacion = async (req: Request, res: Response) => {
       tipo,
       contenido,
       entregado,
-      entregado_en,
+      entregadoEn,
     });
 
     return res.json(notif);
