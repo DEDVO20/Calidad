@@ -2,7 +2,9 @@ import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { config } from "./config/env";
+import { swaggerSpec } from "./config/swagger";
 
 // Importar rutas
 import authRoutes from "./routes/auth.routes";
@@ -34,6 +36,19 @@ app.use("/uploads", express.static("uploads"));
 // Ruta de verificación de salud
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "API en funcionamiento" });
+});
+
+// Documentación de API con Swagger
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "SGC API Documentation",
+  customfavIcon: "/favicon.ico",
+}));
+
+// Endpoint para obtener la especificación OpenAPI en JSON
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
 });
 
 // Registro de rutas principales

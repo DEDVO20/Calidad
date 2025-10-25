@@ -32,18 +32,23 @@ const generateRefreshToken = (userId: string): string => {
 /** Inicio de sesión */
 export const login = async (req: Request, res: Response) => {
   try {
-    const { nombreUsuario, contrasena } = req.body;
+    const { usuario: usuarioOEmail, contrasena } = req.body;
 
     // Validar campos obligatorios
-    if (!nombreUsuario || !contrasena) {
+    if (!usuarioOEmail || !contrasena) {
       return res.status(400).json({
-        message: "Nombre de usuario y contraseña son obligatorios",
+        message: "Usuario/Email y contraseña son obligatorios",
       });
     }
 
-    // Buscar usuario en la base de datos
+    // Buscar usuario en la base de datos por nombre de usuario O correo electrónico
     const usuario = await Usuario.findOne({
-      where: { nombreUsuario },
+      where: {
+        [Op.or]: [
+          { nombreUsuario: usuarioOEmail },
+          { correoElectronico: usuarioOEmail },
+        ],
+      },
       attributes: [
         "id",
         "documento",
@@ -148,10 +153,10 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    // Verificar si el usuario ya existe (por nombreUsuario o documento)
+    // Verificar si el usuario ya existe (por nombreUsuario, correoElectronico o documento)
     const usuarioExistente = await Usuario.findOne({
       where: {
-        [Op.or]: [{ nombreUsuario }, { documento }],
+        [Op.or]: [{ nombreUsuario }, { correoElectronico }, { documento }],
       },
     });
 
@@ -159,6 +164,11 @@ export const register = async (req: Request, res: Response) => {
       if (usuarioExistente.nombreUsuario === nombreUsuario) {
         return res.status(409).json({
           message: "El nombre de usuario ya existe",
+        });
+      }
+      if (usuarioExistente.correoElectronico === correoElectronico) {
+        return res.status(409).json({
+          message: "El correo electrónico ya está registrado",
         });
       }
       if (usuarioExistente.documento === documento) {
