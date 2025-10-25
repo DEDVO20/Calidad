@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Usuario from "../models/usuario.model";
+import { Usuario } from "../database";
 
 /** Crear usuario */
 export const createUsuario = async (req: Request, res: Response) => {
@@ -17,15 +17,27 @@ export const createUsuario = async (req: Request, res: Response) => {
       activo,
     } = req.body;
 
-    if (!documento || !nombre || !primerApellido || !correoElectronico || !nombreUsuario || !contrasenaHash) {
+    if (
+      !documento ||
+      !nombre ||
+      !primerApellido ||
+      !correoElectronico ||
+      !nombreUsuario ||
+      !contrasenaHash
+    ) {
       return res.status(400).json({
-        message: "Faltan campos obligatorios: documento, nombre, primerApellido, correoElectronico, nombreUsuario y contrasenaHash",
+        message:
+          "Faltan campos obligatorios: documento, nombre, primerApellido, correoElectronico, nombreUsuario y contrasenaHash",
       });
     }
 
-    const usuarioExistente = await Usuario.findOne({ where: { nombreUsuario } });
+    const usuarioExistente = await Usuario.findOne({
+      where: { nombreUsuario },
+    });
     if (usuarioExistente) {
-      return res.status(409).json({ message: "El nombre de usuario ya existe." });
+      return res
+        .status(409)
+        .json({ message: "El nombre de usuario ya existe." });
     }
 
     const usuario = await Usuario.create({
@@ -67,7 +79,8 @@ export const getUsuarios = async (_req: Request, res: Response) => {
 export const getUsuarioById = async (req: Request, res: Response) => {
   try {
     const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!usuario)
+      return res.status(404).json({ message: "Usuario no encontrado" });
     return res.json(usuario);
   } catch (error: any) {
     return res.status(500).json({
@@ -81,7 +94,8 @@ export const getUsuarioById = async (req: Request, res: Response) => {
 export const updateUsuario = async (req: Request, res: Response) => {
   try {
     const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!usuario)
+      return res.status(404).json({ message: "Usuario no encontrado" });
 
     await usuario.update(req.body);
     return res.json(usuario);
@@ -97,7 +111,8 @@ export const updateUsuario = async (req: Request, res: Response) => {
 export const deleteUsuario = async (req: Request, res: Response) => {
   try {
     const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!usuario)
+      return res.status(404).json({ message: "Usuario no encontrado" });
 
     await usuario.destroy();
     return res.status(204).send();

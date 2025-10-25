@@ -2,9 +2,12 @@ import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { config } from "./config/env";
+import { swaggerSpec } from "./config/swagger";
 
 // Importar rutas
+import authRoutes from "./routes/auth.routes";
 import areaRoutes from "./routes/area.routes";
 import notificacionRoutes from "./routes/notificacion.routes";
 import configuracionRoutes from "./routes/configuracion.routes";
@@ -40,12 +43,21 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "API en funcionamiento" });
 });
 
-// 📌 Aquí registramos las rutas
-app.use("/api/areas", areaRoutes); // 👈 Nueva ruta de áreas
-app.use("/api/auditorias", auditoriaRoutes); // 👈Nueva ruta de áreas (auditorias)
+// Documentación de API con Swagger
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "SGC API Documentation",
+  customfavIcon: "/favicon.ico",
+}));
 
-// Error handling
+// Endpoint para obtener la especificación OpenAPI en JSON
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 // Registro de rutas principales
+app.use("/api/auth", authRoutes);
 app.use("/api/areas", areaRoutes);
 app.use("/api/notificaciones", notificacionRoutes);
 app.use("/api/configuraciones", configuracionRoutes);
