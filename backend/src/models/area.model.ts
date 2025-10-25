@@ -62,15 +62,17 @@ class Area
         tableName: "areas",
         timestamps: false, // usamos campos manuales
         underscored: true,
-      }
+      },
     );
   }
 
-  static associate(models: any): void {
-    // Ajusta los nombres según existan en tu proyecto:
-    Area.hasMany(models.Usuario, { foreignKey: "areaId", as: "usuarios" });
-    Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
-  }
+  // Asociaciones comentadas temporalmente para evitar errores de inicialización
+  // Se configurarán directamente en database/index.ts
+  // static associate(models: any): void {
+  //   // Ajusta los nombres según existan en tu proyecto:
+  //   Area.hasMany(models.Usuario, { foreignKey: "areaId", as: "usuarios" });
+  //   Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
+  // }
 }
 
 export default Area;

@@ -126,21 +126,23 @@ class Usuario
       },
     );
   }
-  public static associate(models: any): void {
-    Usuario.belongsTo(models.Area, { foreignKey: "areaId", as: "area" });
-    Usuario.hasMany(models.Proceso, {
-      foreignKey: "creadoPor",
-      as: "procesosCreados",
-    });
-    Usuario.hasMany(models.NoConformidad, {
-      foreignKey: "detectadoPor",
-      as: "noConformidadesDetectadas",
-    });
-    Usuario.hasMany(models.Auditoria, {
-      foreignKey: "creadoPor",
-      as: "auditoriasCreadas",
-    });
-  }
+  // Asociaciones comentadas temporalmente para evitar errores de inicialización
+  // Se configurarán directamente en database/index.ts
+  // public static associate(models: any): void {
+  //   Usuario.belongsTo(models.Area, { foreignKey: "areaId", as: "area" });
+  //   Usuario.hasMany(models.Proceso, {
+  //     foreignKey: "creadoPor",
+  //     as: "procesosCreados",
+  //   });
+  //   Usuario.hasMany(models.NoConformidad, {
+  //     foreignKey: "detectadoPor",
+  //     as: "noConformidadesDetectadas",
+  //   });
+  //   Usuario.hasMany(models.Auditoria, {
+  //     foreignKey: "creadoPor",
+  //     as: "auditoriasCreadas",
+  //   });
+  // }
 }
 
 export default Usuario;
