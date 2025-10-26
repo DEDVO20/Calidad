@@ -5,7 +5,7 @@ import {
   gethallazgoAuditoriaById,
   updatehallazgoAuditoria,
   deletehallazgoAuditoria,
-} from "../controllers/hallazgoAuditoria.Controller";
+} from "../controllers/hallazgoAuditoria.controller";
 
 const router = Router();
 
