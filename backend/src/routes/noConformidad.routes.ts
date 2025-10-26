@@ -5,7 +5,7 @@ import {
   getNoConformidadById,
   updateNoConformidad,
   deleteNoConformidad
-} from "../controllers/noConformidad.controller.";
+} from "../controllers/noConformidad.controller";
 
 const router = Router();
 
