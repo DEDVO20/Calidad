@@ -19,16 +19,15 @@ export const createNotificacion = async (req: Request, res: Response) => {
       entregado: false,
     });
 
-    return res.status(201).json(notif);
+    return res.status(201).json(nueva);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al crear la notificación.",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al crear la notificación", error: error.message });
   }
 };
 
-/** Listar todas las notificaciones (opcionalmente por usuario) */
+/** Listar todas las notificaciones */
 export const getNotificaciones = async (req: Request, res: Response) => {
   try {
     const { usuarioId } = req.query;
@@ -39,17 +38,15 @@ export const getNotificaciones = async (req: Request, res: Response) => {
       where,
       order: [["creadoEn", "DESC"]],
     });
-
-    return res.json(notifs);
+    return res.json(lista);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al obtener las notificaciones.",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener las notificaciones", error: error.message });
   }
 };
 
-/** Obtener una notificación por ID */
+/** Obtener notificación por ID */
 export const getNotificacionById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -60,10 +57,9 @@ export const getNotificacionById = async (req: Request, res: Response) => {
 
     return res.json(notificacion);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al obtener la notificación.",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener la notificación", error: error.message });
   }
 };
 
@@ -82,33 +78,11 @@ export const marcarComoLeida = async (req: Request, res: Response) => {
       entregadoEn: new Date(),
     });
 
-    return res.json({
-      message: "Notificación marcada como leída.",
-      notificacion,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al marcar la notificación como leída.",
-      error: error.message,
-    });
-  }
-};
-
-/** Eliminar una notificación */
-export const deleteNotificacion = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const notificacion = await Notificacion.findByPk(id);
-
-    if (!notificacion)
-      return res.status(404).json({ message: "Notificación no encontrada." });
-
     await notificacion.destroy();
     return res.status(204).send();
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al eliminar la notificación.",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al eliminar la notificación", error: error.message });
   }
 };

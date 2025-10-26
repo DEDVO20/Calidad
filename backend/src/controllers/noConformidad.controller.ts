@@ -4,13 +4,13 @@ import NoConformidad from "../models/noConformidad.model";
 /** Crear No Conformidad */
 export const createNoConformidad = async (req: Request, res: Response) => {
   try {
-    const { codigo, descripcion, responsableId, estado } = req.body;
+    const { codigo, descripcion, responsable, estado } = req.body;
 
     // Validación de campos obligatorios
     if (!codigo || !descripcion) {
-      return res.status(400).json({
-        message: "Los campos 'codigo' y 'descripcion' son obligatorios.",
-      });
+      return res
+        .status(400)
+        .json({ message: "Los campos 'codigo' y 'descripcion' son obligatorios." });
     }
 
     // Verificar si ya existe una no conformidad con el mismo código
@@ -31,10 +31,9 @@ export const createNoConformidad = async (req: Request, res: Response) => {
 
     return res.status(201).json(nueva);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al crear la no conformidad",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al crear la no conformidad", error: error.message });
   }
 };
 
@@ -46,10 +45,9 @@ export const getNoConformidades = async (req: Request, res: Response) => {
     });
     return res.json(lista);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al obtener las no conformidades",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener las no conformidades", error: error.message });
   }
 };
 
@@ -64,10 +62,9 @@ export const getNoConformidadById = async (req: Request, res: Response) => {
 
     return res.json(nc);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al obtener la no conformidad",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener la no conformidad", error: error.message });
   }
 };
 
@@ -81,13 +78,12 @@ export const updateNoConformidad = async (req: Request, res: Response) => {
     if (!nc)
       return res.status(404).json({ message: "No conformidad no encontrada." });
 
-    await nc.update({ descripcion, responsableId, estado });
+    await nc.update({ descripcion, responsable, estado });
     return res.json(nc);
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al actualizar la no conformidad",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al actualizar la no conformidad", error: error.message });
   }
 };
 
@@ -103,9 +99,8 @@ export const deleteNoConformidad = async (req: Request, res: Response) => {
     await nc.destroy();
     return res.status(204).send();
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Error al eliminar la no conformidad",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({ message: "Error al eliminar la no conformidad", error: error.message });
   }
 };

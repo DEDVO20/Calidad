@@ -4,37 +4,29 @@ import ParticipanteProceso from "../models/participanteProceso.model";
 /** Crear un participante de proceso */
 export const createParticipante = async (req: Request, res: Response) => {
   try {
-    const { instanciaId, usuarioId, rol } = req.body;
+    const { procesoId, usuarioId, rol } = req.body;
 
-    if (!instanciaId || !usuarioId) {
-      return res.status(400).json({
-        message: "Los campos 'instanciaId' y 'usuarioId' son obligatorios.",
-      });
+    if (!procesoId || !usuarioId) {
+      return res
+        .status(400)
+        .json({ message: "Los campos 'procesoId' y 'usuarioId' son obligatorios." });
     }
 
-    // Evita duplicados
     const existe = await ParticipanteProceso.findOne({
-      where: { instanciaId, usuarioId },
+      where: { procesoId, usuarioId },
     });
 
     if (existe) {
       return res
         .status(409)
-        .json({
-          message: "El usuario ya está asignado a esta instancia de proceso.",
-        });
+        .json({ message: "El usuario ya está asignado a este proceso." });
     }
 
-    const nuevo = await ParticipanteProceso.create({
-      instanciaId,
-      usuarioId,
-      rol,
-    });
-
+    const nuevo = await ParticipanteProceso.create({ procesoId, usuarioId, rol });
     return res.status(201).json(nuevo);
   } catch (error: any) {
     return res.status(500).json({
-      message: "Error al crear el participante del proceso.",
+      message: "Error al crear el participante del proceso",
       error: error.message,
     });
   }
@@ -49,7 +41,7 @@ export const getParticipantes = async (req: Request, res: Response) => {
     return res.json(lista);
   } catch (error: any) {
     return res.status(500).json({
-      message: "Error al obtener los participantes de procesos.",
+      message: "Error al obtener los participantes de procesos",
       error: error.message,
     });
   }
@@ -67,7 +59,7 @@ export const getParticipanteById = async (req: Request, res: Response) => {
     return res.json(participante);
   } catch (error: any) {
     return res.status(500).json({
-      message: "Error al obtener el participante.",
+      message: "Error al obtener el participante",
       error: error.message,
     });
   }
@@ -87,7 +79,7 @@ export const updateParticipante = async (req: Request, res: Response) => {
     return res.json(participante);
   } catch (error: any) {
     return res.status(500).json({
-      message: "Error al actualizar el participante.",
+      message: "Error al actualizar el participante",
       error: error.message,
     });
   }
@@ -106,7 +98,7 @@ export const deleteParticipante = async (req: Request, res: Response) => {
     return res.status(204).send();
   } catch (error: any) {
     return res.status(500).json({
-      message: "Error al eliminar el participante.",
+      message: "Error al eliminar el participante",
       error: error.message,
     });
   }
