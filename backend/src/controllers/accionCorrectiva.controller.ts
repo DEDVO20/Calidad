@@ -121,7 +121,9 @@ export const updateAccionCorrectiva = async (req: Request, res: Response) => {
     }
 
     if (codigo && codigo !== accionCorrectiva.codigo) {
-      const codigoExiste = await AccionCorrectiva.findOne({ where: { codigo } });
+      const codigoExiste = await AccionCorrectiva.findOne({
+        where: { codigo },
+      });
       if (codigoExiste) {
         return res.status(409).json({
           message: "Ya existe una acción correctiva con ese código.",

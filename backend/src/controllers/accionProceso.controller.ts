@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import AccionProceso from "../models/AccionProceso.model";
+import AccionProceso from "../models/accionProceso.model";
 
 /** Crear acción de proceso */
 export const createAccionProceso = async (req: Request, res: Response) => {
@@ -16,7 +16,8 @@ export const createAccionProceso = async (req: Request, res: Response) => {
 
     if (!instanciaId || !etapaId || !tipoAccion || !ejecutadoEn) {
       return res.status(400).json({
-        message: "Los campos 'instanciaId', 'etapaId', 'tipoAccion' y 'ejecutadoEn' son obligatorios.",
+        message:
+          "Los campos 'instanciaId', 'etapaId', 'tipoAccion' y 'ejecutadoEn' son obligatorios.",
       });
     }
 

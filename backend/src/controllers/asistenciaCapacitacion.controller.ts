@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import AsistenciaCapacitacion from "../models/AsistenciaCapacitacion.model";
+import AsistenciaCapacitacion from "../models/asistenciaCapacitacion.model";
 
 /** Crear una asistencia */
 export const createAsistencia = async (req: Request, res: Response) => {
@@ -18,7 +18,8 @@ export const createAsistencia = async (req: Request, res: Response) => {
 
     if (existe) {
       return res.status(409).json({
-        message: "El usuario ya tiene una asistencia registrada en esta capacitación.",
+        message:
+          "El usuario ya tiene una asistencia registrada en esta capacitación.",
       });
     }
 

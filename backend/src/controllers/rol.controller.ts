@@ -15,13 +15,17 @@ export const createRol = async (req: Request, res: Response) => {
     // (Opcional) evitar duplicados por clave
     const existe = await Rol.findOne({ where: { clave } });
     if (existe) {
-      return res.status(409).json({ message: "Ya existe un rol con esa clave." });
+      return res
+        .status(409)
+        .json({ message: "Ya existe un rol con esa clave." });
     }
 
     const rol = await Rol.create({ nombre, clave, descripcion });
     return res.status(201).json(rol);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al crear rol", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al crear rol", error: error.message });
   }
 };
 
@@ -33,7 +37,9 @@ export const getRoles = async (_req: Request, res: Response) => {
     });
     return res.json(roles);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener roles", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener roles", error: error.message });
   }
 };
 
@@ -41,15 +47,14 @@ export const getRoles = async (_req: Request, res: Response) => {
 export const getRolById = async (req: Request, res: Response) => {
   try {
     const rol = await Rol.findByPk(req.params.id, {
-      include: [
-        { association: "usuarios" },
-        { association: "permisos" },
-      ],
+      include: [{ association: "usuarios" }, { association: "permisos" }],
     });
     if (!rol) return res.status(404).json({ message: "Rol no encontrado" });
     return res.json(rol);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener rol", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener rol", error: error.message });
   }
 };
 
@@ -64,14 +69,18 @@ export const updateRol = async (req: Request, res: Response) => {
     if (clave && clave !== rol.clave) {
       const existe = await Rol.findOne({ where: { clave } });
       if (existe) {
-        return res.status(409).json({ message: "Ya existe un rol con esa clave." });
+        return res
+          .status(409)
+          .json({ message: "Ya existe un rol con esa clave." });
       }
     }
 
     await rol.update({ nombre, clave, descripcion });
     return res.json(rol);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al actualizar rol", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al actualizar rol", error: error.message });
   }
 };
 
@@ -79,10 +88,13 @@ export const updateRol = async (req: Request, res: Response) => {
 export const deleteRol = async (req: Request, res: Response) => {
   try {
     const rows = await Rol.destroy({ where: { id: req.params.id } });
-    if (rows === 0) return res.status(404).json({ message: "Rol no encontrado" });
+    if (rows === 0)
+      return res.status(404).json({ message: "Rol no encontrado" });
     return res.status(204).send();
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al eliminar rol", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al eliminar rol", error: error.message });
   }
 };
 
@@ -93,7 +105,9 @@ export const addPermisosToRol = async (req: Request, res: Response) => {
   try {
     const { permisoIds } = req.body as { permisoIds: string[] };
     if (!Array.isArray(permisoIds) || permisoIds.length === 0) {
-      return res.status(400).json({ message: "permisoIds debe ser un array no vacío" });
+      return res
+        .status(400)
+        .json({ message: "permisoIds debe ser un array no vacío" });
     }
 
     const rol = await Rol.findByPk(req.params.id);
@@ -105,10 +119,14 @@ export const addPermisosToRol = async (req: Request, res: Response) => {
     await rol.addPermisos(permisoIds);
 
     // @ts-ignore
-    const actualizado = await Rol.findByPk(req.params.id, { include: [{ association: "permisos" }] });
+    const actualizado = await Rol.findByPk(req.params.id, {
+      include: [{ association: "permisos" }],
+    });
     return res.json(actualizado);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al asignar permisos", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al asignar permisos", error: error.message });
   }
 };
 
@@ -117,7 +135,9 @@ export const removePermisosFromRol = async (req: Request, res: Response) => {
   try {
     const { permisoIds } = req.body as { permisoIds: string[] };
     if (!Array.isArray(permisoIds) || permisoIds.length === 0) {
-      return res.status(400).json({ message: "permisoIds debe ser un array no vacío" });
+      return res
+        .status(400)
+        .json({ message: "permisoIds debe ser un array no vacío" });
     }
 
     const rol = await Rol.findByPk(req.params.id);
@@ -127,9 +147,13 @@ export const removePermisosFromRol = async (req: Request, res: Response) => {
     await rol.removePermisos(permisoIds);
 
     // @ts-ignore
-    const actualizado = await Rol.findByPk(req.params.id, { include: [{ association: "permisos" }] });
+    const actualizado = await Rol.findByPk(req.params.id, {
+      include: [{ association: "permisos" }],
+    });
     return res.json(actualizado);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al remover permisos", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al remover permisos", error: error.message });
   }
 };

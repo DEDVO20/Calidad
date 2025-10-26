@@ -16,7 +16,8 @@ export const createCampoFormulario = async (req: Request, res: Response) => {
 
     if (!procesoId || !nombre || !claveCampo || !tipoCampo) {
       return res.status(400).json({
-        message: "Los campos 'procesoId', 'nombre', 'claveCampo' y 'tipoCampo' son obligatorios.",
+        message:
+          "Los campos 'procesoId', 'nombre', 'claveCampo' y 'tipoCampo' son obligatorios.",
       });
     }
 

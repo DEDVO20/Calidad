@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import SeguimientoObjetivo from "../models/seguimientoObjetivo.model";
 
 /** Crear seguimiento de objetivo */
-export const createSeguimientoObjetivo = async (req: Request, res: Response) => {
+export const createSeguimientoObjetivo = async (
+  req: Request,
+  res: Response,
+) => {
   try {
     const {
       objetivoId,
@@ -53,9 +56,14 @@ export const getSeguimientosObjetivo = async (_req: Request, res: Response) => {
 };
 
 /** Obtener seguimiento de objetivo por ID */
-export const getSeguimientoObjetivoById = async (req: Request, res: Response) => {
+export const getSeguimientoObjetivoById = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const seguimientoObjetivo = await SeguimientoObjetivo.findByPk(req.params.id);
+    const seguimientoObjetivo = await SeguimientoObjetivo.findByPk(
+      req.params.id,
+    );
     if (!seguimientoObjetivo) {
       return res.status(404).json({
         message: "Seguimiento de objetivo no encontrado",
@@ -71,7 +79,10 @@ export const getSeguimientoObjetivoById = async (req: Request, res: Response) =>
 };
 
 /** Actualizar seguimiento de objetivo por ID */
-export const updateSeguimientoObjetivo = async (req: Request, res: Response) => {
+export const updateSeguimientoObjetivo = async (
+  req: Request,
+  res: Response,
+) => {
   try {
     const {
       objetivoId,
@@ -82,7 +93,9 @@ export const updateSeguimientoObjetivo = async (req: Request, res: Response) => 
       registradoPor,
     } = req.body;
 
-    const seguimientoObjetivo = await SeguimientoObjetivo.findByPk(req.params.id);
+    const seguimientoObjetivo = await SeguimientoObjetivo.findByPk(
+      req.params.id,
+    );
     if (!seguimientoObjetivo) {
       return res.status(404).json({
         message: "Seguimiento de objetivo no encontrado",

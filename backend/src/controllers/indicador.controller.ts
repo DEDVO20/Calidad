@@ -4,14 +4,8 @@ import Indicador from "../models/indicador.model";
 /** Crear indicador */
 export const createIndicador = async (req: Request, res: Response) => {
   try {
-    const {
-      procesoId,
-      clave,
-      descripcion,
-      valor,
-      periodoInicio,
-      periodoFin,
-    } = req.body;
+    const { procesoId, clave, descripcion, valor, periodoInicio, periodoFin } =
+      req.body;
 
     if (!clave) {
       return res.status(400).json({
@@ -73,14 +67,8 @@ export const getIndicadorById = async (req: Request, res: Response) => {
 /** Actualizar indicador por ID */
 export const updateIndicador = async (req: Request, res: Response) => {
   try {
-    const {
-      procesoId,
-      clave,
-      descripcion,
-      valor,
-      periodoInicio,
-      periodoFin,
-    } = req.body;
+    const { procesoId, clave, descripcion, valor, periodoInicio, periodoFin } =
+      req.body;
 
     const indicador = await Indicador.findByPk(req.params.id);
     if (!indicador) {

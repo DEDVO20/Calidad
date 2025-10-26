@@ -9,7 +9,9 @@ export const createRolPermiso = async (req: Request, res: Response) => {
     if (!rolId || !permisoId) {
       return res
         .status(400)
-        .json({ message: "Los campos 'rolId' y 'permisoId' son obligatorios." });
+        .json({
+          message: "Los campos 'rolId' y 'permisoId' son obligatorios.",
+        });
     }
 
     const existente = await RolPermiso.findOne({ where: { rolId, permisoId } });

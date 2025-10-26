@@ -4,14 +4,8 @@ import EtapaProceso from "../models/etapaProceso.model";
 /** Crear etapa de proceso */
 export const createEtapaProceso = async (req: Request, res: Response) => {
   try {
-    const {
-      procesoId,
-      orden,
-      nombre,
-      rolId,
-      horasMaximas,
-      permiteReapertura,
-    } = req.body;
+    const { procesoId, orden, nombre, rolId, horasMaximas, permiteReapertura } =
+      req.body;
 
     if (!procesoId || !orden || !nombre) {
       return res.status(400).json({
@@ -73,14 +67,8 @@ export const getEtapaProcesoById = async (req: Request, res: Response) => {
 /** Actualizar etapa de proceso por ID */
 export const updateEtapaProceso = async (req: Request, res: Response) => {
   try {
-    const {
-      procesoId,
-      orden,
-      nombre,
-      rolId,
-      horasMaximas,
-      permiteReapertura,
-    } = req.body;
+    const { procesoId, orden, nombre, rolId, horasMaximas, permiteReapertura } =
+      req.body;
 
     const etapaProceso = await EtapaProceso.findByPk(req.params.id);
     if (!etapaProceso) {

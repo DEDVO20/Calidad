@@ -18,7 +18,8 @@ export const createInstanciaProceso = async (req: Request, res: Response) => {
 
     if (!procesoId || !estado || !iniciadoEn || !etapaActualId) {
       return res.status(400).json({
-        message: "Los campos 'procesoId', 'estado', 'iniciadoEn' y 'etapaActualId' son obligatorios.",
+        message:
+          "Los campos 'procesoId', 'estado', 'iniciadoEn' y 'etapaActualId' son obligatorios.",
       });
     }
 

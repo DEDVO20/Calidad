@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import {
   createNotificacion,
   getNotificaciones,
@@ -146,6 +147,6 @@ router.get("/:id", getNotificacionById);
  *             schema:
  *               $ref: '#/components/schemas/Notificacion'
  */
-router.put("/:id", updateNotificacion);
+router.put("/:id", marcarComoLeida);
 
 export default router;
