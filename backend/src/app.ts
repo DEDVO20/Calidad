@@ -3,7 +3,17 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { config } from "./config/env";
-import areaRoutes from "./routes/area.routes"; // 👈 Importa tu nueva ruta
+import areaRoutes from "./routes/area.routes";
+import accionCorrectivaRoutes from "./routes/accionCorrectiva.routes"; // 👈 Importa tu nueva ruta
+import accionProcesoRoutes from "./routes/accionProceso.routes";
+import etapaProcesoRoutes from "./routes/etapaProceso.routes";
+import instanciaProcesoRoutes from "./routes/instanciaProceso.routes";
+import procesoRoutes from "./routes/proceso.routes";
+import documentoProcesoRoutes from "./routes/documentoProceso.routes";
+import objetivoCalidadRoutes from "./routes/objetivoCalidad.routes";
+import seguimientoObjetivoRoutes from "./routes/seguimientoObjetivo.routes";
+import indicadorRoutes from "./routes/indicador.routes";
+import campoFormularioRoutes from "./routes/campoFormulario.routes";
 
 const app: Application = express();
 
@@ -28,7 +38,17 @@ app.get("/health", (req, res) => {
 });
 
 // 📌 Aquí registramos las rutas
-app.use("/api/areas", areaRoutes); // 👈 Nueva ruta de áreas
+app.use("/api/areas", areaRoutes);
+app.use("/api/acciones-correctivas", accionCorrectivaRoutes);
+app.use("/api/acciones-proceso", accionProcesoRoutes);
+app.use("/api/etapas-proceso", etapaProcesoRoutes);
+app.use("/api/instancias-proceso", instanciaProcesoRoutes);
+app.use("/api/procesos", procesoRoutes);
+app.use("/api/documentos-proceso", documentoProcesoRoutes);
+app.use("/api/objetivos-calidad", objetivoCalidadRoutes);
+app.use("/api/seguimientos-objetivo", seguimientoObjetivoRoutes);
+app.use("/api/indicadores", indicadorRoutes);
+app.use("/api/campos-formulario", campoFormularioRoutes); // 👈 Nueva ruta de áreas
 
 // Error handling
 app.use(
