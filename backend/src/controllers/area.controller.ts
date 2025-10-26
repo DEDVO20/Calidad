@@ -13,10 +13,11 @@ export const createArea = async (req: Request, res: Response) => {
     }
 
     const existe = await Area.findOne({ where: { codigo } });
-    if (existe)
+    if (existe) {
       return res
         .status(409)
         .json({ message: "Ya existe un área con ese código." });
+    }
 
     const area = await Area.create({ codigo, nombre, descripcion });
     return res.status(201).json(area);
@@ -28,7 +29,7 @@ export const createArea = async (req: Request, res: Response) => {
 };
 
 /** Listar todas las Áreas */
-export const getAreas = async (req: Request, res: Response) => {
+export const getAreas = async (_req: Request, res: Response) => {
   try {
     const areas = await Area.findAll({ order: [["creadoEn", "DESC"]] });
     return res.json(areas);
