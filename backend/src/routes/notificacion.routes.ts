@@ -3,7 +3,8 @@ import {
   createNotificacion,
   getNotificaciones,
   getNotificacionById,
-  updateNotificacion,
+  marcarComoLeida,
+  deleteNotificacion,
 } from "../controllers/notificacion.controller";
 
 const router = Router();

@@ -17,13 +17,15 @@ export const createNotificacion = async (req: Request, res: Response) => {
       entregado: false,
     });
 
-    return res.status(201).json(notif);
+    return res.status(201).json(nueva);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al crear notificación", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al crear la notificación", error: error.message });
   }
 };
 
-/** Listar notificaciones (opcionalmente por usuario_id) */
+/** Listar todas las notificaciones */
 export const getNotificaciones = async (req: Request, res: Response) => {
   try {
     const { usuarioId } = req.query;
@@ -34,26 +36,33 @@ export const getNotificaciones = async (req: Request, res: Response) => {
       where,
       order: [["creado_en", "DESC"]],
     });
-
-    return res.json(notifs);
+    return res.json(lista);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener notificaciones", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener las notificaciones", error: error.message });
   }
 };
 
-/** Obtener una notificación por ID */
+/** Obtener notificación por ID */
 export const getNotificacionById = async (req: Request, res: Response) => {
   try {
-    const notif = await Notificacion.findByPk(req.params.id);
-    if (!notif) return res.status(404).json({ message: "Notificación no encontrada" });
-    return res.json(notif);
+    const { id } = req.params;
+    const notificacion = await Notificacion.findByPk(id);
+
+    if (!notificacion)
+      return res.status(404).json({ message: "Notificación no encontrada." });
+
+    return res.json(notificacion);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener la notificación", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener la notificación", error: error.message });
   }
 };
 
-/** Actualizar notificación (título, contenido, entregado, etc.) */
-export const updateNotificacion = async (req: Request, res: Response) => {
+/** Marcar notificación como leída */
+export const marcarComoLeida = async (req: Request, res: Response) => {
   try {
     const { tipo, contenido, entregado, entregadoEn } = req.body;
     const notif = await Notificacion.findByPk(req.params.id);
@@ -66,8 +75,11 @@ export const updateNotificacion = async (req: Request, res: Response) => {
       entregadoEn,
     });
 
-    return res.json(notif);
+    await notificacion.destroy();
+    return res.status(204).send();
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al actualizar la notificación", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al eliminar la notificación", error: error.message });
   }
 };
