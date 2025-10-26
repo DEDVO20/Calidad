@@ -1,5 +1,4 @@
 import { DataTypes, Model, Optional, Sequelize } from "sequelize";
-import Proceso from "./procesos";
 
 interface AreaAttributes {
   id: string;
@@ -24,7 +23,7 @@ class Area
   public creadoEn!: Date;
   public actualizadoEn!: Date;
 
-  public static initModel(sequelize: Sequelize): typeof Area {
+  static initModel(sequelize: Sequelize): typeof Area {
     return Area.init(
       {
         id: {
@@ -55,21 +54,25 @@ class Area
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
+          field: "actualizado_en",
         },
       },
       {
         sequelize,
         tableName: "areas",
-        timestamps: false,
+        timestamps: false, // usamos campos manuales
         underscored: true,
       },
     );
   }
 
-  public static associate(models: any): void {
-    Area.hasMany(models.usuarios, { foreignKey: "areaId", as: "usuarios" });
-    Area.hasMany(models.procesos, { foreignKey: "areaId", as: "procesos" });
-  }
+  // Asociaciones comentadas temporalmente para evitar errores de inicialización
+  // Se configurarán directamente en database/index.ts
+  // static associate(models: any): void {
+  //   // Ajusta los nombres según existan en tu proyecto:
+  //   Area.hasMany(models.Usuario, { foreignKey: "areaId", as: "usuarios" });
+  //   Area.hasMany(models.Proceso, { foreignKey: "areaId", as: "procesos" });
+  // }
 }
 
 export default Area;

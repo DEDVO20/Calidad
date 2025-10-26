@@ -1,40 +1,29 @@
 import { Router } from "express";
 import {
-  createUsuario,
-  getUsuarios,
-  getUsuarioById,
-  updateUsuario,
-  deleteUsuario,
-} from "../controllers/usuario.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+  createPermiso,
+  getPermisos,
+  getPermisoById,
+  updatePermiso,
+  deletePermiso,
+} from "../controllers/permiso.controller";
 
 const router = Router();
 
-// Aplicar middleware de autenticación a todas las rutas
-router.use(authMiddleware);
-
 /**
  * @swagger
- * /api/usuarios:
+ * /api/permisos:
  *   get:
- *     summary: Obtener todos los usuarios
- *     tags: [Usuarios]
- *     description: Retorna una lista de todos los usuarios del sistema
+ *     summary: Obtener todos los permisos
+ *     tags: [Permisos]
+ *     description: Retorna una lista de todos los permisos del sistema
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: page
+ *         name: modulo
  *         schema:
- *           type: integer
- *           default: 1
- *         description: Número de página
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Cantidad de registros por página
+ *           type: string
+ *         description: Filtrar por módulo
  *       - in: query
  *         name: activo
  *         schema:
@@ -42,22 +31,13 @@ router.use(authMiddleware);
  *         description: Filtrar por estado activo
  *     responses:
  *       200:
- *         description: Lista de usuarios
+ *         description: Lista de permisos
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 usuarios:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Usuario'
- *                 total:
- *                   type: integer
- *                 page:
- *                   type: integer
- *                 totalPages:
- *                   type: integer
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Permiso'
  *       401:
  *         description: No autorizado
  *         content:
@@ -65,15 +45,15 @@ router.use(authMiddleware);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/", getUsuarios);
+router.get("/", getPermisos);
 
 /**
  * @swagger
- * /api/usuarios/{id}:
+ * /api/permisos/{id}:
  *   get:
- *     summary: Obtener usuario por ID
- *     tags: [Usuarios]
- *     description: Retorna los detalles de un usuario específico
+ *     summary: Obtener permiso por ID
+ *     tags: [Permisos]
+ *     description: Retorna los detalles de un permiso específico
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -82,16 +62,16 @@ router.get("/", getUsuarios);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario
+ *         description: ID del permiso
  *     responses:
  *       200:
- *         description: Detalles del usuario
+ *         description: Detalles del permiso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Usuario'
+ *               $ref: '#/components/schemas/Permiso'
  *       404:
- *         description: Usuario no encontrado
+ *         description: Permiso no encontrado
  *         content:
  *           application/json:
  *             schema:
@@ -103,15 +83,15 @@ router.get("/", getUsuarios);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/:id", getUsuarioById);
+router.get("/:id", getPermisoById);
 
 /**
  * @swagger
- * /api/usuarios:
+ * /api/permisos:
  *   post:
- *     summary: Crear nuevo usuario
- *     tags: [Usuarios]
- *     description: Crea un nuevo usuario en el sistema
+ *     summary: Crear nuevo permiso
+ *     tags: [Permisos]
+ *     description: Crea un nuevo permiso en el sistema
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -122,29 +102,26 @@ router.get("/:id", getUsuarioById);
  *             type: object
  *             required:
  *               - nombre
- *               - email
- *               - password
+ *               - modulo
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: María García
- *               email:
+ *                 description: Nombre del permiso
+ *                 example: documentos.crear
+ *               descripcion:
  *                 type: string
- *                 format: email
- *                 example: maria.garcia@sgc.com
- *               password:
+ *                 description: Descripción del permiso
+ *                 example: Permite crear nuevos documentos
+ *               modulo:
  *                 type: string
- *                 format: password
- *                 example: Password123!
- *               areaId:
- *                 type: integer
- *                 example: 2
+ *                 description: Módulo al que pertenece
+ *                 example: documentos
  *               activo:
  *                 type: boolean
  *                 default: true
  *     responses:
  *       201:
- *         description: Usuario creado exitosamente
+ *         description: Permiso creado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -152,10 +129,10 @@ router.get("/:id", getUsuarioById);
  *               properties:
  *                 message:
  *                   type: string
- *                 usuario:
- *                   $ref: '#/components/schemas/Usuario'
+ *                 permiso:
+ *                   $ref: '#/components/schemas/Permiso'
  *       400:
- *         description: Email ya registrado
+ *         description: Permiso ya existe
  *         content:
  *           application/json:
  *             schema:
@@ -167,15 +144,15 @@ router.get("/:id", getUsuarioById);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/", createUsuario);
+router.post("/", createPermiso);
 
 /**
  * @swagger
- * /api/usuarios/{id}:
+ * /api/permisos/{id}:
  *   put:
- *     summary: Actualizar usuario
- *     tags: [Usuarios]
- *     description: Actualiza los datos de un usuario existente
+ *     summary: Actualizar permiso
+ *     tags: [Permisos]
+ *     description: Actualiza los datos de un permiso existente
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -184,7 +161,7 @@ router.post("/", createUsuario);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario
+ *         description: ID del permiso
  *     requestBody:
  *       required: true
  *       content:
@@ -194,20 +171,19 @@ router.post("/", createUsuario);
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: María García López
- *               email:
+ *                 example: documentos.editar
+ *               descripcion:
  *                 type: string
- *                 format: email
- *                 example: maria.garcia@sgc.com
- *               areaId:
- *                 type: integer
- *                 example: 3
+ *                 example: Permite editar documentos existentes
+ *               modulo:
+ *                 type: string
+ *                 example: documentos
  *               activo:
  *                 type: boolean
  *                 example: true
  *     responses:
  *       200:
- *         description: Usuario actualizado exitosamente
+ *         description: Permiso actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -215,10 +191,10 @@ router.post("/", createUsuario);
  *               properties:
  *                 message:
  *                   type: string
- *                 usuario:
- *                   $ref: '#/components/schemas/Usuario'
+ *                 permiso:
+ *                   $ref: '#/components/schemas/Permiso'
  *       404:
- *         description: Usuario no encontrado
+ *         description: Permiso no encontrado
  *         content:
  *           application/json:
  *             schema:
@@ -230,15 +206,15 @@ router.post("/", createUsuario);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/:id", updateUsuario);
+router.put("/:id", updatePermiso);
 
 /**
  * @swagger
- * /api/usuarios/{id}:
+ * /api/permisos/{id}:
  *   delete:
- *     summary: Eliminar usuario
- *     tags: [Usuarios]
- *     description: Elimina un usuario del sistema (borrado lógico)
+ *     summary: Eliminar permiso
+ *     tags: [Permisos]
+ *     description: Elimina un permiso del sistema
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -247,10 +223,10 @@ router.put("/:id", updateUsuario);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario
+ *         description: ID del permiso
  *     responses:
  *       200:
- *         description: Usuario eliminado exitosamente
+ *         description: Permiso eliminado exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -259,7 +235,7 @@ router.put("/:id", updateUsuario);
  *                 message:
  *                   type: string
  *       404:
- *         description: Usuario no encontrado
+ *         description: Permiso no encontrado
  *         content:
  *           application/json:
  *             schema:
@@ -271,6 +247,6 @@ router.put("/:id", updateUsuario);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete("/:id", deleteUsuario);
+router.delete("/:id", deletePermiso);
 
 export default router;

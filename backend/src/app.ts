@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { config } from "./config/env";
 import areaRoutes from "./routes/area.routes";
 import accionCorrectivaRoutes from "./routes/accionCorrectiva.routes"; // 👈 Importa tu nueva ruta
@@ -29,12 +30,25 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files
+// Archivos estáticos
 app.use("/uploads", express.static("uploads"));
 
-// Health check
+// Ruta de verificación de salud
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", message: "Api esta Corriendo" });
+  res.json({ status: "OK", message: "API en funcionamiento" });
+});
+
+// Documentación de API con Swagger
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "SGC API Documentation",
+  customfavIcon: "/favicon.ico",
+}));
+
+// Endpoint para obtener la especificación OpenAPI en JSON
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
 });
 
 // 📌 Aquí registramos las rutas
@@ -49,8 +63,22 @@ app.use("/api/objetivos-calidad", objetivoCalidadRoutes);
 app.use("/api/seguimientos-objetivo", seguimientoObjetivoRoutes);
 app.use("/api/indicadores", indicadorRoutes);
 app.use("/api/campos-formulario", campoFormularioRoutes); // 👈 Nueva ruta de áreas
+// Registro de rutas principales
+app.use("/api/auth", authRoutes);
+app.use("/api/areas", areaRoutes);
+app.use("/api/notificaciones", notificacionRoutes);
+app.use("/api/configuraciones", configuracionRoutes);
+app.use("/api/documentos", documentoRoutes);
+app.use("/api/roles", rolRoutes);
+app.use("/api/roles-permisos", rolPermisoRoutes);
+app.use("/api/usuarios", usuarioRoutes);
+app.use("/api/auditoria", auditoriaRoutes);
+app.use("/api/auditorias", auditoriasRoutes);
+app.use("/api/hallazgos-auditoria", hallazgoAuditoriaRoutes);
+app.use("/api/controles-riesgo", controlRiesgoRoutes);
+app.use("/api/riesgos", riesgoRoutes);
 
-// Error handling
+// Manejador global de errores
 app.use(
   (
     err: any,
