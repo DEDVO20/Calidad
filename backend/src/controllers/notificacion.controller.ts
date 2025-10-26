@@ -4,18 +4,17 @@ import Notificacion from "../models/notificacion.model";
 /** Crear notificación */
 export const createNotificacion = async (req: Request, res: Response) => {
   try {
-    const { titulo, mensaje, usuarioId } = req.body;
+    const { usuarioId, tipo, contenido } = req.body;
 
-    if (!titulo || !mensaje || !usuarioId) {
-      return res
-        .status(400)
-        .json({ message: "Los campos 'titulo', 'mensaje' y 'usuarioId' son obligatorios." });
+    if (!usuarioId || !tipo) {
+      return res.status(400).json({ message: "usuario_id y tipo son obligatorios." });
     }
 
-    const nueva = await Notificacion.create({
-      titulo,
-      mensaje,
+    const notif = await Notificacion.create({
       usuarioId,
+      tipo,
+      contenido,
+      entregado: false,
     });
 
     return res.status(201).json(nueva);
@@ -29,8 +28,13 @@ export const createNotificacion = async (req: Request, res: Response) => {
 /** Listar todas las notificaciones */
 export const getNotificaciones = async (req: Request, res: Response) => {
   try {
-    const lista = await Notificacion.findAll({
-      order: [["fechaEnvio", "DESC"]],
+    const { usuarioId } = req.query;
+    const where: any = {};
+    if (usuarioId) where.usuarioId = usuarioId;
+
+    const notifs = await Notificacion.findAll({
+      where,
+      order: [["creado_en", "DESC"]],
     });
     return res.json(lista);
   } catch (error: any) {
@@ -60,29 +64,16 @@ export const getNotificacionById = async (req: Request, res: Response) => {
 /** Marcar notificación como leída */
 export const marcarComoLeida = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const notificacion = await Notificacion.findByPk(id);
+    const { tipo, contenido, entregado, entregadoEn } = req.body;
+    const notif = await Notificacion.findByPk(req.params.id);
+    if (!notif) return res.status(404).json({ message: "Notificación no encontrada" });
 
-    if (!notificacion)
-      return res.status(404).json({ message: "Notificación no encontrada." });
-
-    await notificacion.update({ leida: true });
-    return res.json({ message: "Notificación marcada como leída", notificacion });
-  } catch (error: any) {
-    return res
-      .status(500)
-      .json({ message: "Error al actualizar la notificación", error: error.message });
-  }
-};
-
-/** Eliminar notificación */
-export const deleteNotificacion = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const notificacion = await Notificacion.findByPk(id);
-
-    if (!notificacion)
-      return res.status(404).json({ message: "Notificación no encontrada." });
+    await notif.update({
+      tipo,
+      contenido,
+      entregado,
+      entregadoEn,
+    });
 
     await notificacion.destroy();
     return res.status(204).send();
