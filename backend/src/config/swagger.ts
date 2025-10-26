@@ -356,6 +356,82 @@ const swaggerOptions: swaggerJsdoc.Options = {
         name: "Configuración",
         description: "Configuración del sistema",
       },
+      {
+        name: "Auditorías",
+        description: "Gestión de auditorías internas y externas (ISO 9001 Cláusula 9.2)",
+      },
+      {
+        name: "Auditoría de Sistema",
+        description: "Tracking y registro de acciones del sistema (logs de auditoría)",
+      },
+      {
+        name: "Hallazgos de Auditoría",
+        description: "Gestión de hallazgos detectados en auditorías",
+      },
+      {
+        name: "Riesgos",
+        description: "Gestión de riesgos y su identificación",
+      },
+      {
+        name: "Controles de Riesgo",
+        description: "Gestión de controles para mitigar riesgos",
+      },
+      {
+        name: "Acciones Correctivas",
+        description: "Gestión de acciones correctivas y preventivas",
+      },
+      {
+        name: "No Conformidades",
+        description: "Gestión de no conformidades detectadas",
+      },
+      {
+        name: "Procesos",
+        description: "Gestión de procesos del sistema de calidad",
+      },
+      {
+        name: "Acciones de Proceso",
+        description: "Gestión de acciones dentro de procesos",
+      },
+      {
+        name: "Etapas de Proceso",
+        description: "Gestión de etapas de procesos",
+      },
+      {
+        name: "Instancias de Proceso",
+        description: "Gestión de instancias de ejecución de procesos",
+      },
+      {
+        name: "Participantes de Proceso",
+        description: "Gestión de participantes en procesos",
+      },
+      {
+        name: "Documentos de Proceso",
+        description: "Gestión de documentos asociados a procesos",
+      },
+      {
+        name: "Objetivos de Calidad",
+        description: "Gestión de objetivos de calidad",
+      },
+      {
+        name: "Seguimiento de Objetivos",
+        description: "Gestión del seguimiento de objetivos de calidad",
+      },
+      {
+        name: "Indicadores",
+        description: "Gestión de indicadores de desempeño",
+      },
+      {
+        name: "Capacitaciones",
+        description: "Gestión de capacitaciones del personal",
+      },
+      {
+        name: "Asistencias a Capacitación",
+        description: "Gestión de asistencias a capacitaciones",
+      },
+      {
+        name: "Campos de Formulario",
+        description: "Gestión de campos personalizados de formularios",
+      },
     ],
   },
   apis: [

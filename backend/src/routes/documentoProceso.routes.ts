@@ -1,20 +1,19 @@
 import { Router } from "express";
 import {
-  createParticipante,
-  getParticipantes,
-  getParticipanteById,
-  updateParticipante,
-  deleteParticipante,
-} from "../controllers/participanteProceso.controller";
+  createDocumentoProceso,
+  getDocumentosProceso,
+  getDocumentoProcesoById,
+  updateDocumentoProceso,
+} from "../controllers/documentoProceso.controller";
 
 const router = Router();
 
 /**
  * @swagger
- * /api/participantes-proceso:
+ * /api/documentos-proceso:
  *   post:
- *     summary: Agregar participante a proceso
- *     tags: [Participantes de Proceso]
+ *     summary: Asociar documento a proceso
+ *     tags: [Documentos de Proceso]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -27,42 +26,42 @@ const router = Router();
  *               procesoId:
  *                 type: string
  *                 format: uuid
- *               usuarioId:
+ *               documentoId:
  *                 type: string
  *                 format: uuid
- *               rol:
+ *               tipo:
  *                 type: string
- *                 enum: [responsable, participante, consultor]
+ *                 enum: [entrada, salida, referencia]
  *     responses:
  *       201:
- *         description: Participante agregado
+ *         description: Documento asociado
  *       401:
  *         description: No autorizado
  */
-router.post("/", createParticipante);
+router.post("/", createDocumentoProceso);
 
 /**
  * @swagger
- * /api/participantes-proceso:
+ * /api/documentos-proceso:
  *   get:
- *     summary: Listar participantes
- *     tags: [Participantes de Proceso]
+ *     summary: Listar documentos de procesos
+ *     tags: [Documentos de Proceso]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de participantes
+ *         description: Lista de documentos
  *       401:
  *         description: No autorizado
  */
-router.get("/", getParticipantes);
+router.get("/", getDocumentosProceso);
 
 /**
  * @swagger
- * /api/participantes-proceso/{id}:
+ * /api/documentos-proceso/{id}:
  *   get:
- *     summary: Obtener participante por ID
- *     tags: [Participantes de Proceso]
+ *     summary: Obtener documento de proceso por ID
+ *     tags: [Documentos de Proceso]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -80,14 +79,14 @@ router.get("/", getParticipantes);
  *       401:
  *         description: No autorizado
  */
-router.get("/:id", getParticipanteById);
+router.get("/:id", getDocumentoProcesoById);
 
 /**
  * @swagger
- * /api/participantes-proceso/{id}:
+ * /api/documentos-proceso/{id}:
  *   put:
- *     summary: Actualizar participante
- *     tags: [Participantes de Proceso]
+ *     summary: Actualizar documento de proceso
+ *     tags: [Documentos de Proceso]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -111,31 +110,6 @@ router.get("/:id", getParticipanteById);
  *       401:
  *         description: No autorizado
  */
-router.put("/:id", updateParticipante);
-
-/**
- * @swagger
- * /api/participantes-proceso/{id}:
- *   delete:
- *     summary: Eliminar participante
- *     tags: [Participantes de Proceso]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Eliminado
- *       404:
- *         description: No encontrado
- *       401:
- *         description: No autorizado
- */
-router.delete("/:id", deleteParticipante);
+router.put("/:id", updateDocumentoProceso);
 
 export default router;

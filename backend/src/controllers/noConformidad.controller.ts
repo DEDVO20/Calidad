@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import NoConformidad  from "../models/noConformidad.model";
+import NoConformidad from "../models/noConformidad.model";
 
 /** Crear No Conformidad */
 export const createNoConformidad = async (req: Request, res: Response) => {
@@ -25,7 +25,7 @@ export const createNoConformidad = async (req: Request, res: Response) => {
     const nueva = await NoConformidad.create({
       codigo,
       descripcion,
-      responsable,
+      responsableId,
       estado,
     });
 
@@ -72,7 +72,7 @@ export const getNoConformidadById = async (req: Request, res: Response) => {
 export const updateNoConformidad = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { descripcion, responsable, estado } = req.body;
+    const { descripcion, responsableId, estado } = req.body;
 
     const nc = await NoConformidad.findByPk(id);
     if (!nc)

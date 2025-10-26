@@ -7,7 +7,9 @@ export const createNotificacion = async (req: Request, res: Response) => {
     const { usuarioId, tipo, contenido } = req.body;
 
     if (!usuarioId || !tipo) {
-      return res.status(400).json({ message: "usuario_id y tipo son obligatorios." });
+      return res
+        .status(400)
+        .json({ message: "Los campos 'usuarioId' y 'tipo' son obligatorios." });
     }
 
     const notif = await Notificacion.create({
@@ -34,7 +36,7 @@ export const getNotificaciones = async (req: Request, res: Response) => {
 
     const notifs = await Notificacion.findAll({
       where,
-      order: [["creado_en", "DESC"]],
+      order: [["creadoEn", "DESC"]],
     });
     return res.json(lista);
   } catch (error: any) {
@@ -64,15 +66,16 @@ export const getNotificacionById = async (req: Request, res: Response) => {
 /** Marcar notificación como leída */
 export const marcarComoLeida = async (req: Request, res: Response) => {
   try {
-    const { tipo, contenido, entregado, entregadoEn } = req.body;
-    const notif = await Notificacion.findByPk(req.params.id);
-    if (!notif) return res.status(404).json({ message: "Notificación no encontrada" });
+    const { id } = req.params;
+    const notificacion = await Notificacion.findByPk(id);
 
-    await notif.update({
-      tipo,
-      contenido,
-      entregado,
-      entregadoEn,
+    if (!notificacion) {
+      return res.status(404).json({ message: "Notificación no encontrada." });
+    }
+
+    await notificacion.update({
+      entregado: true,
+      entregadoEn: new Date(),
     });
 
     await notificacion.destroy();

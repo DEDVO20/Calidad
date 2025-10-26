@@ -6,7 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import { config } from "./config/env";
 import { swaggerSpec } from "./config/swagger";
 
-// Importar rutas
+// Importar todas las rutas
 import authRoutes from "./routes/auth.routes";
 import areaRoutes from "./routes/area.routes";
 import notificacionRoutes from "./routes/notificacion.routes";
@@ -14,12 +14,27 @@ import configuracionRoutes from "./routes/configuracion.routes";
 import documentoRoutes from "./routes/documento.routes";
 import rolRoutes from "./routes/rol.routes";
 import rolPermisoRoutes from "./routes/rolPermiso.routes";
+import permisoRoutes from "./routes/permiso.routes";
 import usuarioRoutes from "./routes/usuario.routes";
 import auditoriaRoutes from "./routes/auditoria.routes";
 import auditoriasRoutes from "./routes/auditorias.routes";
 import hallazgoAuditoriaRoutes from "./routes/hallazgoAuditoria.routes";
 import controlRiesgoRoutes from "./routes/controlRiesgo.routes";
 import riesgoRoutes from "./routes/riesgo.routes";
+import accionCorrectivaRoutes from "./routes/accionCorrectiva.routes";
+import accionProcesoRoutes from "./routes/accionProceso.routes";
+import etapaProcesoRoutes from "./routes/etapaProceso.routes";
+import instanciaProcesoRoutes from "./routes/instanciaProceso.routes";
+import procesoRoutes from "./routes/proceso.routes";
+import documentoProcesoRoutes from "./routes/documentoProceso.routes";
+import objetivoCalidadRoutes from "./routes/objetivoCalidad.routes";
+import seguimientoObjetivoRoutes from "./routes/seguimientoObjetivo.routes";
+import indicadorRoutes from "./routes/indicador.routes";
+import campoFormularioRoutes from "./routes/campoFormulario.routes";
+import capacitacionRoutes from "./routes/capacitacion.routes";
+import asistenciaCapacitacionRoutes from "./routes/asistenciaCapacitacion.routes";
+import noConformidadRoutes from "./routes/noConformidad.routes";
+import participanteProcesoRoutes from "./routes/participanteProceso.routes";
 
 const app: Application = express();
 
@@ -64,12 +79,41 @@ app.use("/api/configuraciones", configuracionRoutes);
 app.use("/api/documentos", documentoRoutes);
 app.use("/api/roles", rolRoutes);
 app.use("/api/roles-permisos", rolPermisoRoutes);
+app.use("/api/permisos", permisoRoutes);
 app.use("/api/usuarios", usuarioRoutes);
+
+// Auditorías y hallazgos
 app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/auditorias", auditoriasRoutes);
 app.use("/api/hallazgos-auditoria", hallazgoAuditoriaRoutes);
-app.use("/api/controles-riesgo", controlRiesgoRoutes);
+
+// Riesgos y controles
 app.use("/api/riesgos", riesgoRoutes);
+app.use("/api/controles-riesgo", controlRiesgoRoutes);
+
+// Acciones correctivas y no conformidades
+app.use("/api/acciones-correctivas", accionCorrectivaRoutes);
+app.use("/api/noconformidades", noConformidadRoutes);
+
+// Procesos
+app.use("/api/procesos", procesoRoutes);
+app.use("/api/acciones-proceso", accionProcesoRoutes);
+app.use("/api/etapas-proceso", etapaProcesoRoutes);
+app.use("/api/instancias-proceso", instanciaProcesoRoutes);
+app.use("/api/participantes-proceso", participanteProcesoRoutes);
+app.use("/api/documentos-proceso", documentoProcesoRoutes);
+
+// Objetivos e indicadores
+app.use("/api/objetivos-calidad", objetivoCalidadRoutes);
+app.use("/api/seguimientos-objetivo", seguimientoObjetivoRoutes);
+app.use("/api/indicadores", indicadorRoutes);
+
+// Capacitaciones
+app.use("/api/capacitaciones", capacitacionRoutes);
+app.use("/api/asistencias-capacitacion", asistenciaCapacitacionRoutes);
+
+// Formularios
+app.use("/api/campos-formulario", campoFormularioRoutes);
 
 // Manejador global de errores
 app.use(

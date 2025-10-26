@@ -36,7 +36,7 @@ export const createParticipante = async (req: Request, res: Response) => {
 export const getParticipantes = async (req: Request, res: Response) => {
   try {
     const lista = await ParticipanteProceso.findAll({
-      order: [["createdAt", "DESC"]],
+      order: [["creadoEn", "DESC"]],
     });
     return res.json(lista);
   } catch (error: any) {

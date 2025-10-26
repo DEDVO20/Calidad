@@ -56,7 +56,7 @@ export const createDocumento = async (req: Request, res: Response) => {
 export const getDocumentos = async (req: Request, res: Response) => {
   try {
     const {
-      q,                 // búsqueda por nombre/código (texto)
+      q, // búsqueda por nombre/código (texto)
       estado,
       tipoDocumento,
       visibilidad,
@@ -121,7 +121,8 @@ export const getDocumentoById = async (req: Request, res: Response) => {
       ],
     });
 
-    if (!doc) return res.status(404).json({ message: "Documento no encontrado" });
+    if (!doc)
+      return res.status(404).json({ message: "Documento no encontrado" });
     return res.json(doc);
   } catch (error: any) {
     return res
@@ -134,7 +135,8 @@ export const getDocumentoById = async (req: Request, res: Response) => {
 export const updateDocumento = async (req: Request, res: Response) => {
   try {
     const doc = await Documento.findByPk(req.params.id);
-    if (!doc) return res.status(404).json({ message: "Documento no encontrado" });
+    if (!doc)
+      return res.status(404).json({ message: "Documento no encontrado" });
 
     const {
       nombreArchivo,
@@ -180,7 +182,8 @@ export const updateDocumento = async (req: Request, res: Response) => {
 export const deleteDocumento = async (req: Request, res: Response) => {
   try {
     const rows = await Documento.destroy({ where: { id: req.params.id } });
-    if (rows === 0) return res.status(404).json({ message: "Documento no encontrado" });
+    if (rows === 0)
+      return res.status(404).json({ message: "Documento no encontrado" });
     return res.status(204).send();
   } catch (error: any) {
     return res
