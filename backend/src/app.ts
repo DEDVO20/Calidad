@@ -35,6 +35,10 @@ import capacitacionRoutes from "./routes/capacitacion.routes";
 import asistenciaCapacitacionRoutes from "./routes/asistenciaCapacitacion.routes";
 import noConformidadRoutes from "./routes/noConformidad.routes";
 import participanteProcesoRoutes from "./routes/participanteProceso.routes";
+import usuarioRolRoutes from "./routes/usuarioRol.routes";
+import ticketRoutes from "./routes/ticket.routes";
+import versionDocumentoRoutes from "./routes/versionDocumento.routes";
+import respuestaFormularioRoutes from "./routes/respuestaFormulario.routes";
 
 const app: Application = express();
 
@@ -59,11 +63,15 @@ app.get("/health", (req, res) => {
 });
 
 // Documentación de API con Swagger
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: "SGC API Documentation",
-  customfavIcon: "/favicon.ico",
-}));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "SGC API Documentation",
+    customfavIcon: "/favicon.ico",
+  }),
+);
 
 // Endpoint para obtener la especificación OpenAPI en JSON
 app.get("/api-docs.json", (req, res) => {
@@ -114,6 +122,16 @@ app.use("/api/asistencias-capacitacion", asistenciaCapacitacionRoutes);
 
 // Formularios
 app.use("/api/campos-formulario", campoFormularioRoutes);
+app.use("/api/respuestas-formulario", respuestaFormularioRoutes);
+
+// Tickets
+app.use("/api/tickets", ticketRoutes);
+
+// Usuario Roles
+app.use("/api/usuario-roles", usuarioRolRoutes);
+
+// Versiones de Documentos
+app.use("/api/versiones-documento", versionDocumentoRoutes);
 
 // Manejador global de errores
 app.use(
