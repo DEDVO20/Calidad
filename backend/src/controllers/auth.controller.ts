@@ -37,17 +37,29 @@ export const login = async (req: Request, res: Response) => {
     // Validar campos obligatorios
     if (!usuarioOEmail || !contrasena) {
       return res.status(400).json({
-        message: "Usuario/Email y contraseña son obligatorios",
+        message: "Usuario/Email/Documento y contraseña son obligatorios",
       });
     }
 
-    // Buscar usuario en la base de datos por nombre de usuario O correo electrónico
+    // Construir condiciones de búsqueda
+    const whereConditions: any[] = [
+      { nombreUsuario: usuarioOEmail },
+      { correoElectronico: usuarioOEmail },
+    ];
+
+    // Solo agregar búsqueda por documento si el valor es numérico
+    const documentoNumerico = parseInt(usuarioOEmail, 10);
+    if (
+      !isNaN(documentoNumerico) &&
+      documentoNumerico.toString() === usuarioOEmail.toString()
+    ) {
+      whereConditions.push({ documento: documentoNumerico });
+    }
+
+    // Buscar usuario en la base de datos por nombre de usuario O correo electrónico O documento
     const usuario = await Usuario.findOne({
       where: {
-        [Op.or]: [
-          { nombreUsuario: usuarioOEmail },
-          { correoElectronico: usuarioOEmail },
-        ],
+        [Op.or]: whereConditions,
       },
       attributes: [
         "id",
