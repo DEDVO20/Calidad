@@ -29,11 +29,18 @@ export function SiteHeader() {
   const getPageName = () => {
     const path = location.pathname;
     if (path === "/dashboard") return "Dashboard";
+    if (path.includes("/perfil")) return "Mi Perfil";
     if (path.includes("/usuarios")) return "Usuarios";
     if (path.includes("/documentos")) return "Documentos";
     if (path.includes("/procesos")) return "Procesos";
     if (path.includes("/auditorias")) return "Auditorías";
+    
+    // No Conformidades - rutas específicas
+    if (path.includes("/No_conformidades_Abiertas")) return "No Conformidades Abiertas";
+    if (path.includes("/No_conformidades_EnTratamiento")) return "No Conformidades en Tratamiento";
+    if (path.includes("/No_conformidades_Cerradas")) return "No Conformidades Cerradas";
     if (path.includes("/no-conformidades")) return "No Conformidades";
+    
     if (path.includes("/acciones-correctivas")) return "Acciones Correctivas";
     if (path.includes("/riesgos")) return "Riesgos";
     if (path.includes("/indicadores")) return "Indicadores";
