@@ -152,15 +152,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Abiertas",
-            url: "#",
+            url: "/No_conformidades_Abiertas",
           },
           {
             title: "En Tratamiento",
-            url: "#",
+            url: "/No_conformidades_EnTratamiento",
+          },
+          {
+            title: "Cerradas",
+            url: "/No_conformidades_Cerradas",
           },
           {
             title: "Historial Completo",
-            url: "#",
+            url: "/No_conformidades_HistorialCompleto",
           },
         ],
       },
