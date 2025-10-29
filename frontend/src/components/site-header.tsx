@@ -1,8 +1,8 @@
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Bell, Search, Home } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Bell, Search, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,52 +19,57 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { useLocation } from "react-router-dom"
+} from "@/components/ui/breadcrumb";
+import { useLocation } from "react-router-dom";
 
 export function SiteHeader() {
-  const location = useLocation()
-  
+  const location = useLocation();
+
   // Obtener el nombre de la página actual desde la ruta
   const getPageName = () => {
-    const path = location.pathname
-    if (path === "/dashboard") return "Dashboard"
-    if (path.includes("/usuarios")) return "Usuarios"
-    if (path.includes("/documentos")) return "Documentos"
-    if (path.includes("/procesos")) return "Procesos"
-    if (path.includes("/auditorias")) return "Auditorías"
-    if (path.includes("/no-conformidades")) return "No Conformidades"
-    if (path.includes("/acciones-correctivas")) return "Acciones Correctivas"
-    if (path.includes("/riesgos")) return "Riesgos"
-    if (path.includes("/indicadores")) return "Indicadores"
-    if (path.includes("/capacitaciones")) return "Capacitaciones"
-    return "Dashboard"
-  }
+    const path = location.pathname;
+    if (path === "/dashboard") return "Dashboard";
+    if (path.includes("/usuarios")) return "Usuarios";
+    if (path.includes("/documentos")) return "Documentos";
+    if (path.includes("/procesos")) return "Procesos";
+    if (path.includes("/auditorias")) return "Auditorías";
+    if (path.includes("/no-conformidades")) return "No Conformidades";
+    if (path.includes("/acciones-correctivas")) return "Acciones Correctivas";
+    if (path.includes("/riesgos")) return "Riesgos";
+    if (path.includes("/indicadores")) return "Indicadores";
+    if (path.includes("/capacitaciones")) return "Capacitaciones";
+    return "Dashboard";
+  };
   return (
-    <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear bg-background">
+    <header className="sticky top-0 z-50 group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear bg-background">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        
+
         {/* Breadcrumb dinámico */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/dashboard" className="flex items-center gap-1">
+              <BreadcrumbLink
+                href="/dashboard"
+                className="flex items-center gap-1"
+              >
                 <Home className="h-3.5 w-3.5" />
                 SGC ISO 9001
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage className="font-medium">{getPageName()}</BreadcrumbPage>
+              <BreadcrumbPage className="font-medium">
+                {getPageName()}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        
+
         {/* Barra de búsqueda */}
         <div className="ml-auto flex items-center gap-2">
           <div className="relative hidden md:block">
@@ -75,14 +80,18 @@ export function SiteHeader() {
               className="w-64 pl-8 h-9"
             />
           </div>
-          
+
           {/* Notificaciones */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="relative h-9 w-9">
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative h-9 w-9"
+              >
                 <Bell className="h-4 w-4" />
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
                 >
                   3
@@ -95,15 +104,21 @@ export function SiteHeader() {
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium">Nueva No Conformidad</p>
-                  <p className="text-xs text-muted-foreground">NC-2024-003 requiere atención inmediata</p>
-                  <p className="text-xs text-muted-foreground">Hace 5 minutos</p>
+                  <p className="text-xs text-muted-foreground">
+                    NC-2024-003 requiere atención inmediata
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Hace 5 minutos
+                  </p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium">Auditoría Programada</p>
-                  <p className="text-xs text-muted-foreground">AUD-2024-004 inicia el 15 de noviembre</p>
+                  <p className="text-xs text-muted-foreground">
+                    AUD-2024-004 inicia el 15 de noviembre
+                  </p>
                   <p className="text-xs text-muted-foreground">Hace 2 horas</p>
                 </div>
               </DropdownMenuItem>
@@ -111,7 +126,9 @@ export function SiteHeader() {
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium">Documento Aprobado</p>
-                  <p className="text-xs text-muted-foreground">Manual de Calidad Rev. 3.0 aprobado</p>
+                  <p className="text-xs text-muted-foreground">
+                    Manual de Calidad Rev. 3.0 aprobado
+                  </p>
                   <p className="text-xs text-muted-foreground">Hace 4 horas</p>
                 </div>
               </DropdownMenuItem>
@@ -124,5 +141,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  )
+  );
 }
