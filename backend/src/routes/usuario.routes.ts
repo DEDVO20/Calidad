@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import {
   createUsuario,
   getUsuarios,
@@ -7,8 +7,23 @@ import {
   deleteUsuario,
 } from "../controllers/usuario.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import {
+  uploadProfile,
+  handleMulterError,
+} from "../middlewares/upload.middleware";
 
 const router = Router();
+
+// Middleware condicional para multer
+const conditionalMulter = (req: Request, res: Response, next: NextFunction) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    // Si es multipart, usar multer
+    return uploadProfile.single('foto')(req, res, next);
+  }
+  // Si es JSON, pasar directo
+  next();
+};
 
 // Aplicar middleware de autenticación a todas las rutas
 router.use(authMiddleware);
@@ -230,7 +245,102 @@ router.post("/", createUsuario);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/:id", updateUsuario);
+router.put(
+  "/:id",
+  conditionalMulter,
+  handleMulterError,
+  updateUsuario,
+);
+
+/**
+ * @swagger
+ * /api/usuarios/{id}:
+ *   patch:
+ *     summary: Actualizar parcialmente usuario
+ *     tags: [Usuarios]
+ *     description: Actualiza parcialmente los datos de un usuario existente (soporta foto local o URL de Supabase)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 example: Juan
+ *               segundoNombre:
+ *                 type: string
+ *                 example: Carlos
+ *               primerApellido:
+ *                 type: string
+ *                 example: Pérez
+ *               segundoApellido:
+ *                 type: string
+ *                 example: Gómez
+ *               correoElectronico:
+ *                 type: string
+ *                 example: juan.perez@sgc.com
+ *               areaId:
+ *                 type: string
+ *                 example: 123e4567-e89b-12d3-a456-426614174000
+ *               activo:
+ *                 type: boolean
+ *                 example: true
+ *               contrasena:
+ *                 type: string
+ *                 example: NuevaPassword123!
+ *               foto_url:
+ *                 type: string
+ *                 description: URL de la imagen de perfil en Supabase
+ *                 example: https://xxx.supabase.co/storage/v1/object/public/imagenes/123/123-1738123456.jpg
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               segundoNombre:
+ *                 type: string
+ *               primerApellido:
+ *                 type: string
+ *               segundoApellido:
+ *                 type: string
+ *               correoElectronico:
+ *                 type: string
+ *               areaId:
+ *                 type: string
+ *               activo:
+ *                 type: string
+ *               contrasena:
+ *                 type: string
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo de imagen (alternativa a foto_url)
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente
+ *       404:
+ *         description: Usuario no encontrado
+ *       401:
+ *         description: No autorizado
+ */
+router.patch(
+  "/:id",
+  conditionalMulter,
+  handleMulterError,
+  updateUsuario,
+);
 
 /**
  * @swagger

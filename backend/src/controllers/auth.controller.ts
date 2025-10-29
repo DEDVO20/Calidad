@@ -117,6 +117,7 @@ export const login = async (req: Request, res: Response) => {
       nombreUsuario: usuario.nombreUsuario,
       areaId: usuario.areaId,
       activo: usuario.activo,
+      fotoUrl: (usuario as any).fotoUrl || null,
     };
 
     return res.status(200).json({

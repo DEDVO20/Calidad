@@ -10,6 +10,7 @@ interface UsuarioAttributes {
   correoElectronico: string;
   nombreUsuario: string;
   contrasenaHash: string;
+  fotoUrl?: string;
   areaId: string;
   activo: boolean;
   creadoEn: Date;
@@ -22,6 +23,7 @@ interface UsuarioCreationAttributes
     | "id"
     | "segundoNombre"
     | "segundoApellido"
+    | "fotoUrl"
     | "areaId"
     | "activo"
     | "creadoEn"
@@ -41,6 +43,7 @@ class Usuario
   public correoElectronico!: string;
   public nombreUsuario!: string;
   public contrasenaHash!: string;
+  public fotoUrl?: string;
   public areaId!: string;
   public activo!: boolean;
   public readonly creadoEn!: Date;
@@ -94,6 +97,11 @@ class Usuario
           allowNull: false,
           field: "contrasena_hash",
         },
+        fotoUrl: {
+          type: DataTypes.STRING(500),
+          allowNull: true,
+          field: "foto_url",
+        },
         areaId: {
           type: DataTypes.UUID,
           allowNull: true,
@@ -126,6 +134,20 @@ class Usuario
       },
     );
   }
+
+  // Método toJSON personalizado para devolver campos en camelCase y snake_case
+  public toJSON(): any {
+    const values: any = { ...this.get({ plain: true }) };
+    
+    // Asegurar que fotoUrl esté disponible en ambos formatos
+    if (this.fotoUrl) {
+      values.fotoUrl = this.fotoUrl;  // camelCase (para nuevo frontend)
+      values.foto_url = this.fotoUrl; // snake_case (para compatibilidad)
+    }
+    
+    return values;
+  }
+  
   // Asociaciones comentadas temporalmente para evitar errores de inicialización
   // Se configurarán directamente en database/index.ts
   // public static associate(models: any): void {

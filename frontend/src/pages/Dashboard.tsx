@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { isAuthenticated, getCurrentUser } from "@/services/auth";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { getCurrentUser } from "@/services/auth";
 import { SectionCards } from "@/components/section-cards";
 import { DataTable } from "@/components/data-table";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
@@ -26,20 +19,13 @@ interface User {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Verificar autenticación
-    if (!isAuthenticated()) {
-      navigate("/login");
-      return;
-    }
-
     // Obtener datos del usuario
     const currentUser = getCurrentUser();
     setUser(currentUser);
-  }, [navigate]);
+  }, []);
 
   if (!user) {
     return (
@@ -50,71 +36,65 @@ export default function Dashboard() {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold tracking-tight">
-              Bienvenido, {user.nombre} {user.primerApellido}
-            </h1>
-            <p className="text-muted-foreground">
-              Sistema de Gestión de Calidad ISO 9001
-            </p>
-          </div>
+    <>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold tracking-tight">
+          Bienvenido, {user.nombre} {user.primerApellido}
+        </h1>
+        <p className="text-muted-foreground">
+          Sistema de Gestión de Calidad ISO 9001
+        </p>
+      </div>
 
-          <SectionCards />
+      <SectionCards />
 
-          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-            <div className="rounded-xl border bg-card">
-              <ChartAreaInteractive />
-            </div>
-            <div className="rounded-xl border bg-card p-4">
-              <h3 className="font-semibold mb-4">Información del Usuario</h3>
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Nombre completo:</dt>
-                  <dd className="font-medium">
-                    {user.nombre} {user.segundoNombre || ""}{" "}
-                    {user.primerApellido} {user.segundoApellido || ""}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Documento:</dt>
-                  <dd className="font-medium">{user.documento}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Usuario:</dt>
-                  <dd className="font-medium">{user.nombreUsuario}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Email:</dt>
-                  <dd className="font-medium">{user.correoElectronico}</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Estado:</dt>
-                  <dd>
-                    {user.activo ? (
-                      <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                        Activo
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
-                        Inactivo
-                      </span>
-                    )}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card">
-            <DataTable data={tableData} />
-          </div>
+      <div className="grid auto-rows-min gap-4 md:grid-cols-2">
+        <div className="rounded-xl border bg-card">
+          <ChartAreaInteractive />
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+        <div className="rounded-xl border bg-card p-4">
+          <h3 className="font-semibold mb-4">Información del Usuario</h3>
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Nombre completo:</dt>
+              <dd className="font-medium">
+                {user.nombre} {user.segundoNombre || ""} {user.primerApellido}{" "}
+                {user.segundoApellido || ""}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Documento:</dt>
+              <dd className="font-medium">{user.documento}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Usuario:</dt>
+              <dd className="font-medium">{user.nombreUsuario}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Email:</dt>
+              <dd className="font-medium">{user.correoElectronico}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Estado:</dt>
+              <dd>
+                {user.activo ? (
+                  <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                    Activo
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                    Inactivo
+                  </span>
+                )}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <div className="rounded-xl border bg-card">
+        <DataTable data={tableData} />
+      </div>
+    </>
   );
 }
