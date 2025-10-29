@@ -30,13 +30,47 @@ import {
 import { getCurrentUser } from "@/services/auth";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user = getCurrentUser();
+  const [user, setUser] = React.useState(getCurrentUser());
+  console.log("Usuario", user);
+  // Actualizar usuario cuando cambie en localStorage
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(getCurrentUser());
+    };
+
+    // Escuchar cambios en localStorage
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Escuchar evento custom de actualización de usuario (perfil)
+    const handleUserUpdated = () => {
+      setUser(getCurrentUser());
+    };
+    window.addEventListener("user:updated", handleUserUpdated);
+
+    // Polling para detectar cambios internos (mismo tab)
+
+    const interval = setInterval(() => {
+      const updatedUser = getCurrentUser();
+      if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
+        setUser(updatedUser);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+
+      window.removeEventListener("user:updated", handleUserUpdated);
+      clearInterval(interval);
+    };
+  }, [user]);
 
   const data = {
     user: {
       name: user ? `${user.nombre} ${user.primerApellido}` : "Usuario",
       email: user?.correoElectronico || "usuario@example.com",
       avatar: "/avatars/user.jpg",
+      foto_url: user?.foto_url || user?.fotoUrl || "", // Intentar ambos formatos
     },
     navMain: [
       {

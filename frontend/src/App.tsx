@@ -10,6 +10,8 @@ import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
 import NoConformidadesHistorialCompleto from "./pages/No_conformidades_HistorialCompleto";
 import Dashboard from "./pages/Dashboard";
+import Perfil from "./components/usuarios/Perfil";
+import { ProtectedLayout } from "./components/ProtectedLayout";
 
 
 import "./App.css";

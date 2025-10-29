@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Usuario from "../models/usuario.model";
 import bcrypt from "bcrypt";
+import path from "path";
+import fs from "fs";
 
 /** Crear usuario */
 export const createUsuario = async (req: Request, res: Response) => {
@@ -117,6 +119,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       contrasena,
       areaId,
       activo,
+      fotoUrl, // Agregado para Supabase
     } = req.body;
 
     const usuario = await Usuario.findByPk(req.params.id);
@@ -142,17 +145,42 @@ export const updateUsuario = async (req: Request, res: Response) => {
       }
     }
 
-    const datosActualizacion: any = {
-      documento,
-      nombre,
-      segundoNombre,
-      primerApellido,
-      segundoApellido,
-      correoElectronico,
-      nombreUsuario,
-      areaId,
-      activo,
-    };
+    const datosActualizacion: any = {};
+
+    // Solo actualizar campos que vengan en el request
+    if (documento !== undefined) datosActualizacion.documento = documento;
+    if (nombre !== undefined) datosActualizacion.nombre = nombre;
+    if (segundoNombre !== undefined)
+      datosActualizacion.segundoNombre = segundoNombre;
+    if (primerApellido !== undefined)
+      datosActualizacion.primerApellido = primerApellido;
+    if (segundoApellido !== undefined)
+      datosActualizacion.segundoApellido = segundoApellido;
+    if (correoElectronico !== undefined)
+      datosActualizacion.correoElectronico = correoElectronico;
+    if (nombreUsuario !== undefined)
+      datosActualizacion.nombreUsuario = nombreUsuario;
+    if (areaId !== undefined) datosActualizacion.areaId = areaId;
+    if (activo !== undefined)
+      datosActualizacion.activo = activo === "true" || activo === true;
+
+    // Manejar foto_url de Supabase (prioridad) o archivo local
+    if (fotoUrl !== undefined) {
+      // Si viene foto_url del body (Supabase), usarla directamente
+      datosActualizacion.fotoUrl = fotoUrl;
+    } else if (req.file) {
+      // Si viene un archivo (upload local), guardar la ruta
+      // Eliminar foto anterior si existe
+      const oldFotoUrl = (usuario as any).fotoUrl;
+      if (oldFotoUrl) {
+        const oldFilePath = path.join(process.cwd(), oldFotoUrl);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+      // Guardar nueva URL de foto
+      datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
+    }
 
     if (contrasena) {
       const saltRounds = 10;
@@ -170,6 +198,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
 
     return res.json(usuarioActualizado);
   } catch (error: any) {
+    console.error("Error al actualizar usuario:", error);
     return res.status(500).json({
       message: "Error al actualizar el usuario",
       error: error.message,
