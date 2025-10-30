@@ -108,6 +108,12 @@ export const getUsuarioById = async (req: Request, res: Response) => {
 /** Actualizar usuario por ID */
 export const updateUsuario = async (req: Request, res: Response) => {
   try {
+    console.log('====== PATCH /usuarios/:id ======');
+    console.log('📦 Content-Type:', req.headers['content-type']);
+    console.log('📥 Body completo:', JSON.stringify(req.body, null, 2));
+    console.log('🖼️ foto_url en body:', req.body.foto_url);
+    console.log('📁 req.file:', req.file);
+    
     const {
       documento,
       nombre,
@@ -119,7 +125,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       contrasena,
       areaId,
       activo,
-      fotoUrl, // Agregado para Supabase
+      foto_url, // Agregado para Supabase
     } = req.body;
 
     const usuario = await Usuario.findByPk(req.params.id);
@@ -165,10 +171,12 @@ export const updateUsuario = async (req: Request, res: Response) => {
       datosActualizacion.activo = activo === "true" || activo === true;
 
     // Manejar foto_url de Supabase (prioridad) o archivo local
-    if (fotoUrl !== undefined) {
+    if (foto_url !== undefined) {
+      console.log('✅ Guardando foto_url:', foto_url);
       // Si viene foto_url del body (Supabase), usarla directamente
-      datosActualizacion.fotoUrl = fotoUrl;
+      datosActualizacion.fotoUrl = foto_url;
     } else if (req.file) {
+      console.log('📁 Guardando archivo local:', req.file.filename);
       // Si viene un archivo (upload local), guardar la ruta
       // Eliminar foto anterior si existe
       const oldFotoUrl = (usuario as any).fotoUrl;
@@ -180,7 +188,11 @@ export const updateUsuario = async (req: Request, res: Response) => {
       }
       // Guardar nueva URL de foto
       datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
+    } else {
+      console.log('⚠️ No se recibió ni foto_url ni archivo');
     }
+
+    console.log('💾 Datos a actualizar:', JSON.stringify(datosActualizacion, null, 2));
 
     if (contrasena) {
       const saltRounds = 10;
@@ -195,6 +207,9 @@ export const updateUsuario = async (req: Request, res: Response) => {
     const usuarioActualizado = await Usuario.findByPk(req.params.id, {
       attributes: { exclude: ["contrasenaHash"] },
     });
+
+    console.log('✅ Usuario actualizado:', JSON.stringify(usuarioActualizado, null, 2));
+    console.log('====== FIN PATCH ======\n');
 
     return res.json(usuarioActualizado);
   } catch (error: any) {

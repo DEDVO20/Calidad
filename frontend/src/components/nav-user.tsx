@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-
 import {
   LogOutIcon,
   MoreVerticalIcon,
@@ -7,7 +5,6 @@ import {
   Settings,
   Shield,
 } from "lucide-react";
-
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/services/auth";
 
@@ -62,25 +59,6 @@ export function NavUser({
   };
 
   const userInitials = getInitials(user.name);
-  // Sanitizar y resolver foto_url con fallback
-  const sanitizedFoto = useMemo(() => {
-    const raw = user.foto_url ?? "";
-    const v = typeof raw === "string" ? raw.trim() : "";
-    if (
-      v.startsWith("http://") ||
-      v.startsWith("https://") ||
-      v.startsWith("/")
-    )
-      return v;
-    return "";
-  }, [user.foto_url]);
-  const [photoSrc, setPhotoSrc] = useState<string>(
-    sanitizedFoto || user.avatar,
-  );
-  // Forzar re-render cuando cambie la fuente
-  useEffect(() => {
-    setPhotoSrc(sanitizedFoto || user.avatar);
-  }, [sanitizedFoto, user.avatar]);
 
   return (
     <SidebarMenu>
@@ -93,14 +71,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  key={photoSrc}
-                  src={photoSrc}
+                  src={user.foto_url || user.avatar}
                   alt={user.name}
-                  onError={() => {
-                    if (photoSrc !== user.avatar) setPhotoSrc(user.avatar);
-                  }}
                 />
-
                 <AvatarFallback className="rounded-lg">
                   {userInitials}
                 </AvatarFallback>
@@ -124,14 +97,9 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    key={photoSrc + "-menu"}
-                    src={photoSrc}
+                    src={user.foto_url || user.avatar}
                     alt={user.name}
-                    onError={() => {
-                      if (photoSrc !== user.avatar) setPhotoSrc(user.avatar);
-                    }}
                   />
-
                   <AvatarFallback className="rounded-lg">
                     {userInitials}
                   </AvatarFallback>
