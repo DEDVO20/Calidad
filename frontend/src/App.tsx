@@ -8,6 +8,9 @@ import LoginPage from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil"; 
 import { ProtectedLayout } from "./components/ProtectedLayout";
+import GestionDocumental from "./pages/GestionDocumental";
+import ControlVersiones from "./pages/ControlVersiones";
+
 
 import "./App.css";
 
@@ -22,6 +25,8 @@ function App() {
         <Route element={<ProtectedLayout />}>   // esta linea router 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/GestionDocumental" element={<GestionDocumental />} />
+          <Route path="/ControlVersiones" element={<ControlVersiones />} />
         </Route>
       </Routes>
     </Router>
