@@ -73,6 +73,7 @@ export const login = async (req: Request, res: Response) => {
         "contrasenaHash",
         "areaId",
         "activo",
+        "fotoUrl",
       ],
     });
 

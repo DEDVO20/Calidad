@@ -302,7 +302,7 @@ router.put(
  *               foto_url:
  *                 type: string
  *                 description: URL de la imagen de perfil en Supabase
- *                 example: https://xxx.supabase.co/storage/v1/object/public/imagenes/123/123-1738123456.jpg
+ *                 example: https://xxx.supabase.co/storage/v1/object/public/profile-images/123/123-1738123456.jpg
  *         multipart/form-data:
  *           schema:
  *             type: object
