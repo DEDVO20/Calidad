@@ -40,11 +40,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const cargarPerfilCompleto = async () => {
       const currentUser = getCurrentUser();
       const token = getToken();
-<<<<<<< HEAD
-
-=======
-      
->>>>>>> d8d54fdb068faa99484a1d4cda4427d16f781339
       if (currentUser?.id && token) {
         try {
           const res = await axios.get(`${API_URL}/usuarios/${currentUser.id}`, {
