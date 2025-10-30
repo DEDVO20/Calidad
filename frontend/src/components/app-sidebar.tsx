@@ -31,7 +31,7 @@ import { getCurrentUser } from "@/services/auth";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
-  console.log("Usuario", user);
+
   // Actualizar usuario cuando cambie en localStorage
   React.useEffect(() => {
     const handleStorageChange = () => {
@@ -39,17 +39,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     // Escuchar cambios en localStorage
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Escuchar evento custom de actualización de usuario (perfil)
-    const handleUserUpdated = () => {
-      setUser(getCurrentUser());
-    };
-    window.addEventListener("user:updated", handleUserUpdated);
-
+    window.addEventListener('storage', handleStorageChange);
+    
     // Polling para detectar cambios internos (mismo tab)
-
     const interval = setInterval(() => {
       const updatedUser = getCurrentUser();
       if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
@@ -58,9 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, 1000);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-
-      window.removeEventListener("user:updated", handleUserUpdated);
+      window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
   }, [user]);
@@ -186,15 +176,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Abiertas",
-            url: "#",
+            url: "/No_conformidades_Abiertas",
           },
           {
             title: "En Tratamiento",
-            url: "#",
+            url: "/No_conformidades_EnTratamiento",
           },
           {
-            title: "Historial Completo",
-            url: "#",
+            title: "Cerradas",
+            url: "/No_conformidades_Cerradas",
           },
         ],
       },

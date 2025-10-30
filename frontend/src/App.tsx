@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Perfil from "./components/usuarios/Perfil";
+import Perfil from "./components/usuarios/Perfil"; 
 import { ProtectedLayout } from "./components/ProtectedLayout";
 
 import "./App.css";
@@ -19,7 +19,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         {/* Rutas protegidas con sidebar y navbar */}
-        <Route element={<ProtectedLayout />}>
+        <Route element={<ProtectedLayout />}>   // esta linea router 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/perfil" element={<Perfil />} />
         </Route>
