@@ -40,7 +40,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const cargarPerfilCompleto = async () => {
       const currentUser = getCurrentUser();
       const token = getToken();
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> d8d54fdb068faa99484a1d4cda4427d16f781339
       if (currentUser?.id && token) {
         try {
           const res = await axios.get(`${API_URL}/usuarios/${currentUser.id}`, {
@@ -48,7 +52,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               Authorization: `Bearer ${token}`,
             },
           });
-
           // Actualizar localStorage con datos frescos (solo fotoUrl en camelCase)
           const { foto_url, ...userData } = res.data;
           const updatedUser = {
