@@ -182,6 +182,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
     }
 
+    // Actualizar contraseña si viene en el body
     if (contrasena) {
       const saltRounds = 10;
       datosActualizacion.contrasenaHash = await bcrypt.hash(
