@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Usuario from "../models/usuario.model";
 import bcrypt from "bcrypt";
+import path from "path";
+import fs from "fs";
 
 /** Crear usuario */
 export const createUsuario = async (req: Request, res: Response) => {
@@ -117,7 +119,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       contrasena,
       areaId,
       activo,
-      foto_url, // Supabase URL (se envía como snake_case desde frontend)
+      fotoUrl, // Agregado para Supabase
     } = req.body;
 
     const usuario = await Usuario.findByPk(req.params.id);
@@ -162,9 +164,22 @@ export const updateUsuario = async (req: Request, res: Response) => {
     if (activo !== undefined)
       datosActualizacion.activo = activo === "true" || activo === true;
 
-    // Actualizar foto_url si viene en el body (Supabase)
-    if (foto_url !== undefined) {
-      datosActualizacion.fotoUrl = foto_url;
+    // Manejar foto_url de Supabase (prioridad) o archivo local
+    if (fotoUrl !== undefined) {
+      // Si viene foto_url del body (Supabase), usarla directamente
+      datosActualizacion.fotoUrl = fotoUrl;
+    } else if (req.file) {
+      // Si viene un archivo (upload local), guardar la ruta
+      // Eliminar foto anterior si existe
+      const oldFotoUrl = (usuario as any).fotoUrl;
+      if (oldFotoUrl) {
+        const oldFilePath = path.join(process.cwd(), oldFotoUrl);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+      // Guardar nueva URL de foto
+      datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
     }
 
     // Actualizar contraseña si viene en el body
