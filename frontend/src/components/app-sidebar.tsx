@@ -84,8 +84,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-
-      window.removeEventListener("user:updated", handleUserUpdated);
       clearInterval(interval);
     };
   }, [user]);

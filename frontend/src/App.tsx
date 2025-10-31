@@ -53,6 +53,9 @@ function App() {
               element={<NoConformidadesCerradas />}
             />
           </Route>
+
+          {/* Ruta catch-all para manejar errores de tipeo */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
