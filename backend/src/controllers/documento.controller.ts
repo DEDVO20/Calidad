@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import { Op, UUIDV4 } from "sequelize";
 import Documento from "../models/documento.model";
 
 /** Crear documento */
@@ -11,6 +11,8 @@ export const createDocumento = async (req: Request, res: Response) => {
       tipoMime,
       tamañoBytes,
       subidoPor,
+      creadoPor,
+      revisadoPor,
       visibilidad,
       tipoDocumento,
       codigoDocumento,
@@ -19,6 +21,7 @@ export const createDocumento = async (req: Request, res: Response) => {
       aprobadoPor,
       fechaAprobacion,
       proximaRevision,
+      contenidoHtml,
     } = req.body;
 
     if (!nombreArchivo) {
@@ -32,15 +35,18 @@ export const createDocumento = async (req: Request, res: Response) => {
       rutaAlmacenamiento,
       tipoMime,
       tamañoBytes,
-      subidoPor,
-      visibilidad,
+      subidoPor: subidoPor || creadoPor,
+      creadoPor,
+      revisadoPor: revisadoPor || null,
+      visibilidad: visibilidad || "privado",
       tipoDocumento,
       codigoDocumento,
       version,
-      estado,
+      estado: estado || "borrador",
       aprobadoPor,
       fechaAprobacion,
       proximaRevision,
+
       // creadoEn lo maneja el modelo si corresponde
     });
 
@@ -89,7 +95,9 @@ export const getDocumentos = async (req: Request, res: Response) => {
       include: [
         // usa los alias definidos en el modelo
         { association: "autor" },
+        { association: "revisor" },
         { association: "aprobador" },
+        { association: "subidor" },
         { association: "versiones" },
         { association: "procesosRelacionados" },
       ],
@@ -115,7 +123,9 @@ export const getDocumentoById = async (req: Request, res: Response) => {
     const doc = await Documento.findByPk(req.params.id, {
       include: [
         { association: "autor" },
+        { association: "revisor" },
         { association: "aprobador" },
+        { association: "subidor" },
         { association: "versiones" },
         { association: "procesosRelacionados" },
       ],
@@ -149,27 +159,73 @@ export const updateDocumento = async (req: Request, res: Response) => {
       codigoDocumento,
       version,
       estado,
+      creadoPor,
+      revisadoPor,
       aprobadoPor,
       fechaAprobacion,
       proximaRevision,
+      contenidoHtml,
     } = req.body;
 
-    await doc.update({
-      nombreArchivo,
-      rutaAlmacenamiento,
-      tipoMime,
-      tamañoBytes,
-      subidoPor,
-      visibilidad,
-      tipoDocumento,
-      codigoDocumento,
-      version,
-      estado,
-      aprobadoPor,
-      fechaAprobacion,
-      proximaRevision,
-    });
+    const archivo = req.file;
 
+    //si ahy archivo nuevo, eliminar anterior y subir el nuevo
+    if (archivo) {
+      if (doc.rutaAlmacenamiento) {
+        try {
+          const oldPath = doc.rutaAlmacenamiento.split("/").pop();
+          if (oldPath) {
+            // await deleteFileFromSupabase(oldPath);
+          }
+        } catch (error) {
+          console.error("Error al eliminar archivo anterior:", error);
+        }
+      }
+
+      //Subir nuevo archivo
+      const extension = archivo.originalname.split(".").pop();
+      const filename = `${UUIDV4()}.${extension}`;
+
+      const { url } = await uploadFileToSupabase(
+        filename,
+        archivo.buffer,
+        "documentos",
+      );
+
+      await doc.update({
+        nombreArchivo,
+        rutaAlmacenamiento: url,
+        tipoMime: archivo.mimetype,
+        tamañoBytes: archivo.size,
+        subidoPor,
+        visibilidad,
+        tipoDocumento,
+        codigoDocumento,
+        version,
+        estado,
+        aprobadoPor,
+        fechaAprobacion,
+        proximaRevision,
+        creadoPor,
+        revisadoPor,
+        contenidoHtml,
+      });
+    } else {
+      await doc.update({
+        nombreArchivo,
+        tipoDocumento,
+        codigoDocumento,
+        version,
+        visibilidad,
+        estado,
+        proximaRevision,
+        creadoPor,
+        revisadoPor,
+        aprobadoPor,
+        fechaAprobacion,
+        contenidoHtml,
+      });
+    }
     return res.json(doc);
   } catch (error: any) {
     return res
@@ -178,14 +234,33 @@ export const updateDocumento = async (req: Request, res: Response) => {
   }
 };
 
-/** Eliminar documento por ID */
+/** Eliminar documento */
 export const deleteDocumento = async (req: Request, res: Response) => {
   try {
-    const rows = await Documento.destroy({ where: { id: req.params.id } });
-    if (rows === 0)
+    const doc = await Documento.findByPk(req.params.id);
+
+    if (!doc) {
       return res.status(404).json({ message: "Documento no encontrado" });
+    }
+
+    // Eliminar archivo de Supabase si existe
+    if (doc.rutaAlmacenamiento) {
+      try {
+        const filePath = doc.rutaAlmacenamiento.split("/").pop();
+        if (filePath) {
+          await deleteFileFromSupabase(filePath);
+        }
+      } catch (error) {
+        console.error("Error al eliminar archivo de Supabase:", error);
+      }
+    }
+
+    // Eliminar registro de BD
+    await doc.destroy();
+
     return res.status(204).send();
   } catch (error: any) {
+    console.error("Error al eliminar documento:", error);
     return res
       .status(500)
       .json({ message: "Error al eliminar documento", error: error.message });

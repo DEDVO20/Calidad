@@ -16,6 +16,9 @@ interface DocumentoAttributes {
   aprobadoPor?: string;
   fechaAprobacion?: Date;
   proximaRevision?: Date;
+  creadoPor?: string;
+  revisadoPor?: string;
+  contenidoHtml?: string;
 }
 
 interface DocumentoCreationAttributes
@@ -35,6 +38,9 @@ interface DocumentoCreationAttributes
     | "aprobadoPor"
     | "fechaAprobacion"
     | "proximaRevision"
+    | "creadoPor"
+    | "revisadoPor"
+    | "contenidoHtml"
   > {}
 
 class Documento
@@ -56,6 +62,9 @@ class Documento
   aprobadoPor?: string;
   fechaAprobacion?: Date;
   proximaRevision?: Date;
+  creadoPor?: string;
+  revisadoPor?: string;
+  contenidoHtml?: string;
 
   public static initModel(sequelize: Sequelize): typeof Documento {
     return Documento.init(
@@ -89,6 +98,26 @@ class Documento
           type: DataTypes.UUID,
           allowNull: true,
           field: "subido_por",
+        },
+        creadoPor: {
+          // ← Nuevo
+          type: DataTypes.UUID,
+          allowNull: false,
+          field: "creado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
+        },
+        revisadoPor: {
+          // ← Nuevo
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "revisado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
         },
         creadoEn: {
           type: DataTypes.DATE,
@@ -130,6 +159,11 @@ class Documento
           type: DataTypes.DATEONLY,
           allowNull: true,
           field: "proxima_revision",
+        },
+        contenidoHtml: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "contenido_html",
         },
       },
       {
