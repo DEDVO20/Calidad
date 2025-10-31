@@ -1,4 +1,6 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import {
   Collapsible,
@@ -32,6 +34,30 @@ export function NavMain({
   }[];
   title?: string;
 }) {
+  const location = useLocation();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  // Determinar qué menús deben estar abiertos basándose en la ruta actual
+  useEffect(() => {
+    const newOpenMenus: Record<string, boolean> = {};
+    items.forEach((item) => {
+      if (item.items) {
+        // Verificar si algún subitem coincide con la ruta actual
+        const isActive = item.items.some(
+          (subItem) => location.pathname === subItem.url
+        );
+        newOpenMenus[item.title] = isActive;
+      }
+    });
+    setOpenMenus(newOpenMenus);
+  }, [location.pathname, items]);
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
   return (
     <SidebarGroup>
       {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
@@ -41,7 +67,8 @@ export function NavMain({
             <Collapsible
               key={item.title}
               asChild
-              defaultOpen={item.isActive}
+              open={openMenus[item.title] || false}
+              onOpenChange={() => toggleMenu(item.title)}
               className="group/collapsible"
             >
               <SidebarMenuItem>

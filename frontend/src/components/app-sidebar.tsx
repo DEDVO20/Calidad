@@ -27,11 +27,44 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { getCurrentUser } from "@/services/auth";
+import { getCurrentUser, getToken } from "@/services/auth";
+import axios from "axios";
+
+const API_URL = "/api";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
-  console.log("Usuario", user);
+
+  // Cargar perfil completo del usuario al montar
+  React.useEffect(() => {
+    const cargarPerfilCompleto = async () => {
+      const currentUser = getCurrentUser();
+      const token = getToken();
+      if (currentUser?.id && token) {
+        try {
+          const res = await axios.get(`${API_URL}/usuarios/${currentUser.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          // Actualizar localStorage con datos frescos (solo fotoUrl en camelCase)
+          const { foto_url, ...userData } = res.data;
+          const updatedUser = {
+            ...currentUser,
+            ...userData,
+            fotoUrl: foto_url || res.data.fotoUrl,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        } catch (error) {
+          console.error("Error cargando perfil completo:", error);
+        }
+      }
+    };
+
+    cargarPerfilCompleto();
+  }, []);
+
   // Actualizar usuario cuando cambie en localStorage
   React.useEffect(() => {
     const handleStorageChange = () => {
@@ -39,17 +72,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     // Escuchar cambios en localStorage
-
     window.addEventListener("storage", handleStorageChange);
 
-    // Escuchar evento custom de actualización de usuario (perfil)
-    const handleUserUpdated = () => {
-      setUser(getCurrentUser());
-    };
-    window.addEventListener("user:updated", handleUserUpdated);
-
     // Polling para detectar cambios internos (mismo tab)
-
     const interval = setInterval(() => {
       const updatedUser = getCurrentUser();
       if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
@@ -70,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: user ? `${user.nombre} ${user.primerApellido}` : "Usuario",
       email: user?.correoElectronico || "usuario@example.com",
       avatar: "/avatars/user.jpg",
-      foto_url: user?.foto_url || user?.fotoUrl || "", // Intentar ambos formatos
+      foto_url: user?.fotoUrl || "",
     },
     navMain: [
       {
@@ -186,15 +211,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Abiertas",
-            url: "#",
+            url: "/No_conformidades_Abiertas",
           },
           {
             title: "En Tratamiento",
-            url: "#",
+            url: "/No_conformidades_EnTratamiento",
           },
           {
-            title: "Historial Completo",
-            url: "#",
+            title: "Cerradas",
+            url: "/No_conformidades_Cerradas",
           },
         ],
       },
@@ -319,6 +344,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
   };
+  console.log("User data:", user);
+  console.log("foto_url obtenida:", user?.foto_url || user?.fotoUrl);
 
   return (
     <Sidebar collapsible="icon" {...props}>
