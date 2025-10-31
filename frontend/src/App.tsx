@@ -5,6 +5,9 @@ import {
   Navigate,
 } from "react-router-dom";
 import LoginPage from "./pages/Login";
+import NoConformidadesAbiertas from "@/pages/No_conformidades_Abiertas";
+import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento";
+import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
