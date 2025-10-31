@@ -13,10 +13,11 @@ export const createArea = async (req: Request, res: Response) => {
     }
 
     const existe = await Area.findOne({ where: { codigo } });
-    if (existe)
+    if (existe) {
       return res
         .status(409)
         .json({ message: "Ya existe un área con ese código." });
+    }
 
     const area = await Area.create({ codigo, nombre, descripcion });
     return res.status(201).json(area);

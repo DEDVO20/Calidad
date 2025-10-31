@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "postgres",
-    "password": "postgres123",
-    "database": "sgc_iso9001",
+    "password": "admin",
+    "database": "calidad",
     "host": "localhost",
     "port": 5432,
     "dialect": "postgres"

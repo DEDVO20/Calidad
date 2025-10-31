@@ -54,7 +54,7 @@ class ParticipanteProceso
       },
       {
         sequelize,
-        tableName: "participantes_procesos",
+        tableName: "participante_procesos",
         modelName: "ParticipanteProceso",
         timestamps: false,
         underscored: true,

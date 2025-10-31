@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import Usuario from "../models/Usuarios";
+import Usuario from "../models/usuario.model";
 import bcrypt from "bcrypt";
+import path from "path";
+import fs from "fs";
 
 /** Crear usuario */
 export const createUsuario = async (req: Request, res: Response) => {
@@ -18,20 +20,32 @@ export const createUsuario = async (req: Request, res: Response) => {
       activo,
     } = req.body;
 
-    if (!documento || !nombre || !primerApellido || !correoElectronico || !nombreUsuario || !contrasena) {
+    if (
+      !documento ||
+      !nombre ||
+      !primerApellido ||
+      !correoElectronico ||
+      !nombreUsuario ||
+      !contrasena
+    ) {
       return res.status(400).json({
-        message: "Los campos 'documento', 'nombre', 'primerApellido', 'correoElectronico', 'nombreUsuario' y 'contrasena' son obligatorios.",
+        message:
+          "Los campos 'documento', 'nombre', 'primerApellido', 'correoElectronico', 'nombreUsuario' y 'contrasena' son obligatorios.",
       });
     }
 
     const nombreExiste = await Usuario.findOne({ where: { nombreUsuario } });
     if (nombreExiste) {
-      return res.status(409).json({ message: "Ya existe un usuario con ese nombre de usuario." });
+      return res
+        .status(409)
+        .json({ message: "Ya existe un usuario con ese nombre de usuario." });
     }
 
     const documentoExiste = await Usuario.findOne({ where: { documento } });
     if (documentoExiste) {
-      return res.status(409).json({ message: "Ya existe un usuario con ese documento." });
+      return res
+        .status(409)
+        .json({ message: "Ya existe un usuario con ese documento." });
     }
 
     const saltRounds = 10;
@@ -53,7 +67,9 @@ export const createUsuario = async (req: Request, res: Response) => {
     const { contrasenaHash: _, ...usuarioSinHash } = usuario.toJSON();
     return res.status(201).json(usuarioSinHash);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al crear el usuario", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al crear el usuario", error: error.message });
   }
 };
 
@@ -66,7 +82,9 @@ export const getUsuarios = async (_req: Request, res: Response) => {
     });
     return res.json(usuarios);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener usuarios", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener usuarios", error: error.message });
   }
 };
 
@@ -81,7 +99,9 @@ export const getUsuarioById = async (req: Request, res: Response) => {
     }
     return res.json(usuario);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al obtener el usuario", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el usuario", error: error.message });
   }
 };
 
@@ -99,6 +119,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       contrasena,
       areaId,
       activo,
+      fotoUrl, // Agregado para Supabase
     } = req.body;
 
     const usuario = await Usuario.findByPk(req.params.id);
@@ -109,32 +130,64 @@ export const updateUsuario = async (req: Request, res: Response) => {
     if (nombreUsuario && nombreUsuario !== usuario.nombreUsuario) {
       const nombreExiste = await Usuario.findOne({ where: { nombreUsuario } });
       if (nombreExiste) {
-        return res.status(409).json({ message: "Ya existe un usuario con ese nombre de usuario." });
+        return res
+          .status(409)
+          .json({ message: "Ya existe un usuario con ese nombre de usuario." });
       }
     }
 
     if (documento && documento !== usuario.documento) {
       const documentoExiste = await Usuario.findOne({ where: { documento } });
       if (documentoExiste) {
-        return res.status(409).json({ message: "Ya existe un usuario con ese documento." });
+        return res
+          .status(409)
+          .json({ message: "Ya existe un usuario con ese documento." });
       }
     }
 
-    const datosActualizacion: any = {
-      documento,
-      nombre,
-      segundoNombre,
-      primerApellido,
-      segundoApellido,
-      correoElectronico,
-      nombreUsuario,
-      areaId,
-      activo,
-    };
+    const datosActualizacion: any = {};
+
+    // Solo actualizar campos que vengan en el request
+    if (documento !== undefined) datosActualizacion.documento = documento;
+    if (nombre !== undefined) datosActualizacion.nombre = nombre;
+    if (segundoNombre !== undefined)
+      datosActualizacion.segundoNombre = segundoNombre;
+    if (primerApellido !== undefined)
+      datosActualizacion.primerApellido = primerApellido;
+    if (segundoApellido !== undefined)
+      datosActualizacion.segundoApellido = segundoApellido;
+    if (correoElectronico !== undefined)
+      datosActualizacion.correoElectronico = correoElectronico;
+    if (nombreUsuario !== undefined)
+      datosActualizacion.nombreUsuario = nombreUsuario;
+    if (areaId !== undefined) datosActualizacion.areaId = areaId;
+    if (activo !== undefined)
+      datosActualizacion.activo = activo === "true" || activo === true;
+
+    // Manejar foto_url de Supabase (prioridad) o archivo local
+    if (fotoUrl !== undefined) {
+      // Si viene foto_url del body (Supabase), usarla directamente
+      datosActualizacion.fotoUrl = fotoUrl;
+    } else if (req.file) {
+      // Si viene un archivo (upload local), guardar la ruta
+      // Eliminar foto anterior si existe
+      const oldFotoUrl = (usuario as any).fotoUrl;
+      if (oldFotoUrl) {
+        const oldFilePath = path.join(process.cwd(), oldFotoUrl);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+      // Guardar nueva URL de foto
+      datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
+    }
 
     if (contrasena) {
       const saltRounds = 10;
-      datosActualizacion.contrasenaHash = await bcrypt.hash(contrasena, saltRounds);
+      datosActualizacion.contrasenaHash = await bcrypt.hash(
+        contrasena,
+        saltRounds,
+      );
     }
 
     await usuario.update(datosActualizacion);
@@ -145,6 +198,28 @@ export const updateUsuario = async (req: Request, res: Response) => {
 
     return res.json(usuarioActualizado);
   } catch (error: any) {
-    return res.status(500).json({ message: "Error al actualizar el usuario", error: error.message });
+    console.error("Error al actualizar usuario:", error);
+    return res.status(500).json({
+      message: "Error al actualizar el usuario",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteUsuario = async (req: Request, res: Response) => {
+  try {
+    const usuario = await Usuario.findByPk(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    await usuario.destroy();
+
+    return res.json({ message: "Usuario eliminado correctamente" });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al eliminar el usuario",
+      error: error.message,
+    });
   }
 };
