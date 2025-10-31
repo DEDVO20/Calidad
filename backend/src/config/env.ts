@@ -23,6 +23,11 @@ export const config = {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   },
 
+  supabase: {
+    url: process.env.SUPABASE_URL || "",
+    serviceKey: process.env.SUPABASE_SERVICE_KEY || "",
+  },
+
   // upload: {
   //   maxSize: Number(process.env.MAX_FILE_SIZE) || 10485760, // 10MB
   //   path: process.env.UPLOAD_PATH || "./uploads",

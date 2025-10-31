@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   createDocumento,
   getDocumentos,
@@ -6,8 +7,40 @@ import {
   updateDocumento,
   deleteDocumento,
 } from "../controllers/documento.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
+
+// Configurar multer para manejar archivos en memoria
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB máximo
+  },
+  fileFilter: (req, file, cb) => {
+    // Tipos de archivo permitidos
+    const allowedMimes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Tipo de archivo no permitido. Solo PDF, Word, Excel e imágenes.",
+        ),
+      );
+    }
+  },
+});
 
 /**
  * @swagger
@@ -20,7 +53,12 @@ const router = Router();
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: tipo
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Búsqueda por nombre o código
+ *       - in: query
+ *         name: tipoDocumento
  *         schema:
  *           type: string
  *           enum: [manual, procedimiento, instructivo, formato, registro]
@@ -29,19 +67,48 @@ const router = Router();
  *         name: estado
  *         schema:
  *           type: string
- *           enum: [borrador, revision, aprobado, obsoleto]
+ *           enum: [borrador, en_revision, aprobado, obsoleto]
  *         description: Filtrar por estado
+ *       - in: query
+ *         name: visibilidad
+ *         schema:
+ *           type: string
+ *           enum: [publico, privado]
+ *         description: Filtrar por visibilidad
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Documentos por página
  *     responses:
  *       200:
  *         description: Lista de documentos
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Documento'
+ *               type: object
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Documento'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 pages:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  */
-router.get("/", getDocumentos);
+router.get("/", authMiddleware, getDocumentos);
 
 /**
  * @swagger
@@ -57,7 +124,8 @@ router.get("/", getDocumentos);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: ID del documento
  *     responses:
  *       200:
@@ -69,7 +137,7 @@ router.get("/", getDocumentos);
  *       404:
  *         description: Documento no encontrado
  */
-router.get("/:id", getDocumentoById);
+router.get("/:id", authMiddleware, getDocumentoById);
 
 /**
  * @swagger
@@ -77,7 +145,7 @@ router.get("/:id", getDocumentoById);
  *   post:
  *     summary: Crear nuevo documento
  *     tags: [Documentos]
- *     description: Crea un nuevo documento en el sistema de calidad
+ *     description: Crea un nuevo documento en el sistema de calidad (con archivo opcional y/o contenido HTML)
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -87,40 +155,69 @@ router.get("/:id", getDocumentoById);
  *           schema:
  *             type: object
  *             required:
- *               - codigo
- *               - nombre
- *               - tipo
+ *               - nombreArchivo
+ *               - codigoDocumento
+ *               - version
+ *               - creadoPor
  *             properties:
- *               codigo:
+ *               nombreArchivo:
  *                 type: string
- *                 example: DOC-001
- *               nombre:
+ *                 example: Formato de Solicitud de Equipos
+ *               codigoDocumento:
  *                 type: string
- *                 example: Manual de Calidad
- *               tipo:
- *                 type: string
- *                 enum: [manual, procedimiento, instructivo, formato, registro]
- *                 example: manual
+ *                 example: FO-GC-001
  *               version:
  *                 type: string
  *                 example: "1.0"
+ *               tipoDocumento:
+ *                 type: string
+ *                 enum: [formato, procedimiento, instructivo, manual, politica, registro, plan]
+ *                 example: formato
  *               estado:
  *                 type: string
- *                 enum: [borrador, revision, aprobado, obsoleto]
+ *                 enum: [borrador, en_revision, aprobado, obsoleto]
  *                 default: borrador
+ *               visibilidad:
+ *                 type: string
+ *                 enum: [publico, privado]
+ *                 default: privado
+ *               creadoPor:
+ *                 type: string
+ *                 format: uuid
+ *                 description: ID del usuario que creó el documento
+ *               revisadoPor:
+ *                 type: string
+ *                 format: uuid
+ *                 description: ID del usuario que revisó el documento
+ *               aprobadoPor:
+ *                 type: string
+ *                 format: uuid
+ *                 description: ID del usuario que aprobó el documento
+ *               proximaRevision:
+ *                 type: string
+ *                 format: date
+ *                 example: "2024-12-31"
+ *               contenidoHtml:
+ *                 type: string
+ *                 description: Contenido HTML del documento (desde TipTap)
  *               archivo:
  *                 type: string
  *                 format: binary
- *                 description: Archivo del documento
+ *                 description: Archivo del documento (opcional si hay contenidoHtml)
  *     responses:
  *       201:
  *         description: Documento creado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Documento'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 documento:
+ *                   $ref: '#/components/schemas/Documento'
  */
-router.post("/", createDocumento);
+router.post("/", authMiddleware, upload.single("archivo"), createDocumento);
 
 /**
  * @swagger
@@ -136,31 +233,59 @@ router.post("/", createDocumento);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: ID del documento
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
- *               nombre:
+ *               nombreArchivo:
+ *                 type: string
+ *               codigoDocumento:
+ *                 type: string
+ *               version:
  *                 type: string
  *               estado:
  *                 type: string
- *                 enum: [borrador, revision, aprobado, obsoleto]
- *               version:
+ *                 enum: [borrador, en_revision, aprobado, obsoleto]
+ *               visibilidad:
  *                 type: string
+ *                 enum: [publico, privado]
+ *               tipoDocumento:
+ *                 type: string
+ *               revisadoPor:
+ *                 type: string
+ *                 format: uuid
+ *               aprobadoPor:
+ *                 type: string
+ *                 format: uuid
+ *               proximaRevision:
+ *                 type: string
+ *                 format: date
+ *               contenidoHtml:
+ *                 type: string
+ *               archivo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Nuevo archivo (opcional)
  *     responses:
  *       200:
  *         description: Documento actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Documento'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 documento:
+ *                   $ref: '#/components/schemas/Documento'
  */
-router.put("/:id", updateDocumento);
+router.put("/:id", authMiddleware, upload.single("archivo"), updateDocumento);
 
 /**
  * @swagger
@@ -168,7 +293,7 @@ router.put("/:id", updateDocumento);
  *   delete:
  *     summary: Eliminar documento
  *     tags: [Documentos]
- *     description: Elimina un documento del sistema
+ *     description: Elimina un documento del sistema y su archivo de Supabase
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -176,14 +301,15 @@ router.put("/:id", updateDocumento);
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: ID del documento
  *     responses:
- *       200:
+ *       204:
  *         description: Documento eliminado exitosamente
  *       404:
  *         description: Documento no encontrado
  */
-router.delete("/:id", deleteDocumento);
+router.delete("/:id", authMiddleware, deleteDocumento);
 
 export default router;
