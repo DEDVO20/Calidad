@@ -29,27 +29,6 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
 
-<<<<<<< HEAD
-        {/* Rutas protegidas con sidebar y navbar */}
-        <Route element={<ProtectedLayout />}>
-          <Route path="/perfil" element={<Perfil />} />
-          <Route
-            path="/No_conformidades_Abiertas"
-            element={<NoConformidadesAbiertas />}
-          />
-          <Route
-            path="/No_conformidades_EnTratamiento"
-            element={<NoConformidadesEnTratamiento />}
-          />
-          <Route
-            path="/No_conformidades_Cerradas"
-            element={<NoConformidadesCerradas />}
-          />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
-      </Routes>
-    </Router>
-=======
           {/* Rutas protegidas con sidebar y navbar */}
           <Route element={<ProtectedLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -61,11 +40,22 @@ function App() {
               path="/documentos/:id/editar"
               element={<EditarDocumento />}
             />
+            <Route
+              path="/No_conformidades_Abiertas"
+              element={<NoConformidadesAbiertas />}
+            />
+            <Route
+              path="/No_conformidades_EnTratamiento"
+              element={<NoConformidadesEnTratamiento />}
+            />
+            <Route
+              path="/No_conformidades_Cerradas"
+              element={<NoConformidadesCerradas />}
+            />
           </Route>
         </Routes>
       </Router>
     </AuthProvider>
->>>>>>> main
   );
 }
 
