@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { Op, UUIDV4 } from "sequelize";
 import Documento from "../models/documento.model";
+import {
+  uploadFileToSupabase,
+  deleteFileFromSupabase,
+} from "../utils/supabase";
 
 /** Crear documento */
 export const createDocumento = async (req: Request, res: Response) => {

@@ -119,7 +119,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Gestión Documental",
-            url: "#",
+            url: "/documentos",
           },
           {
             title: "Control de Versiones",
