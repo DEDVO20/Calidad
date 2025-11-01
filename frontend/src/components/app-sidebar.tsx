@@ -194,11 +194,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Cerradas",
-            url: "#",
+            url: "/Acciones_correctivas_Cerradas",
           },
           {
             title: "Verificadas",
-            url: "#",
+            url: "/Acciones_correctivas_Verificadas",
           },
         ],
       },
