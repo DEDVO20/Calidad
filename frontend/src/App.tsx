@@ -8,6 +8,8 @@ import LoginPage from "./pages/Login";
 import NoConformidadesAbiertas from "@/pages/No_conformidades_Abiertas";
 import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento";
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
+import AprobacionesPendientes from "./pages/documentos/Aprobaciones_Pendientes";
+import DocumentosObsoletos from "./pages/documentos/Documentos_Obsoletos";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -36,10 +38,11 @@ function App() {
             <Route path="/documentos" element={<Documentos />} />
             <Route path="/documentos/crear" element={<CreateDocument />} />
             <Route path="/documentos/:id" element={<VerDocumento />} />
-            <Route
-              path="/documentos/:id/editar"
-              element={<EditarDocumento />}
-            />
+            <Route path="/documentos/:id/aprobaciones" element={<AprobacionesPendientes />} />
+            <Route path="/Aprobaciones_Pendientes" element={<AprobacionesPendientes />} />
+            <Route path="/Documentos_Obsoletos" element={<DocumentosObsoletos />} />
+
+            <Route path="/documentos/:id/editar" element={<EditarDocumento />} />
             <Route
               path="/No_conformidades_Abiertas"
               element={<NoConformidadesAbiertas />}
