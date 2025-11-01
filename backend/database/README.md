@@ -34,7 +34,7 @@ La base de datos incluye las siguientes entidades principales:
 
 ### ⚠️ No Conformidades y Acciones
 - **No_Conformidades**: Registro de no conformidades
-- **Accion_Correctivas**: Acciones correctivas y preventivas
+- **acciones_correctivas**: Acciones correctivas y preventivas
 - **Accion_Procesos**: Acciones de mejora en procesos
 
 ### 🎯 Gestión de Riesgos
