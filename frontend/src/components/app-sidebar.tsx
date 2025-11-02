@@ -148,11 +148,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Aprobaciones Pendientes",
-            url: "#",
+            url: "/Aprobaciones_Pendientes",
           },
           {
             title: "Documentos Obsoletos",
-            url: "#",
+            url: "/Documentos_Obsoletos",
           },
         ],
       },
