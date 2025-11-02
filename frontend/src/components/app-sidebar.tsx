@@ -27,11 +27,45 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { getCurrentUser } from "@/services/auth";
+import { getCurrentUser, getToken } from "@/services/auth";
+import axios from "axios";
+
+const API_URL = "/api";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
 
+<<<<<<< HEAD
+=======
+  // Cargar perfil completo del usuario al montar
+  React.useEffect(() => {
+    const cargarPerfilCompleto = async () => {
+      const currentUser = getCurrentUser();
+      const token = getToken();
+      if (currentUser?.id && token) {
+        try {
+          const res = await axios.get(`${API_URL}/usuarios/${currentUser.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          // Actualizar localStorage con datos frescos (solo fotoUrl en camelCase)
+          const updatedUser = {
+            ...currentUser,
+            ...res.data,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        } catch (error) {
+          console.error("Error cargando perfil completo:", error);
+        }
+      }
+    };
+
+    cargarPerfilCompleto();
+  }, []);
+
+>>>>>>> main
   // Actualizar usuario cuando cambie en localStorage
   React.useEffect(() => {
     const handleStorageChange = () => {
@@ -39,8 +73,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     // Escuchar cambios en localStorage
+<<<<<<< HEAD
     window.addEventListener('storage', handleStorageChange);
     
+=======
+    window.addEventListener("storage", handleStorageChange);
+
+>>>>>>> main
     // Polling para detectar cambios internos (mismo tab)
     const interval = setInterval(() => {
       const updatedUser = getCurrentUser();
@@ -50,7 +89,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, 1000);
 
     return () => {
+<<<<<<< HEAD
       window.removeEventListener('storage', handleStorageChange);
+=======
+      window.removeEventListener("storage", handleStorageChange);
+>>>>>>> main
       clearInterval(interval);
     };
   }, [user]);
@@ -60,7 +103,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: user ? `${user.nombre} ${user.primerApellido}` : "Usuario",
       email: user?.correoElectronico || "usuario@example.com",
       avatar: "/avatars/user.jpg",
-      foto_url: user?.foto_url || user?.fotoUrl || "", // Intentar ambos formatos
+      fotoUrl: user?.fotoUrl || "",
     },
     navMain: [
       {
@@ -109,8 +152,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Gestión Documental",
-            url: "/GestionDocumental",
-            icon: FileText,
+            url: "/documentos",
           },
           {
             title: "Control de Versiones",
@@ -163,11 +205,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Cerradas",
-            url: "#",
+            url: "/Acciones_correctivas_Cerradas",
           },
           {
             title: "Verificadas",
-            url: "#",
+            url: "/Acciones_correctivas_Verificadas",
           },
         ],
       },

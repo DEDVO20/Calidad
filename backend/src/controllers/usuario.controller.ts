@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Usuario from "../models/usuario.model";
+import Area from "../models/area.model";
 import bcrypt from "bcrypt";
 import path from "path";
 import fs from "fs";
@@ -78,6 +79,13 @@ export const getUsuarios = async (_req: Request, res: Response) => {
   try {
     const usuarios = await Usuario.findAll({
       attributes: { exclude: ["contrasenaHash"] },
+      include: [
+        {
+          model: Area,
+          as: "area",
+          attributes: ["id", "codigo", "nombre", "descripcion"],
+        },
+      ],
       order: [["creadoEn", "DESC"]],
     });
     return res.json(usuarios);
@@ -93,6 +101,13 @@ export const getUsuarioById = async (req: Request, res: Response) => {
   try {
     const usuario = await Usuario.findByPk(req.params.id, {
       attributes: { exclude: ["contrasenaHash"] },
+      include: [
+        {
+          model: Area,
+          as: "area",
+          attributes: ["id", "codigo", "nombre", "descripcion"],
+        },
+      ],
     });
     if (!usuario) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -164,9 +179,9 @@ export const updateUsuario = async (req: Request, res: Response) => {
     if (activo !== undefined)
       datosActualizacion.activo = activo === "true" || activo === true;
 
-    // Manejar foto_url de Supabase (prioridad) o archivo local
+    // Manejar fotoUrl de Supabase (prioridad) o archivo local
     if (fotoUrl !== undefined) {
-      // Si viene foto_url del body (Supabase), usarla directamente
+      // Si viene fotoUrl del body (Supabase), usarla directamente
       datosActualizacion.fotoUrl = fotoUrl;
     } else if (req.file) {
       // Si viene un archivo (upload local), guardar la ruta
@@ -182,6 +197,7 @@ export const updateUsuario = async (req: Request, res: Response) => {
       datosActualizacion.fotoUrl = `/uploads/profiles/${req.file.filename}`;
     }
 
+    // Actualizar contraseña si viene en el body
     if (contrasena) {
       const saltRounds = 10;
       datosActualizacion.contrasenaHash = await bcrypt.hash(
@@ -194,6 +210,13 @@ export const updateUsuario = async (req: Request, res: Response) => {
 
     const usuarioActualizado = await Usuario.findByPk(req.params.id, {
       attributes: { exclude: ["contrasenaHash"] },
+      include: [
+        {
+          model: Area,
+          as: "area",
+          attributes: ["id", "codigo", "nombre", "descripcion"],
+        },
+      ],
     });
 
     return res.json(usuarioActualizado);

@@ -1,30 +1,37 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error(
-    "Faltan las variables de entorno de Supabase. Por favor configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local",
+    "Faltan las variables de entorno de Supabase. Por favor configura SUPABASE_URL y SUPABASE_SERVICE_KEY en .env",
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Cliente de Supabase con service key para operaciones del backend
+export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 /**
- * Sube un archivo a Supabase Storage
+ * Sube un archivo a Supabase Storage desde el backend
  */
 export async function uploadFileToSupabase(
-  file: Buffer | File,
   filename: string,
+  fileBuffer: Buffer,
   bucket: string = "documentos",
 ): Promise<{ path: string; url: string }> {
   try {
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(filename, file, {
+      .upload(filename, fileBuffer, {
         cacheControl: "3600",
         upsert: false,
+        contentType: "application/octet-stream",
       });
 
     if (error) {
@@ -76,4 +83,20 @@ export async function getSignedUrl(
   }
 
   return data.signedUrl;
+}
+
+/**
+ * Lista archivos en un bucket
+ */
+export async function listFiles(
+  bucket: string = "documentos",
+  path?: string,
+): Promise<any[]> {
+  const { data, error } = await supabase.storage.from(bucket).list(path);
+
+  if (error) {
+    throw new Error(`Error al listar archivos: ${error.message}`);
+  }
+
+  return data || [];
 }

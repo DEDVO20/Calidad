@@ -12,11 +12,12 @@ interface AccionCorrectivaAttributes {
   fechaCompromiso?: Date;
   fechaImplementacion?: Date;
   estado?: string;
-  eficaciaVerificada?: string;
+  eficaciaVerificada?: boolean;
   verificadoPor?: string;
   fechaVerificacion?: Date;
   observacion?: string;
   creadoEn?: Date;
+  actualizadoEn?: Date;
 }
 
 interface AccionCorrectivaCreationAttributes
@@ -36,6 +37,7 @@ interface AccionCorrectivaCreationAttributes
     | "fechaVerificacion"
     | "observacion"
     | "creadoEn"
+    | "actualizadoEn"
   > {}
 
 class AccionCorrectiva
@@ -46,18 +48,19 @@ class AccionCorrectiva
   public noConformidadId!: string;
   public codigo!: string;
   public tipo?: string;
-  public descripcion!: string;
-  public estado!: string;
+  public descripcion?: string;
+  public estado?: string;
   public analisisCausaRaiz?: string;
   public planAccion?: string;
   public responsableId?: string;
   public fechaCompromiso?: Date;
   public fechaImplementacion?: Date;
-  public eficaciaVerificada?: string;
+  public eficaciaVerificada?: boolean;
   public verificadoPor?: string;
   public fechaVerificacion?: Date;
   public observacion?: string;
   public creadoEn?: Date;
+  public actualizadoEn?: Date; 
 
   public static initModel(sequelize: Sequelize): typeof AccionCorrectiva {
     return AccionCorrectiva.init(
@@ -138,6 +141,11 @@ class AccionCorrectiva
           defaultValue: DataTypes.NOW,
           field: "creado_en",
         },
+        actualizadoEn: {
+          type: DataTypes.DATE,
+          defaultValue: DataTypes.NOW,
+          field: "actualizado_en",
+        },
       },
       {
         sequelize,
@@ -159,7 +167,7 @@ class AccionCorrectiva
       as: "verificador",
     });
     this.belongsTo(models.NoConformidad, {
-      foreignKey: "NoConformidad",
+      foreignKey: "noConformidadId",
       as: "noConformidad",
     });
   }

@@ -49,8 +49,9 @@ export default function ProfilePage() {
     segundoApellido: "",
     correoElectronico: "",
     areaId: "",
+    areaNombre: "",
     activo: false,
-    foto_url: "",
+    fotoUrl: "",
   });
 
   const [foto, setFoto] = useState<File | null>(null);
@@ -80,10 +81,11 @@ export default function ProfilePage() {
         },
       });
 
-      setProfile(res.data);
+      setProfile({ ...res.data, areaNombre: res.data.area?.nombre || "" });
+      console.log("res", res.data);
 
-      // Intentar ambos formatos: foto_url (snake_case) y fotoUrl (camelCase)
-      const imageUrl = res.data.foto_url || res.data.fotoUrl;
+      // Usar fotoUrl en camelCase
+      const imageUrl = res.data.fotoUrl;
       setPreview(imageUrl || null);
 
       // Extraer el path de la imagen antigua para poder eliminarla después
@@ -149,7 +151,7 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      let fotoUrl = profile.foto_url;
+      let fotoUrl = profile.fotoUrl;
 
       // 1. Si hay nueva foto, subirla a Supabase
       if (foto) {
@@ -191,7 +193,7 @@ export default function ProfilePage() {
         correoElectronico: string;
         areaId: string;
         activo: boolean;
-        fotoUrl: string; // Cambio a camelCase para que coincida con el backend
+        fotoUrl: string;
         contrasena?: string;
       }
 
@@ -203,7 +205,7 @@ export default function ProfilePage() {
         correoElectronico: profile.correoElectronico,
         areaId: profile.areaId,
         activo: profile.activo,
-        fotoUrl: fotoUrl, // Cambio a camelCase
+        fotoUrl: fotoUrl, // Enviar como fotoUrl al backend (camelCase)
       };
 
       if (newPassword) {
@@ -218,29 +220,18 @@ export default function ProfilePage() {
       });
 
       // Actualizar el estado local
-      setProfile({ ...profile, foto_url: fotoUrl });
+      setProfile({ ...profile, fotoUrl: fotoUrl });
       setPreview(fotoUrl);
       setFoto(null);
 
-      // Actualizar localStorage con la nueva foto
-
+      // Actualizar localStorage con la nueva foto (solo fotoUrl en camelCase)
       const storedUser = getCurrentUser();
-
       if (storedUser) {
         const updatedUser = {
           ...storedUser,
-
           fotoUrl: fotoUrl,
-
-          foto_url: fotoUrl,
         };
-
         localStorage.setItem("user", JSON.stringify(updatedUser));
-
-        // Notificar a la app que el usuario fue actualizado
-        window.dispatchEvent(
-          new CustomEvent("user:updated", { detail: updatedUser }),
-        );
       }
 
       toast.success("Perfil actualizado correctamente.");
@@ -394,8 +385,8 @@ export default function ProfilePage() {
               <FieldContent>
                 <Input
                   name="areaId"
-                  value={profile.areaId}
-                  onChange={handleChange}
+                  value={profile.areaNombre}
+                  //onChange={handleChange}
                 />
               </FieldContent>
             </Field>
