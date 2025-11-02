@@ -49,6 +49,7 @@ export default function ProfilePage() {
     segundoApellido: "",
     correoElectronico: "",
     areaId: "",
+    areaNombre: "",
     activo: false,
     fotoUrl: "",
   });
@@ -80,10 +81,11 @@ export default function ProfilePage() {
         },
       });
 
-      setProfile(res.data);
+      setProfile({ ...res.data, areaNombre: res.data.area?.nombre || "" });
+      console.log("res", res.data);
 
-      // Intentar ambos formatos: foto_url (snake_case) y fotoUrl (camelCase)
-      const imageUrl = res.data.fotoUrl || res.data.foto_url;
+      // Usar fotoUrl en camelCase
+      const imageUrl = res.data.fotoUrl;
       setPreview(imageUrl || null);
 
       // Extraer el path de la imagen antigua para poder eliminarla después
@@ -191,7 +193,7 @@ export default function ProfilePage() {
         correoElectronico: string;
         areaId: string;
         activo: boolean;
-        foto_url: string;
+        fotoUrl: string;
         contrasena?: string;
       }
 
@@ -203,7 +205,7 @@ export default function ProfilePage() {
         correoElectronico: profile.correoElectronico,
         areaId: profile.areaId,
         activo: profile.activo,
-        foto_url: fotoUrl, // Enviar como foto_url al backend (snake_case)
+        fotoUrl: fotoUrl, // Enviar como fotoUrl al backend (camelCase)
       };
 
       if (newPassword) {
@@ -383,8 +385,8 @@ export default function ProfilePage() {
               <FieldContent>
                 <Input
                   name="areaId"
-                  value={profile.areaId}
-                  onChange={handleChange}
+                  value={profile.areaNombre}
+                  //onChange={handleChange}
                 />
               </FieldContent>
             </Field>

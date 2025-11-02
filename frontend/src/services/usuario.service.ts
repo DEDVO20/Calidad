@@ -10,7 +10,6 @@ export interface Usuario {
   telefono?: string;
   cargo?: string;
   activo: boolean;
-  foto_url?: string;
   fotoUrl?: string;
 }
 
@@ -48,7 +47,7 @@ class UsuarioService {
           ...this.getAuthHeader(),
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {

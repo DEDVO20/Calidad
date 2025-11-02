@@ -48,11 +48,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             },
           });
           // Actualizar localStorage con datos frescos (solo fotoUrl en camelCase)
-          const { foto_url, ...userData } = res.data;
           const updatedUser = {
             ...currentUser,
-            ...userData,
-            fotoUrl: foto_url || res.data.fotoUrl,
+            ...res.data,
           };
           localStorage.setItem("user", JSON.stringify(updatedUser));
           setUser(updatedUser);
@@ -93,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: user ? `${user.nombre} ${user.primerApellido}` : "Usuario",
       email: user?.correoElectronico || "usuario@example.com",
       avatar: "/avatars/user.jpg",
-      foto_url: user?.fotoUrl || "",
+      fotoUrl: user?.fotoUrl || "",
     },
     navMain: [
       {
@@ -342,8 +340,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
   };
-  console.log("User data:", user);
-  console.log("foto_url obtenida:", user?.foto_url || user?.fotoUrl);
 
   return (
     <Sidebar collapsible="icon" {...props}>
