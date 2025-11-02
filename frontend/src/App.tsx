@@ -8,6 +8,8 @@ import LoginPage from "./pages/Login";
 import NoConformidadesAbiertas from "@/pages/No_conformidades_Abiertas";
 import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento";
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
+import AccionesCorrectivasCerradas from "./pages/Acciones_correctivas_Cerradas";
+import AccionesCorrectivasVerificadas from "./pages/Acciones_correctivas_Verificadas";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -40,7 +42,30 @@ function App() {
               path="/documentos/:id/editar"
               element={<EditarDocumento />}
             />
+            <Route
+              path="/No_conformidades_Abiertas"
+              element={<NoConformidadesAbiertas />}
+            />
+            <Route
+              path="/No_conformidades_EnTratamiento"
+              element={<NoConformidadesEnTratamiento />}
+            />
+            <Route
+              path="/No_conformidades_Cerradas"
+              element={<NoConformidadesCerradas />}
+            />
+            <Route
+              path="/Acciones_correctivas_Cerradas"
+              element={<AccionesCorrectivasCerradas />}
+            />
+            <Route
+              path="/Acciones_correctivas_Verificadas"
+              element={<AccionesCorrectivasVerificadas />}
+            />
           </Route>
+
+          {/* Ruta catch-all para manejar errores de tipeo */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

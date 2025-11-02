@@ -135,19 +135,18 @@ class Usuario
     );
   }
 
-  // Método toJSON personalizado para devolver campos en camelCase y snake_case
+  // Método toJSON personalizado para devolver campos en camelCase
   public toJSON(): any {
     const values: any = { ...this.get({ plain: true }) };
-    
-    // Asegurar que fotoUrl esté disponible en ambos formatos
+
+    // Asegurar que fotoUrl esté disponible solo en camelCase
     if (this.fotoUrl) {
-      values.fotoUrl = this.fotoUrl;  // camelCase (para nuevo frontend)
-      values.foto_url = this.fotoUrl; // snake_case (para compatibilidad)
+      values.fotoUrl = this.fotoUrl;
     }
-    
+
     return values;
   }
-  
+
   // Asociaciones comentadas temporalmente para evitar errores de inicialización
   // Se configurarán directamente en database/index.ts
   // public static associate(models: any): void {
