@@ -32,6 +32,7 @@ export function SiteHeader() {
     if (path.includes("/perfil")) return "Mi Perfil";
     if (path.includes("/usuarios")) return "Usuarios";
     if (path.includes("/documentos")) return "Documentos";
+    if (path.includes("/control-versiones")) return "Control de Versiones";
     if (path.includes("/procesos")) return "Procesos";
     if (path.includes("/auditorias")) return "Auditorías";
 

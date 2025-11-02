@@ -35,8 +35,6 @@ const API_URL = "/api";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
 
-<<<<<<< HEAD
-=======
   // Cargar perfil completo del usuario al montar
   React.useEffect(() => {
     const cargarPerfilCompleto = async () => {
@@ -65,7 +63,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     cargarPerfilCompleto();
   }, []);
 
->>>>>>> main
   // Actualizar usuario cuando cambie en localStorage
   React.useEffect(() => {
     const handleStorageChange = () => {
@@ -73,13 +70,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     // Escuchar cambios en localStorage
-<<<<<<< HEAD
-    window.addEventListener('storage', handleStorageChange);
-    
-=======
     window.addEventListener("storage", handleStorageChange);
 
->>>>>>> main
     // Polling para detectar cambios internos (mismo tab)
     const interval = setInterval(() => {
       const updatedUser = getCurrentUser();
@@ -89,11 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, 1000);
 
     return () => {
-<<<<<<< HEAD
-      window.removeEventListener('storage', handleStorageChange);
-=======
       window.removeEventListener("storage", handleStorageChange);
->>>>>>> main
       clearInterval(interval);
     };
   }, [user]);
@@ -156,8 +144,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Control de Versiones",
-            url: "/ControlVersiones",
-            icon: FileText,
+            url: "/control-versiones",
+            
           },
           {
             title: "Aprobaciones Pendientes",

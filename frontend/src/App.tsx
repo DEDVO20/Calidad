@@ -19,6 +19,8 @@ import EditarDocumento from "./pages/EditarDocumento";
 import { ProtectedLayout } from "./components/ProtectedLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "sonner";
+import ControlVersiones from "./pages/ControlVersiones";
+
 
 import "./App.css";
 
@@ -31,24 +33,15 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
 
-<<<<<<< HEAD
-        {/* Rutas protegidas con sidebar y navbar */}
-        <Route element={<ProtectedLayout />}>   // esta linea router 
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/GestionDocumental" element={<GestionDocumental />} />
-          <Route path="/ControlVersiones" element={<ControlVersiones />} />
-        </Route>
-      </Routes>
-    </Router>
-=======
           {/* Rutas protegidas con sidebar y navbar */}
           <Route element={<ProtectedLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/documentos" element={<Documentos />} />
+            <Route path="/control-versiones" element={<ControlVersiones />} />
             <Route path="/documentos/crear" element={<CreateDocument />} />
             <Route path="/documentos/:id" element={<VerDocumento />} />
+            
             <Route
               path="/documentos/:id/editar"
               element={<EditarDocumento />}
@@ -75,12 +68,17 @@ function App() {
             />
           </Route>
 
+           
+
+
+
+
+
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
->>>>>>> main
   );
 }
 
