@@ -10,6 +10,8 @@ import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
 import AprobacionesPendientes from "./pages/documentos/Aprobaciones_Pendientes";
 import DocumentosObsoletos from "./pages/documentos/Documentos_Obsoletos";
+import AccionesCorrectivasCerradas from "./pages/Acciones_correctivas_Cerradas";
+import AccionesCorrectivasVerificadas from "./pages/Acciones_correctivas_Verificadas";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -54,6 +56,26 @@ function App() {
             <Route
               path="/No_conformidades_Cerradas"
               element={<NoConformidadesCerradas />}
+            />
+            <Route
+              path="/No_conformidades_Abiertas"
+              element={<NoConformidadesAbiertas />}
+            />
+            <Route
+              path="/No_conformidades_EnTratamiento"
+              element={<NoConformidadesEnTratamiento />}
+            />
+            <Route
+              path="/No_conformidades_Cerradas"
+              element={<NoConformidadesCerradas />}
+            />
+            <Route
+              path="/Acciones_correctivas_Cerradas"
+              element={<AccionesCorrectivasCerradas />}
+            />
+            <Route
+              path="/Acciones_correctivas_Verificadas"
+              element={<AccionesCorrectivasVerificadas />}
             />
           </Route>
 

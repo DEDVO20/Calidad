@@ -824,8 +824,8 @@ module.exports = {
       },
     });
 
-    // Create accion_correctivas table
-    await queryInterface.createTable("accion_correctivas", {
+    /// Create acciones_correctivas table
+    await queryInterface.createTable("acciones_correctivas", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -842,20 +842,25 @@ module.exports = {
         onDelete: "CASCADE",
       },
       codigo: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
       },
+      tipo: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       descripcion: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
-      tipo_accion: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["correctiva", "preventiva", "mejora"]],
-        },
+      analisis_causa_raiz: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      plan_accion: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       responsable_id: {
         type: Sequelize.UUID,
@@ -867,24 +872,37 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      fecha_planificada: {
-        type: Sequelize.DATE,
+      fecha_compromiso: {
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
       fecha_implementacion: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
       estado: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "planificada",
-      },
-      efectividad: {
-        type: Sequelize.STRING(50),
         allowNull: true,
       },
-      observaciones: {
+      eficacia_verificada: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+      },
+      verificado_por: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      fecha_verificacion: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      observacion: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
@@ -1995,7 +2013,7 @@ module.exports = {
       "riesgos",
       "hallazgo_auditorias",
       "auditorias",
-      "accion_correctivas",
+      "acciones_correctivas",
       "no_conformidades",
       "indicadores",
       "participante_procesos",

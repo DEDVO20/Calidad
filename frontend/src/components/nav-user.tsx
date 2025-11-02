@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-
 import {
   LogOutIcon,
   MoreVerticalIcon,
@@ -34,7 +32,7 @@ export function NavUser({
     name: string;
     email: string;
     avatar: string;
-    foto_url?: string;
+    fotoUrl?: string;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -73,7 +71,7 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user.foto_url || user.avatar}
+                  src={user.fotoUrl || user.avatar}
                   alt={user.name}
                 />
                 <AvatarFallback className="rounded-lg">
@@ -99,7 +97,7 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user.foto_url || user.avatar}
+                    src={user.fotoUrl || user.avatar}
                     alt={user.name}
                   />
                   <AvatarFallback className="rounded-lg">

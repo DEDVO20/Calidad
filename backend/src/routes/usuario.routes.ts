@@ -16,10 +16,10 @@ const router = Router();
 
 // Middleware condicional para multer
 const conditionalMulter = (req: Request, res: Response, next: NextFunction) => {
-  const contentType = req.headers['content-type'] || '';
-  if (contentType.includes('multipart/form-data')) {
+  const contentType = req.headers["content-type"] || "";
+  if (contentType.includes("multipart/form-data")) {
     // Si es multipart, usar multer
-    return uploadProfile.single('foto')(req, res, next);
+    return uploadProfile.single("foto")(req, res, next);
   }
   // Si es JSON, pasar directo
   next();
@@ -245,12 +245,7 @@ router.post("/", createUsuario);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put(
-  "/:id",
-  conditionalMulter,
-  handleMulterError,
-  updateUsuario,
-);
+router.put("/:id", conditionalMulter, handleMulterError, updateUsuario);
 
 /**
  * @swagger
@@ -299,7 +294,7 @@ router.put(
  *               contrasena:
  *                 type: string
  *                 example: NuevaPassword123!
- *               foto_url:
+ *               fotoUrl:
  *                 type: string
  *                 description: URL de la imagen de perfil en Supabase
  *                 example: https://xxx.supabase.co/storage/v1/object/public/imagenes/123/123-1738123456.jpg
@@ -326,7 +321,7 @@ router.put(
  *               foto:
  *                 type: string
  *                 format: binary
- *                 description: Archivo de imagen (alternativa a foto_url)
+ *                 description: Archivo de imagen (alternativa a fotoUrl)
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
@@ -335,12 +330,7 @@ router.put(
  *       401:
  *         description: No autorizado
  */
-router.patch(
-  "/:id",
-  conditionalMulter,
-  handleMulterError,
-  updateUsuario,
-);
+router.patch("/:id", conditionalMulter, handleMulterError, updateUsuario);
 
 /**
  * @swagger
