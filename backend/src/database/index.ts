@@ -6,6 +6,7 @@ import Usuario from "../models/usuario.model";
 import Area from "../models/area.model";
 import Rol from "../models/rol.model";
 import Permiso from "../models/permiso.model";
+import AccionCorrectiva from "../models/accionCorrectiva.model";
 
 // Crear instancia de Sequelize
 const sequelize = new Sequelize({
@@ -31,6 +32,7 @@ const initModels = () => {
   Area.initModel(sequelize);
   Rol.initModel(sequelize);
   Permiso.initModel(sequelize);
+  AccionCorrectiva.initModel(sequelize);
 
   // Solo configurar asociaciones básicas que existen
   // Usuario <-> Area
@@ -99,6 +101,7 @@ export {
   Area,
   Rol,
   Permiso,
+  AccionCorrectiva,
 };
 
 export default sequelize;
