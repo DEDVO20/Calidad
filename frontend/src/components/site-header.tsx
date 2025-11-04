@@ -35,6 +35,10 @@ export function SiteHeader() {
     if (path.includes("/procesos")) return "Procesos";
     if (path.includes("/auditorias")) return "Auditorías";
     
+    // Gestión de Áreas
+    if (path.includes("/gestionar_areas")) return "Gestionar Áreas";
+    if (path.includes("/Asignar_Responsables")) return "Asignar Responsables";
+    
     // No Conformidades - rutas específicas
     if (path.includes("/No_conformidades_Abiertas")) return "No Conformidades Abiertas";
     if (path.includes("/No_conformidades_EnTratamiento")) return "No Conformidades en Tratamiento";

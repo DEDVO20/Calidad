@@ -10,6 +10,9 @@ import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
 import AprobacionesPendientes from "./pages/documentos/Aprobaciones_Pendientes";
 import DocumentosObsoletos from "./pages/documentos/Documentos_Obsoletos";
+//areas 
+import GestionarAreas from "./pages/areas/Gestionar_Areas";
+import AreasResponsables from "./pages/areas/Asignar_Responsables";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -41,6 +44,9 @@ function App() {
             <Route path="/documentos/:id/aprobaciones" element={<AprobacionesPendientes />} />
             <Route path="/Aprobaciones_Pendientes" element={<AprobacionesPendientes />} />
             <Route path="/Documentos_Obsoletos" element={<DocumentosObsoletos />} />
+            
+            <Route path="/gestionar_areas" element={<GestionarAreas />} />
+            <Route path="/Asignar_Responsables" element={<AreasResponsables />} />
 
             <Route path="/documentos/:id/editar" element={<EditarDocumento />} />
             <Route
