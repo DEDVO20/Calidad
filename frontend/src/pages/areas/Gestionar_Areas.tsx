@@ -210,7 +210,7 @@ export default function AreasResponsables() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <AlertTriangle className="h-6 w-6 text-sky-500" />
-            Áreas Responsables
+            Gestionar Areas
           </h1>
           <p className="text-gray-500">
             {total} {total === 1 ? "área registrada" : "áreas registradas"}
