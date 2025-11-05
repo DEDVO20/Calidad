@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { UserPlus, Users, Building2, AlertCircle, Eye, Trash2, X, Save, Search } from "lucide-react";
+import {
+  UserPlus,
+  Users,
+  Building2,
+  AlertCircle,
+  Eye,
+  Trash2,
+  X,
+  Save,
+  Search,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +27,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -59,18 +80,24 @@ export default function AsignarResponsables() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [dialogMode, setDialogMode] = useState<'create' | 'view'>('create');
-  const [selectedAsignacion, setSelectedAsignacion] = useState<Asignacion | null>(null);
+  const [dialogMode, setDialogMode] = useState<"create" | "view">("create");
+  const [selectedAsignacion, setSelectedAsignacion] =
+    useState<Asignacion | null>(null);
   const [formData, setFormData] = useState({
-    areaId: '',
-    usuarioId: '',
-    esPrincipal: false
+    areaId: "",
+    usuarioId: "",
+    esPrincipal: false,
   });
   const [saving, setSaving] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    asignacion: Asignacion | null;
+  }>({ open: false, asignacion: null });
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAuthToken = () => {
@@ -96,7 +123,7 @@ export default function AsignarResponsables() {
       const [asignacionesRes, areasRes, usuariosRes] = await Promise.all([
         fetch(`${API_URL}/asignaciones`, { headers }),
         fetch(`${API_URL}/areas`, { headers }),
-        fetch(`${API_URL}/usuarios`, { headers })
+        fetch(`${API_URL}/usuarios`, { headers }),
       ]);
 
       if (!asignacionesRes.ok || !areasRes.ok || !usuariosRes.ok) {
@@ -106,29 +133,29 @@ export default function AsignarResponsables() {
       const [asignacionesData, areasData, usuariosData] = await Promise.all([
         asignacionesRes.json(),
         areasRes.json(),
-        usuariosRes.json()
+        usuariosRes.json(),
       ]);
 
       setAsignaciones(asignacionesData);
       setAreas(areasData);
       setUsuarios(usuariosData);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al cargar datos:", error);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : "Error desconocido");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreate = () => {
-    setDialogMode('create');
-    setFormData({ areaId: '', usuarioId: '', esPrincipal: false });
+    setDialogMode("create");
+    setFormData({ areaId: "", usuarioId: "", esPrincipal: false });
     setSelectedAsignacion(null);
     setShowDialog(true);
   };
 
   const handleView = (asignacion: Asignacion) => {
-    setDialogMode('view');
+    setDialogMode("view");
     setSelectedAsignacion(asignacion);
     setShowDialog(true);
   };
@@ -143,12 +170,12 @@ export default function AsignarResponsables() {
       }
 
       if (!formData.areaId || !formData.usuarioId) {
-        alert("Debes seleccionar un área y un usuario");
+        toast.error("Debes seleccionar un área y un usuario");
         return;
       }
 
       const response = await fetch(`${API_URL}/asignaciones`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -158,24 +185,31 @@ export default function AsignarResponsables() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Error al crear asignación');
+        throw new Error(errorData.message || "Error al crear asignación");
       }
 
       await fetchData();
       setShowDialog(false);
-      alert('Responsable asignado exitosamente');
-    } catch (error: any) {
-      console.error('Error al guardar:', error);
-      alert(error.message || "Error desconocido");
+      toast.success("Responsable asignado exitosamente");
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      toast.error(error instanceof Error ? error.message : "Error desconocido");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (asignacion: Asignacion) => {
-    if (!confirm(`¿Estás seguro de eliminar la asignación de ${asignacion.usuario.nombre} al área ${asignacion.area.nombre}?`)) {
-      return;
-    }
+  const openDeleteDialog = (asignacion: Asignacion) => {
+    setDeleteDialog({ open: true, asignacion });
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialog({ open: false, asignacion: null });
+  };
+
+  const handleDelete = async () => {
+    const asignacion = deleteDialog.asignacion;
+    if (!asignacion) return;
 
     try {
       const token = getAuthToken();
@@ -184,28 +218,30 @@ export default function AsignarResponsables() {
       }
 
       const response = await fetch(`${API_URL}/asignaciones/${asignacion.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error('Error al eliminar asignación');
+        throw new Error("Error al eliminar asignación");
       }
 
       await fetchData();
-      alert('Asignación eliminada exitosamente');
-    } catch (error: any) {
-      console.error('Error al eliminar:', error);
-      alert(error.message || "Error al eliminar");
+      toast.success("Asignación eliminada exitosamente");
+      closeDeleteDialog();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error(error instanceof Error ? error.message : "Error al eliminar");
     }
   };
 
-  const filteredAsignaciones = asignaciones.filter(asig => 
-    asig.area.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asig.usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asig.area.codigo.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredAsignaciones = asignaciones.filter(
+    (asig) =>
+      asig.area.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      asig.usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      asig.area.codigo.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -220,9 +256,11 @@ export default function AsignarResponsables() {
   }
 
   const totalAsignaciones = asignaciones.length;
-  const areasConResponsable = new Set(asignaciones.map(a => a.areaId)).size;
+  const areasConResponsable = new Set(asignaciones.map((a) => a.areaId)).size;
   const areasSinResponsable = areas.length - areasConResponsable;
-  const responsablesPrincipales = asignaciones.filter(a => a.esPrincipal).length;
+  const responsablesPrincipales = asignaciones.filter(
+    (a) => a.esPrincipal,
+  ).length;
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
@@ -233,7 +271,10 @@ export default function AsignarResponsables() {
             Asignar Responsables
           </h1>
           <p className="text-gray-500">
-            {totalAsignaciones} {totalAsignaciones === 1 ? "asignación activa" : "asignaciones activas"}
+            {totalAsignaciones}{" "}
+            {totalAsignaciones === 1
+              ? "asignación activa"
+              : "asignaciones activas"}
           </p>
         </div>
         <Button onClick={handleCreate}>
@@ -250,7 +291,7 @@ export default function AsignarResponsables() {
               <div>
                 <p className="font-medium">Error de conexión</p>
                 <p className="text-sm">{error}</p>
-                <button 
+                <button
                   className="text-sm underline mt-1 inline-block"
                   onClick={fetchData}
                 >
@@ -266,7 +307,9 @@ export default function AsignarResponsables() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Total Asignaciones</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Asignaciones
+              </CardTitle>
               <Users className="h-4 w-4 text-gray-500" />
             </div>
             <div className="text-2xl font-bold">{totalAsignaciones}</div>
@@ -275,7 +318,9 @@ export default function AsignarResponsables() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Áreas con Responsable</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Áreas con Responsable
+              </CardTitle>
               <Building2 className="h-4 w-4 text-green-500" />
             </div>
             <div className="text-2xl font-bold">{areasConResponsable}</div>
@@ -284,7 +329,9 @@ export default function AsignarResponsables() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Áreas sin Responsable</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Áreas sin Responsable
+              </CardTitle>
               <AlertCircle className="h-4 w-4 text-amber-500" />
             </div>
             <div className="text-2xl font-bold">{areasSinResponsable}</div>
@@ -293,7 +340,9 @@ export default function AsignarResponsables() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Responsables Principales</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Responsables Principales
+              </CardTitle>
               <UserPlus className="h-4 w-4 text-blue-500" />
             </div>
             <div className="text-2xl font-bold">{responsablesPrincipales}</div>
@@ -306,7 +355,9 @@ export default function AsignarResponsables() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Asignaciones de Responsables</CardTitle>
-              <CardDescription>Gestiona los responsables asignados a cada área</CardDescription>
+              <CardDescription>
+                Gestiona los responsables asignados a cada área
+              </CardDescription>
             </div>
             <div className="w-72">
               <div className="relative">
@@ -327,29 +378,53 @@ export default function AsignarResponsables() {
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-left p-3 text-sm font-medium w-24">Código</th>
+                    <th className="text-left p-3 text-sm font-medium w-24">
+                      Código
+                    </th>
                     <th className="text-left p-3 text-sm font-medium">Área</th>
-                    <th className="text-left p-3 text-sm font-medium">Responsable</th>
+                    <th className="text-left p-3 text-sm font-medium">
+                      Responsable
+                    </th>
                     <th className="text-left p-3 text-sm font-medium">Email</th>
-                    <th className="text-left p-3 text-sm font-medium w-24">Tipo</th>
-                    <th className="text-left p-3 text-sm font-medium w-32">Fecha</th>
-                    <th className="text-right p-3 text-sm font-medium w-28">Acciones</th>
+                    <th className="text-left p-3 text-sm font-medium w-24">
+                      Tipo
+                    </th>
+                    <th className="text-left p-3 text-sm font-medium w-32">
+                      Fecha
+                    </th>
+                    <th className="text-right p-3 text-sm font-medium w-28">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAsignaciones.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center p-12 text-gray-500">
-                        {searchTerm ? 'No se encontraron resultados' : 'No hay asignaciones registradas'}
+                      <td
+                        colSpan={7}
+                        className="text-center p-12 text-gray-500"
+                      >
+                        {searchTerm
+                          ? "No se encontraron resultados"
+                          : "No hay asignaciones registradas"}
                       </td>
                     </tr>
                   ) : (
                     filteredAsignaciones.map((asignacion) => (
-                      <tr key={asignacion.id} className="border-b hover:bg-gray-50">
-                        <td className="p-3 font-medium">{asignacion.area.codigo}</td>
-                        <td className="p-3 font-medium">{asignacion.area.nombre}</td>
+                      <tr
+                        key={asignacion.id}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="p-3 font-medium">
+                          {asignacion.area.codigo}
+                        </td>
+                        <td className="p-3 font-medium">
+                          {asignacion.area.nombre}
+                        </td>
                         <td className="p-3">{asignacion.usuario.nombre}</td>
-                        <td className="p-3 text-sm text-gray-600">{asignacion.usuario.email}</td>
+                        <td className="p-3 text-sm text-gray-600">
+                          {asignacion.usuario.email}
+                        </td>
                         <td className="p-3">
                           {asignacion.esPrincipal ? (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -362,7 +437,9 @@ export default function AsignarResponsables() {
                           )}
                         </td>
                         <td className="p-3 text-sm text-gray-500">
-                          {new Date(asignacion.creadoEn).toLocaleDateString('es-CO')}
+                          {new Date(asignacion.creadoEn).toLocaleDateString(
+                            "es-CO",
+                          )}
                         </td>
                         <td className="p-3">
                           <div className="flex items-center justify-end gap-2">
@@ -378,7 +455,7 @@ export default function AsignarResponsables() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-600 hover:text-red-700"
-                              onClick={() => handleDelete(asignacion)}
+                              onClick={() => openDeleteDialog(asignacion)}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -398,23 +475,27 @@ export default function AsignarResponsables() {
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
             <DialogTitle>
-              {dialogMode === 'create' ? 'Nueva Asignación de Responsable' : 'Detalles de la Asignación'}
+              {dialogMode === "create"
+                ? "Nueva Asignación de Responsable"
+                : "Detalles de la Asignación"}
             </DialogTitle>
             <DialogDescription>
-              {dialogMode === 'create' 
-                ? 'Selecciona un área y asigna un responsable.' 
-                : 'Información completa de la asignación.'}
+              {dialogMode === "create"
+                ? "Selecciona un área y asigna un responsable."
+                : "Información completa de la asignación."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            {dialogMode === 'create' ? (
+            {dialogMode === "create" ? (
               <>
                 <div className="grid gap-2">
                   <Label htmlFor="area">Área *</Label>
                   <Select
                     value={formData.areaId}
-                    onValueChange={(value) => setFormData({ ...formData, areaId: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, areaId: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un área" />
@@ -433,7 +514,9 @@ export default function AsignarResponsables() {
                   <Label htmlFor="usuario">Responsable *</Label>
                   <Select
                     value={formData.usuarioId}
-                    onValueChange={(value) => setFormData({ ...formData, usuarioId: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, usuarioId: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un usuario" />
@@ -453,7 +536,12 @@ export default function AsignarResponsables() {
                     type="checkbox"
                     id="esPrincipal"
                     checked={formData.esPrincipal}
-                    onChange={(e) => setFormData({ ...formData, esPrincipal: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        esPrincipal: e.target.checked,
+                      })
+                    }
                     className="h-4 w-4 rounded border-gray-300"
                   />
                   <Label htmlFor="esPrincipal" className="cursor-pointer">
@@ -461,54 +549,71 @@ export default function AsignarResponsables() {
                   </Label>
                 </div>
               </>
-            ) : selectedAsignacion && (
-              <>
-                <div className="grid gap-3">
-                  <div>
-                    <Label className="text-gray-500">Área</Label>
-                    <p className="font-medium mt-1">
-                      [{selectedAsignacion.area.codigo}] {selectedAsignacion.area.nombre}
-                    </p>
-                    {selectedAsignacion.area.descripcion && (
-                      <p className="text-sm text-gray-600 mt-1">{selectedAsignacion.area.descripcion}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-500">Responsable</Label>
-                    <p className="font-medium mt-1">{selectedAsignacion.usuario.nombre}</p>
-                    <p className="text-sm text-gray-600">{selectedAsignacion.usuario.email}</p>
-                    <p className="text-sm text-gray-600">Rol: {selectedAsignacion.usuario.rol}</p>
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-500">Tipo de Responsable</Label>
-                    <p className="mt-1">
-                      {selectedAsignacion.esPrincipal ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Responsable Principal
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Responsable de Apoyo
-                        </span>
+            ) : (
+              selectedAsignacion && (
+                <>
+                  <div className="grid gap-3">
+                    <div>
+                      <Label className="text-gray-500">Área</Label>
+                      <p className="font-medium mt-1">
+                        [{selectedAsignacion.area.codigo}]{" "}
+                        {selectedAsignacion.area.nombre}
+                      </p>
+                      {selectedAsignacion.area.descripcion && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          {selectedAsignacion.area.descripcion}
+                        </p>
                       )}
-                    </p>
-                  </div>
-                </div>
+                    </div>
 
-                <div className="grid gap-2 pt-2 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Asignado el:</span>
-                    <span>{new Date(selectedAsignacion.creadoEn).toLocaleString('es-CO')}</span>
+                    <div>
+                      <Label className="text-gray-500">Responsable</Label>
+                      <p className="font-medium mt-1">
+                        {selectedAsignacion.usuario.nombre}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {selectedAsignacion.usuario.email}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Rol: {selectedAsignacion.usuario.rol}
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-gray-500">
+                        Tipo de Responsable
+                      </Label>
+                      <p className="mt-1">
+                        {selectedAsignacion.esPrincipal ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Responsable Principal
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            Responsable de Apoyo
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </>
+
+                  <div className="grid gap-2 pt-2 border-t">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Asignado el:</span>
+                      <span>
+                        {new Date(selectedAsignacion.creadoEn).toLocaleString(
+                          "es-CO",
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )
             )}
           </div>
 
           <DialogFooter>
-            {dialogMode === 'view' ? (
+            {dialogMode === "view" ? (
               <Button variant="outline" onClick={() => setShowDialog(false)}>
                 <X className="mr-2 h-4 w-4" />
                 Cerrar
@@ -537,6 +642,39 @@ export default function AsignarResponsables() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog para confirmación de eliminación */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={closeDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteDialog.asignacion && (
+                <>
+                  Esta acción eliminará la asignación de{" "}
+                  <span className="font-semibold">
+                    {deleteDialog.asignacion.usuario.nombre}
+                  </span>{" "}
+                  al área{" "}
+                  <span className="font-semibold">
+                    {deleteDialog.asignacion.area.nombre}
+                  </span>
+                  . Esta acción no se puede deshacer.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

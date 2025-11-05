@@ -6,6 +6,7 @@ import Usuario from "../models/usuario.model";
 import Area from "../models/area.model";
 import Rol from "../models/rol.model";
 import Permiso from "../models/permiso.model";
+import Asignacion from "../models/asignacion.model";
 
 // Crear instancia de Sequelize
 const sequelize = new Sequelize({
@@ -31,11 +32,20 @@ const initModels = () => {
   Area.initModel(sequelize);
   Rol.initModel(sequelize);
   Permiso.initModel(sequelize);
+  Asignacion.initModel(sequelize);
 
   // Solo configurar asociaciones básicas que existen
   // Usuario <-> Area
   Usuario.belongsTo(Area, { foreignKey: "areaId", as: "area" });
   Area.hasMany(Usuario, { foreignKey: "areaId", as: "usuarios" });
+
+  // Asignacion <-> Area
+  Asignacion.belongsTo(Area, { foreignKey: "areaId", as: "area" });
+  Area.hasMany(Asignacion, { foreignKey: "areaId", as: "asignaciones" });
+
+  // Asignacion <-> Usuario
+  Asignacion.belongsTo(Usuario, { foreignKey: "usuarioId", as: "usuario" });
+  Usuario.hasMany(Asignacion, { foreignKey: "usuarioId", as: "asignaciones" });
 
   // Colección de modelos para exportar
   const models = {
@@ -43,6 +53,7 @@ const initModels = () => {
     Area,
     Rol,
     Permiso,
+    Asignacion,
   };
 
   return models;
@@ -99,6 +110,7 @@ export {
   Area,
   Rol,
   Permiso,
+  Asignacion,
 };
 
 export default sequelize;

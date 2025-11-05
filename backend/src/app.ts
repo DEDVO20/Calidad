@@ -39,6 +39,7 @@ import usuarioRolRoutes from "./routes/usuarioRol.routes";
 import ticketRoutes from "./routes/ticket.routes";
 import versionDocumentoRoutes from "./routes/versionDocumento.routes";
 import respuestaFormularioRoutes from "./routes/respuestaFormulario.routes";
+import asignacionRoutes from "./routes/asignacion.routes";
 
 const app: Application = express();
 
@@ -129,6 +130,9 @@ app.use("/api/tickets", ticketRoutes);
 
 // Usuario Roles
 app.use("/api/usuario-roles", usuarioRolRoutes);
+
+// Asignaciones de Responsables
+app.use("/api/asignaciones", asignacionRoutes);
 
 // Versiones de Documentos
 app.use("/api/versiones-documento", versionDocumentoRoutes);
