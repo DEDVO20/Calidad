@@ -69,14 +69,11 @@ export default function AsignarResponsables() {
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const getAuthToken = () => {
     return localStorage.getItem("token");
   };
 
+  // Cargar datos iniciales
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -92,7 +89,6 @@ export default function AsignarResponsables() {
         "Content-Type": "application/json",
       };
 
-      // Fetch todas las asignaciones
       const [asignacionesRes, areasRes, usuariosRes] = await Promise.all([
         fetch(`${API_URL}/asignaciones`, { headers }),
         fetch(`${API_URL}/areas`, { headers }),
@@ -120,11 +116,46 @@ export default function AsignarResponsables() {
     }
   };
 
-  const handleCreate = () => {
+  // RECARGAR ÁREAS Y USUARIOS AL ABRIR EL MODAL
+  const handleCreate = async () => {
     setDialogMode('create');
     setFormData({ areaId: '', usuarioId: '', esPrincipal: false });
     setSelectedAsignacion(null);
-    setShowDialog(true);
+
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        alert("Sesión no válida");
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const [areasRes, usuariosRes] = await Promise.all([
+        fetch(`${API_URL}/areas`, { headers }),
+        fetch(`${API_URL}/usuarios`, { headers })
+      ]);
+
+      if (!areasRes.ok || !usuariosRes.ok) {
+        throw new Error("No se pudieron cargar los datos actualizados");
+      }
+
+      const [areasData, usuariosData] = await Promise.all([
+        areasRes.json(),
+        usuariosRes.json()
+      ]);
+
+      setAreas(areasData);
+      setUsuarios(usuariosData);
+    } catch (err) {
+      console.error("Error al recargar datos:", err);
+      alert("Error al cargar áreas/usuarios. Intenta recargar la página.");
+    } finally {
+      setShowDialog(true);
+    }
   };
 
   const handleView = (asignacion: Asignacion) => {
@@ -161,7 +192,7 @@ export default function AsignarResponsables() {
         throw new Error(errorData.message || 'Error al crear asignación');
       }
 
-      await fetchData();
+      await fetchData(); // Recargar todo
       setShowDialog(false);
       alert('Responsable asignado exitosamente');
     } catch (error: any) {
@@ -207,6 +238,15 @@ export default function AsignarResponsables() {
     asig.usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     asig.area.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    fetchData();
+
+    // OPCIONAL: Recargar cada 30 segundos
+    // const interval = setInterval(fetchData, 30000);
+    // return () => clearInterval(interval);
+  }, []);
 
   if (loading) {
     return (
@@ -420,11 +460,20 @@ export default function AsignarResponsables() {
                       <SelectValue placeholder="Selecciona un área" />
                     </SelectTrigger>
                     <SelectContent>
-                      {areas.map((area) => (
-                        <SelectItem key={area.id} value={area.id}>
-                          [{area.codigo}] {area.nombre}
+                      {areas.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          No hay áreas disponibles
                         </SelectItem>
-                      ))}
+                      ) : (
+                        areas.map((area) => (
+                          <SelectItem key={area.id} value={area.id}>
+                            [{area.codigo}] {area.nombre}
+                            {asignaciones.some(a => a.areaId === area.id) && (
+                              <span className="ml-2 text-xs text-green-600">asignado</span>
+                            )}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -439,11 +488,17 @@ export default function AsignarResponsables() {
                       <SelectValue placeholder="Selecciona un usuario" />
                     </SelectTrigger>
                     <SelectContent>
-                      {usuarios.map((usuario) => (
-                        <SelectItem key={usuario.id} value={usuario.id}>
-                          {usuario.nombre} ({usuario.email})
+                      {usuarios.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          No hay usuarios disponibles
                         </SelectItem>
-                      ))}
+                      ) : (
+                        usuarios.map((usuario) => (
+                          <SelectItem key={usuario.id} value={usuario.id}>
+                            {usuario.nombre} ({usuario.email})
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
