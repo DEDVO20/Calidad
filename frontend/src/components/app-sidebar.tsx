@@ -123,15 +123,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Lista de Usuarios",
-            url: "#",
+            url: "/ListaDeUsuarios",
           },
           {
             title: "Nuevo Usuario",
-            url: "#",
+            url: "/NuevoUsuario",
           },
           {
             title: "Roles y Permisos",
-            url: "#",
+            url: "/Roles_y_Permisos",
           },
         ],
       },
