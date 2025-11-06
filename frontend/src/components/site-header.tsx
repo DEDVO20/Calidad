@@ -34,7 +34,15 @@ export function SiteHeader() {
     if (path.includes("/documentos")) return "Documentos";
     if (path.includes("/procesos")) return "Procesos";
     if (path.includes("/auditorias")) return "Auditorías";
+    
+    // Gestión de Áreas
+    if (path.includes("/gestionar_areas")) return "Gestionar Áreas";
+    if (path.includes("/Asignar_Responsables")) return "Asignar Responsables";
 
+    //usuarios 
+    if (path.includes("/ListaDeUsuarios")) return "Lista de Usuarios";
+    if (path.includes("/NuevoUsuario")) return "Nuevo Usuario";
+    
     // No Conformidades - rutas específicas
     if (path.includes("/No_conformidades_Abiertas"))
       return "No Conformidades Abiertas";
@@ -46,6 +54,8 @@ export function SiteHeader() {
 
     if (path.includes("/Acciones_correctivas_Cerradas"))
       return "Acciones Correctivas cerradas";
+
+    if (path.includes("/acciones-correctivas")) return "Acciones Correctivas";
     if (path.includes("/riesgos")) return "Riesgos";
     if (path.includes("/indicadores")) return "Indicadores";
     if (path.includes("/capacitaciones")) return "Capacitaciones";
