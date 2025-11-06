@@ -32,6 +32,8 @@ import EditarDocumento from "./pages/EditarDocumento";
 import { ProtectedLayout } from "./components/ProtectedLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "sonner";
+import ControlVersiones from "./pages/ControlVersiones";
+
 
 import "./App.css";
 
@@ -49,6 +51,14 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/documentos" element={<Documentos />} />
+            <Route path="/control-versiones" element={<ControlVersiones />} />
+            <Route path="/documentos/crear" element={<CreateDocument />} />
+            <Route path="/documentos/:id" element={<VerDocumento />} />
+            
+            <Route
+              path="/documentos/:id/editar"
+              element={<EditarDocumento />}
+            />
             <Route path="/documentos/crear" element={<CreateDocument />} />
             <Route path="/documentos/:id" element={<VerDocumento />} />
             <Route path="/documentos/:id/aprobaciones" element={<AprobacionesPendientes />} />
