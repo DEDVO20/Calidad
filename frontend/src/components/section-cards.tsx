@@ -16,7 +16,7 @@ import {
 
 export function SectionCards() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 *:data-[slot=card]:shadow-xs *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4*:data-[slot=card]:shadow-xs *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card">
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>No Conformidades Activas</CardDescription>
