@@ -34,7 +34,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "sonner";
 import ControlVersiones from "./pages/ControlVersiones";
 
-//Acciones Correctivas
 import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
 import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
 

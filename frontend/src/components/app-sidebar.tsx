@@ -145,6 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Control de Versiones",
             url: "/control-versiones",
+            
           },
           {
             title: "Aprobaciones Pendientes",
