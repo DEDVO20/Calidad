@@ -1,17 +1,22 @@
-import { AlertTriangle, CheckCircle2, FileCheck, TrendingUpIcon } from "lucide-react"
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FileCheck,
+  TrendingUpIcon,
+} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4*:data-[slot=card]:shadow-xs *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card">
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>No Conformidades Activas</CardDescription>
@@ -19,9 +24,11 @@ export function SectionCards() {
             12
           </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs bg-red-50 text-red-700 border-red-200">
-              <AlertTriangle className="size-3" />
-              3 Mayores
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs bg-red-50 text-red-700 border-red-200"
+            >
+              <AlertTriangle className="size-3" />3 Mayores
             </Badge>
           </div>
         </CardHeader>
@@ -29,9 +36,7 @@ export function SectionCards() {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Requiere atención inmediata <AlertTriangle className="size-4" />
           </div>
-          <div className="text-muted-foreground">
-            9 menores en tratamiento
-          </div>
+          <div className="text-muted-foreground">9 menores en tratamiento</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
@@ -63,7 +68,10 @@ export function SectionCards() {
             94.5%
           </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs bg-green-50 text-green-700 border-green-200"
+            >
               <TrendingUpIcon className="size-3" />
               +2.5%
             </Badge>
@@ -83,7 +91,10 @@ export function SectionCards() {
             28
           </CardTitle>
           <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="flex gap-1 rounded-lg text-xs bg-green-50 text-green-700 border-green-200"
+            >
               <CheckCircle2 className="size-3" />
               85% Cerradas
             </Badge>
@@ -97,5 +108,5 @@ export function SectionCards() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
