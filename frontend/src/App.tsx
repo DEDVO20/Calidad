@@ -23,6 +23,10 @@ import NuevosUsuarios from "./pages/usuarios/NuevoUsuario";
 import RolesYPermisos from "./pages/usuarios/Roles_Permisos";
 //-------------------
 
+//auditorias---------
+import AuditoriasPlanificacion  from "./pages/auditorias/AuditoriasPlanificacion";
+
+
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -61,6 +65,9 @@ function App() {
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
+            
+          {/* Rutas de auditorías */}
+          <Route path="AuditoriasPlanificacion" element={<AuditoriasPlanificacion />} />
 
             <Route path="/documentos/:id/editar" element={<EditarDocumento />} />
             <Route
@@ -84,6 +91,7 @@ function App() {
               element={<AccionesCorrectivasVerificadas />}
             />
           </Route>
+
 
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

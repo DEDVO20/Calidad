@@ -226,7 +226,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Planificación",
-            url: "#",
+            url: "/AuditoriasPlanificacion",
           },
           {
             title: "En Curso",
