@@ -8,8 +8,8 @@ import LoginPage from "./pages/Login";
 import NoConformidadesAbiertas from "@/pages/No_conformidades_Abiertas";
 import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento";
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
-import AccionesCorrectivasCerradas from "./pages/Acciones_correctivas_Cerradas";
-import AccionesCorrectivasVerificadas from "./pages/Acciones_correctivas_Verificadas";
+import AccionesCorrectivasCerradas from "./pages/Acciones_correctivas/Acciones_correctivas_Cerradas";
+import AccionesCorrectivasVerificadas from "./pages/Acciones_correctivas/Acciones_correctivas_Verificadas";
 import AprobacionesPendientes from "./pages/documentos/Aprobaciones_Pendientes";
 import DocumentosObsoletos from "./pages/documentos/Documentos_Obsoletos";
 //areas ----------------------
