@@ -48,7 +48,7 @@ export default function Dashboard() {
 
       <SectionCards />
 
-      <div className="grid auto-rows-min gap-4 md:grid-cols-2">
+      <div className="grid auto-rows-min gap-4 lx:grid-cols-2">
         <div className="rounded-xl border bg-card">
           <ChartAreaInteractive />
         </div>
