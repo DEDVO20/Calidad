@@ -34,6 +34,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "sonner";
 import ControlVersiones from "./pages/ControlVersiones";
 
+import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
+import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
 
 import "./App.css";
 
@@ -54,25 +56,40 @@ function App() {
             <Route path="/control-versiones" element={<ControlVersiones />} />
             <Route path="/documentos/crear" element={<CreateDocument />} />
             <Route path="/documentos/:id" element={<VerDocumento />} />
-            
+
             <Route
               path="/documentos/:id/editar"
               element={<EditarDocumento />}
             />
             <Route path="/documentos/crear" element={<CreateDocument />} />
             <Route path="/documentos/:id" element={<VerDocumento />} />
-            <Route path="/documentos/:id/aprobaciones" element={<AprobacionesPendientes />} />
-            <Route path="/Aprobaciones_Pendientes" element={<AprobacionesPendientes />} />
-            <Route path="/Documentos_Obsoletos" element={<DocumentosObsoletos />} />
-            
+            <Route
+              path="/documentos/:id/aprobaciones"
+              element={<AprobacionesPendientes />}
+            />
+            <Route
+              path="/Aprobaciones_Pendientes"
+              element={<AprobacionesPendientes />}
+            />
+            <Route
+              path="/Documentos_Obsoletos"
+              element={<DocumentosObsoletos />}
+            />
+
             <Route path="/gestionar_areas" element={<GestionarAreas />} />
-            <Route path="/Asignar_Responsables" element={<AreasResponsables />} />
+            <Route
+              path="/Asignar_Responsables"
+              element={<AreasResponsables />}
+            />
 
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
 
-            <Route path="/documentos/:id/editar" element={<EditarDocumento />} />
+            <Route
+              path="/documentos/:id/editar"
+              element={<EditarDocumento />}
+            />
             <Route
               path="/No_conformidades_Abiertas"
               element={<NoConformidadesAbiertas />}
@@ -94,6 +111,14 @@ function App() {
               element={<AccionesCorrectivasVerificadas />}
             />
           </Route>
+          <Route
+            path="/Acciones_correctivas_Nuevas"
+            element={<NuevasAccionesCorrectivas />}
+          />
+          <Route
+            path="/Acciones_correctivas_EnProceso"
+            element={<EnProcesoAccionesCorrectivas />}
+          />
 
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

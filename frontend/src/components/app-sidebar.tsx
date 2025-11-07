@@ -185,11 +185,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Nuevas",
-            url: "#",
+            url: "/Acciones_correctivas/nuevas",
           },
           {
             title: "En Proceso",
-            url: "#",
+            url: "/Acciones_correctivas/enproceso",
           },
           {
             title: "Cerradas",
