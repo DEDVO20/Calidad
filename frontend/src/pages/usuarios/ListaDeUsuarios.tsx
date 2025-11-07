@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Users,
-  UserPlus,
   Search,
   Eye,
   Edit,
@@ -22,7 +21,6 @@ import {
   UserX,
   Building2,
   Mail,
-  Phone,
   Shield,
   CheckCircle,
   XCircle,
@@ -176,7 +174,7 @@ export default function ListaUsuarios() {
           user.correoElectronico.toLowerCase().includes(term) ||
           user.nombreUsuario.toLowerCase().includes(term) ||
           user.documento.toString().includes(term) ||
-          user.area?.nombre.toLowerCase().includes(term)
+          user.area?.nombre.toLowerCase().includes(term),
       );
     }
 
@@ -276,7 +274,6 @@ export default function ListaUsuarios() {
             />
             Actualizar
           </Button>
-          
         </div>
       </div>
 
@@ -306,7 +303,10 @@ export default function ListaUsuarios() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="bg-green-50 text-green-700 border-green-200"
+            >
               {((usuariosActivos / total) * 100 || 0).toFixed(0)}% del total
             </Badge>
           </CardContent>
@@ -323,7 +323,10 @@ export default function ListaUsuarios() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            <Badge
+              variant="outline"
+              className="bg-red-50 text-red-700 border-red-200"
+            >
               {((usuariosInactivos / total) * 100 || 0).toFixed(0)}% del total
             </Badge>
           </CardContent>
@@ -340,7 +343,10 @@ export default function ListaUsuarios() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+            <Badge
+              variant="outline"
+              className="bg-purple-50 text-purple-700 border-purple-200"
+            >
               Roles asignados
             </Badge>
           </CardContent>
@@ -640,7 +646,7 @@ export default function ListaUsuarios() {
                       </p>
                       <p className="text-sm text-gray-900">
                         {new Date(
-                          dialogState.usuario.creadoEn
+                          dialogState.usuario.creadoEn,
                         ).toLocaleDateString("es-ES", {
                           year: "numeric",
                           month: "long",
