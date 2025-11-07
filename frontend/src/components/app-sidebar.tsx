@@ -106,11 +106,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Gestionar Áreas",
-            url: "#",
+            url: "/gestionar_areas",
           },
           {
             title: "Asignar Responsables",
-            url: "#",
+            url: "/Asignar_Responsables",
           },
         ],
       },
@@ -121,15 +121,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Lista de Usuarios",
-            url: "#",
+            url: "/ListaDeUsuarios",
           },
           {
             title: "Nuevo Usuario",
-            url: "#",
+            url: "/NuevoUsuario",
           },
           {
             title: "Roles y Permisos",
-            url: "#",
+            url: "/Roles_y_Permisos",
           },
         ],
       },
@@ -144,15 +144,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: "Control de Versiones",
-            url: "#",
+            url: "/control-versiones",
+            
           },
           {
             title: "Aprobaciones Pendientes",
-            url: "#",
+            url: "/Aprobaciones_Pendientes",
           },
           {
             title: "Documentos Obsoletos",
-            url: "#",
+            url: "/Documentos_Obsoletos",
           },
         ],
       },
@@ -184,11 +185,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Nuevas",
-            url: "#",
+            url: "/Acciones_correctivas_Nuevas",
           },
           {
             title: "En Proceso",
-            url: "#",
+            url: "/Acciones_correctivas_EnProceso",
           },
           {
             title: "Cerradas",
