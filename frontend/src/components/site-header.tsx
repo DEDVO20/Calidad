@@ -54,7 +54,10 @@ export function SiteHeader() {
     if (path.includes("/no-conformidades")) return "No Conformidades";
 
     if (path.includes("/Acciones_correctivas_Cerradas"))
-      return "Acciones Correctivas cerradas";
+      return "Acciones Correctivas Cerradas";
+
+    if (path.includes("/Acciones_correctivas_Verificadas"))
+      return "Acciones Correctivas Verificadas";
 
     if (path.includes("/acciones-correctivas")) return "Acciones Correctivas";
     if (path.includes("/riesgos")) return "Riesgos";
