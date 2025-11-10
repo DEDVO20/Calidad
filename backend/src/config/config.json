@@ -3,18 +3,31 @@
     "username": "postgres",
     "password": "admin123",
     "database": "calidad",
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port": 5432,
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "logging": true
   },
-  "production": {
-    "use_env_variable": "DATABASE_URL",
+  "cloud": {
+    "use_env_variable": "DATABASE_URL_CLOUD",
     "dialect": "postgres",
     "dialectOptions": {
       "ssl": {
         "require": true,
         "rejectUnauthorized": false
       }
-    }
+    },
+    "logging": true
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL_CLOUD",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    },
+    "logging": false
   }
 }
