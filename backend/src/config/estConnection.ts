@@ -1,15 +1,28 @@
-// testConnection.ts
-import sequelize from "./database"; // ajusta la ruta según tu proyecto
+// db/connection.js o similar
+require("dotenv").config();
+const { Pool } = require("pg");
 
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("✅ Conexión exitosa a la base de datos Supabase/PostgreSQL.");
-    const [result] = await sequelize.query("SELECT NOW();");
-    console.log("🕒 Fecha/hora del servidor:", (result[0] as any).now);
-  } catch (error) {
-    console.error("❌ Error al conectar con la base de datos:", error);
-  } finally {
-    await sequelize.close();
-  }
-})();
+const isCloudMode = process.env.USE_CLOUD === "true";
+
+const pool = new Pool(
+  isCloudMode
+    ? {
+        connectionString: process.env.DATABASE_URL_CLOUD,
+        ssl: {
+          rejectUnauthorized: false, // Necesario para Supabase
+        },
+      }
+    : {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+      },
+);
+
+console.log(
+  `🔌 Conectado a base de datos: ${isCloudMode ? "SUPABASE (Nube)" : "LOCAL"}`,
+);
+
+module.exports = pool;

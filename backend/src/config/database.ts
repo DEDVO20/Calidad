@@ -1,6 +1,7 @@
 // src/config/database.ts
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
+import { URL } from "url";
 
 dotenv.config();
 
@@ -20,9 +21,16 @@ if (USE_CLOUD || NODE_ENV === "production") {
     );
   }
 
-  sequelize = new Sequelize(DATABASE_URL_CLOUD, {
+  // Parsear la URL manualmente para extraer los componentes
+  const dbUrl = new URL(DATABASE_URL_CLOUD);
+
+  sequelize = new Sequelize({
+    database: dbUrl.pathname.slice(1), // Remover el "/" inicial
+    username: dbUrl.username,
+    password: dbUrl.password,
+    host: dbUrl.hostname,
+    port: parseInt(dbUrl.port),
     dialect: "postgres",
-    protocol: "postgres",
     logging: NODE_ENV === "development" ? console.log : false,
     dialectOptions: {
       ssl: {
@@ -40,6 +48,7 @@ if (USE_CLOUD || NODE_ENV === "production") {
 
   console.log("✅ Conectado a Supabase (nube)");
   console.log(`🌍 Ambiente: ${NODE_ENV}`);
+  console.log(`🔗 Host: ${dbUrl.hostname}:${dbUrl.port}`);
 } else {
   // 💻 Configuración para base de datos local
   const DB_NAME = process.env.DB_NAME || "calidad";

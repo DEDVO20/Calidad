@@ -9,7 +9,7 @@
     "logging": true
   },
   "cloud": {
-    "use_env_variable": "DATABASE_URL_CLOUD",
+    "use_env_variable": "process.env.DATABASE_URL_CLOUD",
     "dialect": "postgres",
     "dialectOptions": {
       "ssl": {
