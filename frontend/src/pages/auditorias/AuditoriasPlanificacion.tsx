@@ -1,87 +1,91 @@
-import React, { useState } from 'react';
-import { Calendar, Plus, Search, Download, Eye, Edit, Trash2, Users, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Plus, Search, Download, Eye, Edit, Trash2, Users, CheckCircle, AlertCircle, Clock, Loader2 } from 'lucide-react';
 
-// Tipos
-interface Auditoria {
-  id: string;
-  codigo: string;
-  nombre?: string;
-  tipo?: string;
-  objetivo?: string;
-  alcance?: string;
-  normaReferencia?: string;
-  auditorLiderId?: string;
-  fechaPlanificada?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
-  estado?: string;
-  creadoPor?: string;
-  creadoEn: string;
-}
+// Configuración de la API
+const API_BASE_URL = 'http://localhost:3000/api';
 
-interface Usuario {
-  id: string;
-  nombre: string;
-  primerApellido: string;
-  segundoApellido?: string;
-}
+// Servicio API para Auditorías
+const auditoriaService = {
+  async getAll(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.tipo) params.append('tipo', filters.tipo);
+    if (filters.estado) params.append('estado', filters.estado);
+    
+    const url = `${API_BASE_URL}/auditorias${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error('Error al cargar auditorías');
+    return response.json();
+  },
+
+  async create(data) {
+    const response = await fetch(`${API_BASE_URL}/auditorias`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) throw new Error('Error al crear auditoría');
+    return response.json();
+  },
+
+  async update(id, data) {
+    const response = await fetch(`${API_BASE_URL}/auditorias/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) throw new Error('Error al actualizar auditoría');
+    return response.json();
+  },
+
+  async delete(id) {
+    const response = await fetch(`${API_BASE_URL}/auditorias/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    
+    if (!response.ok) throw new Error('Error al eliminar auditoría');
+    return true;
+  }
+};
+
+// Servicio API para Usuarios
+const usuarioService = {
+  async getAll() {
+    const response = await fetch(`${API_BASE_URL}/usuarios`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error('Error al cargar usuarios');
+    return response.json();
+  }
+};
 
 const AuditoriasPlanificacion = () => {
-  // Datos mock
-  const [auditorias, setAuditorias] = useState<Auditoria[]>([
-    {
-      id: '1',
-      codigo: 'AUD-2025-001',
-      nombre: 'Auditoría Interna de Procesos',
-      tipo: 'interna',
-      objetivo: 'Verificar cumplimiento ISO 9001:2015 en procesos clave',
-      alcance: 'Procesos de producción y calidad',
-      normaReferencia: 'ISO 9001:2015',
-      auditorLiderId: '1',
-      fechaPlanificada: '2025-03-15',
-      fechaInicio: '2025-03-16',
-      fechaFin: '2025-03-18',
-      estado: 'planificada',
-      creadoPor: '2',
-      creadoEn: '2025-01-10T08:00:00Z'
-    },
-    {
-      id: '2',
-      codigo: 'AUD-2025-002',
-      nombre: 'Auditoría de Certificación',
-      tipo: 'certificacion',
-      objetivo: 'Obtener certificación ISO 9001:2015',
-      alcance: 'Todo el sistema de gestión',
-      normaReferencia: 'ISO 9001:2015',
-      auditorLiderId: '3',
-      fechaPlanificada: '2025-06-20',
-      estado: 'en_curso',
-      creadoPor: '1',
-      creadoEn: '2025-02-01T10:30:00Z'
-    },
-    {
-      id: '3',
-      codigo: 'AUD-2024-015',
-      nombre: 'Auditoría de Seguimiento',
-      tipo: 'seguimiento',
-      objetivo: 'Verificar corrección de no conformidades',
-      alcance: 'Áreas con hallazgos previos',
-      normaReferencia: 'ISO 9001:2015',
-      auditorLiderId: '2',
-      fechaPlanificada: '2024-12-10',
-      fechaInicio: '2024-12-11',
-      fechaFin: '2024-12-12',
-      estado: 'completada',
-      creadoPor: '1',
-      creadoEn: '2024-11-15T09:00:00Z'
-    }
-  ]);
-
-  const usuarios: Usuario[] = [
-    { id: '1', nombre: 'Ana', primerApellido: 'García', segundoApellido: 'López' },
-    { id: '2', nombre: 'Carlos', primerApellido: 'Martínez' },
-    { id: '3', nombre: 'Laura', primerApellido: 'Pérez', segundoApellido: 'Ruiz' }
-  ];
+  // Estados
+  const [auditorias, setAuditorias] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   // Estados para filtros
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -90,7 +94,7 @@ const AuditoriasPlanificacion = () => {
 
   // Estados para modal
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [auditoriaEditando, setAuditoriaEditando] = useState<Auditoria | null>(null);
+  const [auditoriaEditando, setAuditoriaEditando] = useState(null);
   const [formData, setFormData] = useState({
     codigo: '',
     nombre: '',
@@ -102,27 +106,75 @@ const AuditoriasPlanificacion = () => {
     fechaPlanificada: '',
     fechaInicio: '',
     fechaFin: '',
-    estado: 'planificada',
-    creadoPor: ''
+    estado: 'planificada'
   });
 
-  // Filtrar auditorías
-  const auditoriasFiltradas = auditorias.filter(aud => {
-    const cumpleTipo = !filtroTipo || aud.tipo === filtroTipo;
-    const cumpleEstado = !filtroEstado || aud.estado === filtroEstado;
-    const cumpleBusqueda = !busqueda ||
-      aud.codigo?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      aud.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      aud.objetivo?.toLowerCase().includes(busqueda.toLowerCase());
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
-    return cumpleTipo && cumpleEstado && cumpleBusqueda;
+  // Cargar auditorías cuando cambien los filtros
+  useEffect(() => {
+    if (!loading) {
+      cargarAuditorias();
+    }
+  }, [filtroTipo, filtroEstado]);
+
+  const cargarDatos = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Cargar usuarios y auditorías en paralelo
+      const [usuariosData, auditoriasData] = await Promise.all([
+        usuarioService.getAll(),
+        auditoriaService.getAll({ tipo: filtroTipo, estado: filtroEstado })
+      ]);
+      
+      setUsuarios(usuariosData);
+      setAuditorias(auditoriasData.auditorias || auditoriasData);
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+      setError('Error al cargar los datos. Por favor, intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cargarAuditorias = async () => {
+    try {
+      const data = await auditoriaService.getAll({ tipo: filtroTipo, estado: filtroEstado });
+      setAuditorias(data.auditorias || data);
+    } catch (err) {
+      console.error('Error al cargar auditorías:', err);
+      setError('Error al cargar auditorías');
+    }
+  };
+
+  // Filtrar auditorías localmente por búsqueda
+  const auditoriasFiltradas = auditorias.filter(aud => {
+    if (!busqueda) return true;
+    
+    const searchLower = busqueda.toLowerCase();
+    return (
+      aud.codigo?.toLowerCase().includes(searchLower) ||
+      aud.nombre?.toLowerCase().includes(searchLower) ||
+      aud.objetivo?.toLowerCase().includes(searchLower)
+    );
   });
 
   // Abrir modal para crear
   const abrirModalCrear = () => {
     setAuditoriaEditando(null);
+    
+    // Generar código automático
+    const year = new Date().getFullYear();
+    const nextNumber = auditorias.length + 1;
+    const codigo = `AUD-${year}-${String(nextNumber).padStart(3, '0')}`;
+    
     setFormData({
-      codigo: `AUD-${new Date().getFullYear()}-${String(auditorias.length + 1).padStart(3, '0')}`,
+      codigo,
       nombre: '',
       tipo: 'interna',
       objetivo: '',
@@ -132,14 +184,13 @@ const AuditoriasPlanificacion = () => {
       fechaPlanificada: '',
       fechaInicio: '',
       fechaFin: '',
-      estado: 'planificada',
-      creadoPor: usuarios[0]?.id || ''
+      estado: 'planificada'
     });
     setMostrarModal(true);
   };
 
   // Abrir modal para editar
-  const abrirModalEditar = (auditoria: Auditoria) => {
+  const abrirModalEditar = (auditoria) => {
     setAuditoriaEditando(auditoria);
     setFormData({
       codigo: auditoria.codigo,
@@ -152,67 +203,77 @@ const AuditoriasPlanificacion = () => {
       fechaPlanificada: auditoria.fechaPlanificada?.split('T')[0] || '',
       fechaInicio: auditoria.fechaInicio?.split('T')[0] || '',
       fechaFin: auditoria.fechaFin?.split('T')[0] || '',
-      estado: auditoria.estado || 'planificada',
-      creadoPor: auditoria.creadoPor || ''
+      estado: auditoria.estado || 'planificada'
     });
     setMostrarModal(true);
   };
 
-  // Guardar auditoría (mock)
-  const guardarAuditoria = (e: React.FormEvent) => {
+  // Guardar auditoría
+  const guardarAuditoria = async (e) => {
     e.preventDefault();
+    
+    try {
+      setSaving(true);
+      setError(null);
 
-    if (auditoriaEditando) {
-      setAuditorias(prev => prev.map(a => 
-        a.id === auditoriaEditando.id 
-          ? { ...a, ...formData }
-          : a
-      ));
-      alert('Auditoría actualizada');
-    } else {
-      const nuevaAuditoria: Auditoria = {
-        id: String(Date.now()),
-        ...formData,
-        creadoEn: new Date().toISOString()
-      };
-      setAuditorias(prev => [...prev, nuevaAuditoria]);
-      alert('Auditoría creada exitosamente');
+      if (auditoriaEditando) {
+        await auditoriaService.update(auditoriaEditando.id, formData);
+      } else {
+        await auditoriaService.create(formData);
+      }
+
+      setMostrarModal(false);
+      await cargarAuditorias();
+      
+      // Mostrar mensaje de éxito
+      alert(auditoriaEditando ? 'Auditoría actualizada exitosamente' : 'Auditoría creada exitosamente');
+    } catch (err) {
+      console.error('Error al guardar auditoría:', err);
+      setError(err.message || 'Error al guardar la auditoría');
+    } finally {
+      setSaving(false);
     }
-
-    setMostrarModal(false);
   };
 
-  // Eliminar auditoría (mock)
-  const eliminarAuditoria = (id: string) => {
+  // Eliminar auditoría
+  const eliminarAuditoria = async (id) => {
     if (!confirm('¿Está seguro de eliminar esta auditoría?')) return;
-    setAuditorias(prev => prev.filter(a => a.id !== id));
-    alert('Auditoría eliminada');
+    
+    try {
+      setError(null);
+      await auditoriaService.delete(id);
+      await cargarAuditorias();
+      alert('Auditoría eliminada exitosamente');
+    } catch (err) {
+      console.error('Error al eliminar auditoría:', err);
+      setError(err.message || 'Error al eliminar la auditoría');
+    }
   };
 
   // Obtener color de estado
-  const getEstadoColor = (estado?: string) => {
-    const colores: Record<string, string> = {
+  const getEstadoColor = (estado) => {
+    const colores = {
       planificada: 'bg-blue-100 text-blue-800',
       en_curso: 'bg-yellow-100 text-yellow-800',
       completada: 'bg-green-100 text-green-800',
       cancelada: 'bg-red-100 text-red-800'
     };
-    return colores[estado || 'planificada'] || 'bg-gray-100 text-gray-800';
+    return colores[estado] || 'bg-gray-100 text-gray-800';
   };
 
   // Obtener icono de estado
-  const getEstadoIcono = (estado?: string) => {
-    const iconos: Record<string, React.ReactNode> = {
+  const getEstadoIcono = (estado) => {
+    const iconos = {
       planificada: <Clock className="w-4 h-4" />,
       en_curso: <AlertCircle className="w-4 h-4" />,
       completada: <CheckCircle className="w-4 h-4" />,
       cancelada: <Trash2 className="w-4 h-4" />
     };
-    return iconos[estado || 'planificada'] || <Clock className="w-4 h-4" />;
+    return iconos[estado] || <Clock className="w-4 h-4" />;
   };
 
   // Formatear fecha
-  const formatearFecha = (fecha?: string) => {
+  const formatearFecha = (fecha) => {
     if (!fecha) return 'No definida';
     return new Date(fecha).toLocaleDateString('es-ES', {
       year: 'numeric',
@@ -222,11 +283,30 @@ const AuditoriasPlanificacion = () => {
   };
 
   // Obtener nombre completo usuario
-  const getNombreUsuario = (id?: string) => {
+  const getNombreUsuario = (id) => {
     const usuario = usuarios.find(u => u.id === id);
     if (!usuario) return 'No asignado';
     return `${usuario.nombre} ${usuario.primerApellido} ${usuario.segundoApellido || ''}`.trim();
   };
+
+  // Calcular estadísticas
+  const stats = {
+    total: auditorias.length,
+    planificadas: auditorias.filter(a => a.estado === 'planificada').length,
+    enCurso: auditorias.filter(a => a.estado === 'en_curso').length,
+    completadas: auditorias.filter(a => a.estado === 'completada').length
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Cargando auditorías...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -255,6 +335,13 @@ const AuditoriasPlanificacion = () => {
               Nueva Auditoría
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
 
           {/* Filtros y búsqueda */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -306,7 +393,7 @@ const AuditoriasPlanificacion = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{auditorias.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
               <Calendar className="w-8 h-8 text-blue-600" />
             </div>
@@ -315,9 +402,7 @@ const AuditoriasPlanificacion = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Planificadas</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {auditorias.filter(a => a.estado === 'planificada').length}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{stats.planificadas}</p>
               </div>
               <Clock className="w-8 h-8 text-blue-600" />
             </div>
@@ -326,9 +411,7 @@ const AuditoriasPlanificacion = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">En Curso</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {auditorias.filter(a => a.estado === 'en_curso').length}
-                </p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.enCurso}</p>
               </div>
               <AlertCircle className="w-8 h-8 text-yellow-600" />
             </div>
@@ -337,9 +420,7 @@ const AuditoriasPlanificacion = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Completadas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {auditorias.filter(a => a.estado === 'completada').length}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{stats.completadas}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
@@ -638,15 +719,18 @@ const AuditoriasPlanificacion = () => {
                   <button
                     type="button"
                     onClick={() => setMostrarModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    disabled={saving}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={saving}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                   >
-                    {auditoriaEditando ? 'Actualizar' : 'Crear'} Auditoría
+                    {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {saving ? 'Guardando...' : (auditoriaEditando ? 'Actualizar' : 'Crear') + ' Auditoría'}
                   </button>
                 </div>
               </form>
