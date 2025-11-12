@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import NuevasAccionesCorrectivas from "./nuevas";
 
 interface AccionCorrectiva {
   id: number;
@@ -39,6 +47,7 @@ export default function AccionesCorrectivasCerradas() {
   const [accionesCorrectivas, setAccionesCorrectivas] = useState<AccionCorrectiva[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAccionesCorrectivasCerradas();
@@ -66,18 +75,29 @@ export default function AccionesCorrectivasCerradas() {
       );
 
       // Transformar los datos para el DataTable
-      const transformedData = accionesCerradas.map((ac: AccionCorrectivaAPI, index: number) => ({
-        id: index + 1, // Generar ID numérico secuencial
-        codigo: ac.codigo,
-        tipo: ac.tipo || "Correctiva",
-        descripcion: ac.descripcion || "Sin descripción",
-        estado: "Cerrada",
-        gravedad: ac.eficaciaVerificada ? "Verificada" : "Pendiente Verificación",
-        fechaDeteccion: ac.fechaCompromiso 
-          ? new Date(ac.fechaCompromiso).toLocaleDateString('es-ES')
-          : new Date().toLocaleDateString('es-ES'),
-        responsable: "Sin asignar", // Se actualizará con asociaciones
-      }));
+      const transformedData = accionesCerradas.map((ac: AccionCorrectivaAPI, index: number) => {
+        let fechaFormateada = "Sin fecha";
+        if (ac.fechaCompromiso) {
+          try {
+            // La fecha viene en formato YYYY-MM-DD, convertir a DD/MM/YYYY
+            const [anio, mes, dia] = ac.fechaCompromiso.split('-');
+            fechaFormateada = `${dia}/${mes}/${anio}`;
+          } catch (e) {
+            console.error("Error al formatear fecha:", e);
+          }
+        }
+
+        return {
+          id: index + 1,
+          codigo: ac.codigo,
+          tipo: ac.tipo || "Correctiva",
+          descripcion: ac.descripcion || "Sin descripción",
+          estado: "Cerrada",
+          gravedad: ac.eficaciaVerificada ? "Verificada" : "Pendiente Verificación",
+          fechaDeteccion: fechaFormateada,
+          responsable: "Sin asignar",
+        };
+      });
 
       setAccionesCorrectivas(transformedData);
       setTotal(transformedData.length);
@@ -143,10 +163,20 @@ export default function AccionesCorrectivasCerradas() {
             {total} acción{total !== 1 ? "es" : ""} completamente implementada{total !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Nueva Acción Correctiva
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Nueva Acción Correctiva
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nueva Acción Correctiva</DialogTitle>
+            </DialogHeader>
+            <NuevasAccionesCorrectivas />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

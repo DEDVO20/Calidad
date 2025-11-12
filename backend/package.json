@@ -28,7 +28,16 @@
     "db:auto-reset": "node scripts/run-migrations.js reset",
     "test:auth": "node scripts/test-auth.js",
     "test:db": "node scripts/test-auth.js database",
-    "test:db-connection": "node scripts/test-db-connection.js"
+    "test:db-connection": "node scripts/test-db-connection.js",
+    "setup:supabase": "node scripts/setup-supabase.js",
+    "test:connection": "npx ts-node src/config/estConnection.ts",
+    "env:local": "node scripts/switch-env.js local",
+    "env:cloud": "node scripts/switch-env.js cloud",
+    "check:db": "node scripts/check-connection.js",
+    "db:status": "node scripts/db-status.js",
+    "test:cloud": "node scripts/testConection.js",
+    "test:local": "node scripts/testConection.js",
+    "debug:env": "node scripts/debug-env.js"
   },
   "keywords": [],
   "author": "",
@@ -49,7 +58,8 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
