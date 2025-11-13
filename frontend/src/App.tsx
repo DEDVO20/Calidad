@@ -23,6 +23,17 @@ import NuevosUsuarios from "./pages/usuarios/NuevoUsuario";
 import RolesYPermisos from "./pages/usuarios/Roles_Permisos";
 //-------------------
 
+//auditorias---------
+import AuditoriasPlanificacion  from "./pages/auditorias/AuditoriasPlanificacion";
+import AuditoriasEnCurso from "./pages/auditorias/EnCurso";
+import AuditoriasHallazgosView from "./pages/auditorias/hallazgos";
+import AuditoriasCompletas from "./pages/auditorias/Completadas";
+//-------------------
+
+//Objetivos de calidad
+import ObjetivosActivos from "./pages/objetivosCalidad/Activos";
+import Seguimiento from "./pages/objetivosCalidad/Seguimiento";
+
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -85,6 +96,16 @@ function App() {
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
+            
+          {/* Rutas de auditorías */}
+          <Route path="/AuditoriasPlanificacion" element={<AuditoriasPlanificacion />} />
+          <Route path="/AuditoriasEnCurso" element={<AuditoriasEnCurso />} />
+          <Route path="/AuditoriasCompletas" element={<AuditoriasCompletas />} />
+          <Route path="/AuditoriasHallazgosView" element={<AuditoriasHallazgosView />} />
+
+          {/* Rutas de Objetivos de Calidad */}
+          <Route path="/Activos" element={<ObjetivosActivos />} />
+          <Route path="/Seguimiento" element={<Seguimiento />} />
 
             <Route
               path="/documentos/:id/editar"
@@ -119,6 +140,7 @@ function App() {
               element={<EnProcesoAccionesCorrectivas />}
             />
           </Route>
+
 
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

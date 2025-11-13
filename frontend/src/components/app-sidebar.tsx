@@ -227,19 +227,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Planificación",
-            url: "#",
+            url: "/AuditoriasPlanificacion",
           },
           {
             title: "En Curso",
-            url: "#",
+            url: "/AuditoriasEnCurso",
           },
           {
             title: "Completadas",
-            url: "#",
+            url: "/AuditoriasCompletas",
           },
           {
             title: "Hallazgos",
-            url: "#",
+            url: "/AuditoriasHallazgosView",
           },
         ],
       },
@@ -269,11 +269,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Objetivos Activos",
-            url: "#",
+            url: "/Activos",
           },
           {
             title: "Seguimiento",
-            url: "#",
+            url: "/Seguimiento",
           },
           {
             title: "Historial",
