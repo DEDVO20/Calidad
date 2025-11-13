@@ -77,7 +77,7 @@ export default function NuevasAccionesCorrectivas() {
       };
 
       const [noConformidadesRes, usuariosRes] = await Promise.all([
-        fetch(`${API_URL}/no-conformidades`, { headers }),
+        fetch(`${API_URL}/noconformidades`, { headers }),
         fetch(`${API_URL}/usuarios`, { headers }),
       ]);
 

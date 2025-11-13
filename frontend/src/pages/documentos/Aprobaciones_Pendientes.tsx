@@ -80,7 +80,7 @@ export default function AprobacionesPendientes() {
       const token = localStorage.getItem("token");
       
       // Endpoint correcto según tu backend
-      const response = await fetch("/api/documentos?estado=en_revision", {
+      const response = await fetch("/api/documentos", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

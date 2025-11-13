@@ -23,6 +23,17 @@ import NuevosUsuarios from "./pages/usuarios/NuevoUsuario";
 import RolesYPermisos from "./pages/usuarios/Roles_Permisos";
 //-------------------
 
+//auditorias---------
+import AuditoriasPlanificacion  from "./pages/auditorias/AuditoriasPlanificacion";
+import AuditoriasEnCurso from "./pages/auditorias/EnCurso";
+import AuditoriasHallazgosView from "./pages/auditorias/hallazgos";
+import AuditoriasCompletas from "./pages/auditorias/Completadas";
+//-------------------
+
+//Objetivos de calidad
+import ObjetivosActivos from "./pages/objetivosCalidad/Activos";
+import Seguimiento from "./pages/objetivosCalidad/Seguimiento";
+
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./components/usuarios/Perfil";
 import Documentos from "./pages/Documentos";
@@ -36,6 +47,14 @@ import ControlVersiones from "./pages/ControlVersiones";
 
 import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
 import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
+
+
+//capacitaciones ----------------------
+import CapacitacionesProgramadas from "./pages/CapacitacionesProgramadas";
+import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
+import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
+import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
+
 
 import "./App.css";
 
@@ -85,6 +104,16 @@ function App() {
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
+            
+          {/* Rutas de auditorías */}
+          <Route path="/AuditoriasPlanificacion" element={<AuditoriasPlanificacion />} />
+          <Route path="/AuditoriasEnCurso" element={<AuditoriasEnCurso />} />
+          <Route path="/AuditoriasCompletas" element={<AuditoriasCompletas />} />
+          <Route path="/AuditoriasHallazgosView" element={<AuditoriasHallazgosView />} />
+
+          {/* Rutas de Objetivos de Calidad */}
+          <Route path="/Activos" element={<ObjetivosActivos />} />
+          <Route path="/Seguimiento" element={<Seguimiento />} />
 
             <Route
               path="/documentos/:id/editar"
@@ -118,6 +147,10 @@ function App() {
               path="/Acciones_correctivas_EnProceso"
               element={<EnProcesoAccionesCorrectivas />}
             />
+            <Route path="/capacitaciones/programadas" element={<CapacitacionesProgramadas />} />
+            <Route path="/capacitaciones/historial" element={<CapacitacionesHistorial />} />
+            <Route path="/capacitaciones/asistencias" element={<CapacitacionesAsistencia />} />
+            <Route path="/capacitaciones/competencias" element={<CapacitacionesCompetencia />} />
           </Route>
 
           {/* Ruta catch-all para manejar errores de tipeo */}
