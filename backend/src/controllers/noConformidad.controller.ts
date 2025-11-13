@@ -41,8 +41,21 @@ export const createNoConformidad = async (req: Request, res: Response) => {
 /** Listar todas las No Conformidades */
 export const getNoConformidades = async (req: Request, res: Response) => {
   try {
+    const { estado } = req.query;
+    
+    const where: any = {};
+    if (estado) {
+      where.estado = estado;
+    }
+    
     const lista = await NoConformidad.findAll({
-      order: [["createdAt", "DESC"]],
+      where,
+      order: [["creadoEn", "DESC"]],
+      include: [
+        { association: "detectadoPorUsuario" },
+        { association: "responsable" },
+        { association: "area" },
+      ],
     });
     return res.json(lista);
   } catch (error: any) {
