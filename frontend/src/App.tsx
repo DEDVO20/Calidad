@@ -110,15 +110,15 @@ function App() {
               path="/Acciones_correctivas_Verificadas"
               element={<AccionesCorrectivasVerificadas />}
             />
+            <Route
+              path="/Acciones_correctivas_Nuevas"
+              element={<NuevasAccionesCorrectivas />}
+            />
+            <Route
+              path="/Acciones_correctivas_EnProceso"
+              element={<EnProcesoAccionesCorrectivas />}
+            />
           </Route>
-          <Route
-            path="/Acciones_correctivas_Nuevas"
-            element={<NuevasAccionesCorrectivas />}
-          />
-          <Route
-            path="/Acciones_correctivas_EnProceso"
-            element={<EnProcesoAccionesCorrectivas />}
-          />
 
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

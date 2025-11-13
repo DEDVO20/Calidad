@@ -22,9 +22,17 @@ const sequelize = new Sequelize({
   port: config.database.port,
   dialect: "postgres",
   logging: config.nodeEnv === "development" ? console.log : false,
+  dialectOptions: config.database.ssl
+    ? {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      }
+    : {},
   pool: {
-    max: 5,
-    min: 0,
+    max: 10,
+    min: 2,
     acquire: 30000,
     idle: 10000,
   },
@@ -104,7 +112,15 @@ const initModels = () => {
 const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Conexión a la base de datos establecida correctamente.");
+    if (config.useCloud) {
+      console.log("✅ Conexión a Supabase establecida correctamente.");
+      console.log(`🌍 Host: ${config.database.host}`);
+    } else {
+      console.log(
+        "✅ Conexión a la base de datos local establecida correctamente.",
+      );
+      console.log(`💻 Host: ${config.database.host}:${config.database.port}`);
+    }
     return true;
   } catch (error) {
     console.error("❌ Error al conectar con la base de datos:", error);
