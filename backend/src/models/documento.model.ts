@@ -179,7 +179,15 @@ class Documento
   public static associate(models: any) {
     Documento.belongsTo(models.Usuario, {
       foreignKey: "subidoPor",
+      as: "subidor",
+    });
+    Documento.belongsTo(models.Usuario, {
+      foreignKey: "creadoPor",
       as: "autor",
+    });
+    Documento.belongsTo(models.Usuario, {
+      foreignKey: "revisadoPor",
+      as: "revisor",
     });
     Documento.belongsTo(models.Usuario, {
       foreignKey: "aprobadoPor",
