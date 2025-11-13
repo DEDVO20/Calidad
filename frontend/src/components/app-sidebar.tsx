@@ -311,19 +311,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Programadas",
-            url: "#",
+            url: "/capacitaciones/programadas",
           },
           {
             title: "Historial",
-            url: "#",
+            url: "/capacitaciones/historial",
           },
           {
             title: "Asistencias",
-            url: "#",
+            url: "/capacitaciones/asistencias",
           },
           {
             title: "Competencias",
-            url: "#",
+            url: "/capacitaciones/competencias",
           },
         ],
       },

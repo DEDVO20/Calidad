@@ -48,6 +48,14 @@ import ControlVersiones from "./pages/ControlVersiones";
 import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
 import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
 
+
+//capacitaciones ----------------------
+import CapacitacionesProgramadas from "./pages/CapacitacionesProgramadas";
+import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
+import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
+import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
+
+
 import "./App.css";
 
 function App() {
