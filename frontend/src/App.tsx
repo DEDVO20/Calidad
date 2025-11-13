@@ -126,26 +126,7 @@ function App() {
               path="/Acciones_correctivas_EnProceso"
               element={<EnProcesoAccionesCorrectivas />}
             />
-
-
-            <Route path="/capacitaciones/programadas" element={<CapacitacionesProgramadas />} />
-            <Route path="/capacitaciones/historial" element={<CapacitacionesHistorial />} />
-            <Route path="/capacitaciones/asistencias" element={<CapacitacionesAsistencia/>} />
-            <Route path="/capacitaciones/competencias" element={<CapacitacionesCompetencia />} />
-
           </Route>
-
-
-          
-          
-
-
-
-           
-
-
-
-
 
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
