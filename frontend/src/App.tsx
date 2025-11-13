@@ -37,6 +37,11 @@ import ControlVersiones from "./pages/ControlVersiones";
 import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
 import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
 
+import TableroIndicadores from "./pages/Indicadores/tablero";
+import EficaciaIndicadores from "./pages/Indicadores/eficacia";
+import EficienciaIndicadores from "./pages/Indicadores/eficiencia";
+import CumplimientoIndicadores from "./pages/Indicadores/cumplimiento";
+
 import "./App.css";
 
 function App() {
@@ -110,7 +115,7 @@ function App() {
               path="/Acciones_correctivas_Verificadas"
               element={<AccionesCorrectivasVerificadas />}
             />
-          </Route>
+          
           <Route
             path="/Acciones_correctivas_Nuevas"
             element={<NuevasAccionesCorrectivas />}
@@ -120,6 +125,23 @@ function App() {
             element={<EnProcesoAccionesCorrectivas />}
           />
 
+          <Route
+           path="/indicadores/tablero"
+            element={<TableroIndicadores />}
+          />
+          <Route 
+           path="/indicadores/eficacia"
+           element={<EficaciaIndicadores />}
+         />
+          <Route 
+           path="/indicadores/eficiencia"
+           element={<EficienciaIndicadores />} 
+          />
+          <Route
+           path="/indicadores/cumplimiento"
+           element={<CumplimientoIndicadores />}
+         />
+        </Route>
           {/* Ruta catch-all para manejar errores de tipeo */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

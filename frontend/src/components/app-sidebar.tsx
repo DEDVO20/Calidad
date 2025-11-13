@@ -288,19 +288,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Tablero de Indicadores",
-            url: "#",
+            url: "/indicadores/tablero",
           },
           {
             title: "Eficacia",
-            url: "#",
+            url: "/indicadores/eficacia",
           },
           {
             title: "Eficiencia",
-            url: "#",
+            url: "/indicadores/eficiencia",
           },
           {
             title: "Cumplimiento",
-            url: "#",
+            url: "/indicadores/cumplimiento",
           },
         ],
       },

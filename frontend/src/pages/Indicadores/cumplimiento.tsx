@@ -1,0 +1,276 @@
+import { useEffect, useState } from "react";
+import { Shield, CheckCircle, XCircle, AlertTriangle, FileCheck } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const API_URL = "http://localhost:3000/api";
+
+interface Indicador {
+  id: string;
+  procesoId?: string;
+  clave: string;
+  descripcion?: string;
+  valor?: number;
+  periodoInicio?: string;
+  periodoFin?: string;
+  creadoEn: string;
+}
+
+export default function CumplimientoIndicadores() {
+  const [indicadores, setIndicadores] = useState<Indicador[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchIndicadores();
+  }, []);
+
+  const getAuthToken = () => {
+    return localStorage.getItem("token");
+  };
+
+  const fetchIndicadores = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("No hay sesión activa");
+      }
+
+      const response = await fetch(`${API_URL}/indicadores`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al cargar indicadores");
+      }
+
+      const data = await response.json();
+      // Filtrar indicadores de cumplimiento
+      const indicadoresCumplimiento = data.filter((ind: Indicador) => 
+        ind.clave.toLowerCase().includes('cumplimiento') || 
+        ind.clave.toLowerCase().includes('cumpl') ||
+        ind.descripcion?.toLowerCase().includes('cumplimiento') ||
+        ind.descripcion?.toLowerCase().includes('normativa') ||
+        ind.descripcion?.toLowerCase().includes('regulación') ||
+        ind.descripcion?.toLowerCase().includes('estándar')
+      );
+      setIndicadores(indicadoresCumplimiento);
+    } catch (error: any) {
+      console.error("Error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const promedioCumplimiento = indicadores.length > 0 
+    ? indicadores.reduce((sum, ind) => sum + (ind.valor || 0), 0) / indicadores.length 
+    : 0;
+  
+  const cumplidos = indicadores.filter(ind => (ind.valor || 0) >= 95).length;
+  const cumplimientoParcial = indicadores.filter(ind => (ind.valor || 0) >= 70 && (ind.valor || 0) < 95).length;
+  const incumplidos = indicadores.filter(ind => (ind.valor || 0) < 70).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent" />
+          <p className="mt-4 text-sm text-gray-500">Cargando indicadores de cumplimiento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Shield className="h-6 w-6 text-sky-500" />
+            Cumplimiento
+          </h1>
+          <p className="text-gray-500">
+            Verifique adherencia a estándares y regulaciones
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-amber-800">
+              <AlertTriangle className="h-5 w-5" />
+              <div>
+                <p className="font-medium">Error de conexión</p>
+                <p className="text-sm">{error}</p>
+                <button 
+                  className="text-sm underline mt-1 inline-block"
+                  onClick={fetchIndicadores}
+                >
+                  Intentar nuevamente
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Métricas principales */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium">Cumplimiento Promedio</CardTitle>
+              <FileCheck className="h-4 w-4 text-blue-500" />
+            </div>
+            <div className="text-2xl font-bold">{promedioCumplimiento.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 mt-1">De estándares y normas</p>
+          </CardHeader>
+        </Card>
+
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-green-800">Totalmente Cumplidos</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            </div>
+            <div className="text-2xl font-bold text-green-700">{cumplidos}</div>
+            <p className="text-xs text-green-600 mt-1">≥ 95% cumplimiento</p>
+          </CardHeader>
+        </Card>
+
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-amber-800">Cumplimiento Parcial</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+            </div>
+            <div className="text-2xl font-bold text-amber-700">{cumplimientoParcial}</div>
+            <p className="text-xs text-amber-600 mt-1">70-94% cumplimiento</p>
+          </CardHeader>
+        </Card>
+
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-red-800">Incumplidos</CardTitle>
+              <XCircle className="h-4 w-4 text-red-600" />
+            </div>
+            <div className="text-2xl font-bold text-red-700">{incumplidos}</div>
+            <p className="text-xs text-red-600 mt-1">&lt; 70% cumplimiento</p>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Tabla de indicadores de cumplimiento */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicadores de Cumplimiento</CardTitle>
+          <CardDescription>
+            Seguimiento de adherencia a normativas, estándares y regulaciones
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-left p-3 text-sm font-medium">Indicador</th>
+                    <th className="text-left p-3 text-sm font-medium">Descripción</th>
+                    <th className="text-left p-3 text-sm font-medium w-32">Cumplimiento</th>
+                    <th className="text-left p-3 text-sm font-medium w-32">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {indicadores.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center p-12 text-gray-500">
+                        No hay indicadores de cumplimiento registrados
+                      </td>
+                    </tr>
+                  ) : (
+                    indicadores.map((indicador) => {
+                      const valor = indicador.valor || 0;
+                      let badgeColor = "bg-red-500";
+                      let estado = "Incumplido";
+                      let Icon = XCircle;
+                      
+                      if (valor >= 95) {
+                        badgeColor = "bg-green-500";
+                        estado = "Cumplido";
+                        Icon = CheckCircle;
+                      } else if (valor >= 70) {
+                        badgeColor = "bg-amber-500";
+                        estado = "Parcial";
+                        Icon = AlertTriangle;
+                      }
+
+                      return (
+                        <tr key={indicador.id} className="border-b hover:bg-gray-50">
+                          <td className="p-3 font-medium">{indicador.clave}</td>
+                          <td className="p-3">
+                            {indicador.descripcion || "Sin descripción"}
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
+                                <div 
+                                  className={`h-2 rounded-full ${badgeColor}`}
+                                  style={{ width: `${Math.min(valor, 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-lg font-bold">
+                                {valor.toFixed(1)}%
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <Badge className={`${badgeColor} flex items-center gap-1 w-fit`}>
+                              <Icon className="h-3 w-3" />
+                              {estado}
+                            </Badge>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Información adicional */}
+      <Card className="border-purple-200 bg-purple-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-purple-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-purple-900 mb-2">Importancia del Cumplimiento</h3>
+              <p className="text-sm text-purple-800">
+                Los indicadores de cumplimiento verifican que la organización sigue las normativas, estándares 
+                y regulaciones aplicables (ISO 9001, leyes laborales, normas ambientales, etc.). 
+                Un alto cumplimiento reduce riesgos legales y mejora la reputación organizacional.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
