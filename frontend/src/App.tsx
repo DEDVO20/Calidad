@@ -37,6 +37,14 @@ import ControlVersiones from "./pages/ControlVersiones";
 import NuevasAccionesCorrectivas from "./pages/Acciones_correctivas/nuevas";
 import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso";
 
+
+//capacitaciones ----------------------
+import CapacitacionesProgramadas from "./pages/CapacitacionesProgramadas";
+import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
+import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
+import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
+
+
 import "./App.css";
 
 function App() {
@@ -118,7 +126,20 @@ function App() {
               path="/Acciones_correctivas_EnProceso"
               element={<EnProcesoAccionesCorrectivas />}
             />
+
+
+            <Route path="/capacitaciones/programadas" element={<CapacitacionesProgramadas />} />
+            <Route path="/capacitaciones/historial" element={<CapacitacionesHistorial />} />
+            <Route path="/capacitaciones/asistencias" element={<CapacitacionesAsistencia/>} />
+            <Route path="/capacitaciones/competencias" element={<CapacitacionesCompetencia />} />
+
           </Route>
+
+
+          
+          
+
+
 
            
 
