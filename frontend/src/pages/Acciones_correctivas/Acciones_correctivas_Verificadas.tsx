@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import NuevasAccionesCorrectivas from "./nuevas";
 
 interface AccionCorrectiva {
   id: number;
@@ -41,6 +49,7 @@ export default function AccionesCorrectivasVerificadas() {
   const [accionesCorrectivas, setAccionesCorrectivas] = useState<AccionCorrectiva[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAccionesCorrectivasVerificadas();
@@ -66,20 +75,33 @@ export default function AccionesCorrectivasVerificadas() {
       );
 
       // Transformar los datos para el DataTable (adaptando a schema)
-      const transformedData = accionesVerificadas.map((ac: AccionCorrectivaAPI, index: number) => ({
-        id: index + 1, // Generar ID numérico secuencial
-        codigo: ac.codigo,
-        tipo: ac.tipo || "Correctiva",
-        descripcion: ac.descripcion || "Sin descripción",
-        estado: "Verificada",
-        gravedad: "Eficacia Comprobada",
-        fechaDeteccion: ac.fechaVerificacion
-          ? new Date(ac.fechaVerificacion).toLocaleDateString('es-ES')
-          : ac.fechaCompromiso
-          ? new Date(ac.fechaCompromiso).toLocaleDateString('es-ES')
-          : new Date().toLocaleDateString('es-ES'),
-        responsable: "Sin asignar", // Se actualizará con asociaciones
-      }));
+      const transformedData = accionesVerificadas.map((ac: AccionCorrectivaAPI, index: number) => {
+        let fechaFormateada = "Sin fecha";
+        
+        // Prioridad: fechaVerificacion > fechaCompromiso
+        const fechaAUsar = ac.fechaVerificacion || ac.fechaCompromiso;
+        
+        if (fechaAUsar) {
+          try {
+            // La fecha viene en formato YYYY-MM-DD, convertir a DD/MM/YYYY
+            const [anio, mes, dia] = fechaAUsar.split('-');
+            fechaFormateada = `${dia}/${mes}/${anio}`;
+          } catch (e) {
+            console.error("Error al formatear fecha:", e);
+          }
+        }
+
+        return {
+          id: index + 1,
+          codigo: ac.codigo,
+          tipo: ac.tipo || "Correctiva",
+          descripcion: ac.descripcion || "Sin descripción",
+          estado: "Verificada",
+          gravedad: "Eficacia Comprobada",
+          fechaDeteccion: fechaFormateada,
+          responsable: "Sin asignar",
+        };
+      });
 
       setAccionesCorrectivas(transformedData);
       setTotal(transformedData.length);
@@ -155,10 +177,20 @@ export default function AccionesCorrectivasVerificadas() {
             {total} acción{total !== 1 ? "es" : ""} con eficacia verificada
           </p>
         </div>
-        <Button>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Nueva Acción Correctiva
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Nueva Acción Correctiva
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nueva Acción Correctiva</DialogTitle>
+            </DialogHeader>
+            <NuevasAccionesCorrectivas />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

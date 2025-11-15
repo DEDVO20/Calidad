@@ -19,12 +19,11 @@ import {
 } from "@/components/ui/dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Search, Eye, Filter, FileText, Layers, Star, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * ControlVersiones (componente completo)
  *
- * - Indicadores arriba ()
+ * - Indicadores arriba (resumen)
  * - Buscador + botón Filtrar (por fecha)
  * - Tabla de documentos
  * - Modal "Ver" con: info básica + historial de versiones
@@ -59,7 +58,7 @@ export default function ControlVersiones() {
   const [selectedDoc, setSelectedDoc] = useState<Documento | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
 
-  // Datos de ejemplo (reemplazar cuando se hayan hecho pruebas realess)
+  // Datos de ejemplo (reemplazar cuando se conecte con backend)
   const documentos: Documento[] = [
     {
       id: 1,
@@ -88,10 +87,9 @@ export default function ControlVersiones() {
       ],
       url: "/docs/auditoria.pdf",
     },
-    // agrega más documentos reales cuando hagas fetch
   ];
 
-  // filtros: busqueda por nombre / autor y filtro por fecha exacta
+  // filtros
   const filtrados = useMemo(() => {
     return documentos.filter((doc) => {
       const term = search.trim().toLowerCase();
@@ -104,19 +102,23 @@ export default function ControlVersiones() {
     });
   }, [documentos, search, filterDate]);
 
-  // indicadores (para tarjetas superior)
+  // indicadores (usados en tarjetas superiores)
   const totalDocumentos = documentos.length;
   const totalVersiones = documentos.reduce((s, d) => s + (d.versionesVigentes || 0), 0);
-  const masVersiones = documentos.reduce((best, cur) => (cur.versionesVigentes > (best?.versionesVigentes ?? 0) ? cur : best), documentos[0]);
-  const ultimoDocumento = documentos.reduce((last, cur) => (new Date(cur.fecha) > new Date(last.fecha) ? cur : last), documentos[0]);
+  const masVersiones = documentos.reduce(
+    (best, cur) => (cur.versionesVigentes > (best?.versionesVigentes ?? 0) ? cur : best),
+    documentos[0]
+  );
+  const ultimoDocumento = documentos.reduce(
+    (last, cur) => (new Date(cur.fecha) > new Date(last.fecha) ? cur : last),
+    documentos[0]
+  );
 
-  // Manejo de abrir modal: cuando se selecciona documento, reseteo version seleccionada
   const openDoc = (doc: Documento) => {
     setSelectedDoc(doc);
     setSelectedVersion(null);
   };
 
-  // Cuando se selecciona una versión en el modal, se carga en iframe (selectedVersion)
   const verVersion = (v: Version) => {
     setSelectedVersion(v);
   };
@@ -125,12 +127,12 @@ export default function ControlVersiones() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Control de Versiones</h1>
 
-      {/* tarjetas resumen  */}
+      {/* Tarjetas resumen con indicadores */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-500">Total</p>
+              <p className="text-sm text-gray-500">Total Documentos</p>
               <p className="text-2xl font-bold">{totalDocumentos}</p>
             </div>
             <FileText className="h-7 w-7 text-gray-500" />
@@ -140,36 +142,33 @@ export default function ControlVersiones() {
         <div className="bg-white border rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-500">Aprobados</p>
-            
-              <p className="text-2xl font-bold text-green-600">{documentos.filter(d => d.estado?.toLowerCase() === "aprobado").length}</p>
+              <p className="text-sm text-gray-500">Total Versiones</p>
+              <p className="text-2xl font-bold text-purple-600">{totalVersiones}</p>
             </div>
-            <Layers className="h-7 w-7 text-green-600" />
+            <Layers className="h-7 w-7 text-purple-600" />
           </div>
         </div>
 
         <div className="bg-white border rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">En Proceso</p>
-              <p className="text-2xl font-bold text-blue-600">{documentos.filter(d => d.estado?.toLowerCase().includes("proceso")).length}</p>
-            </div>
-            <Star className="h-7 w-7 text-blue-600" />
+          <div>
+            <p className="text-sm text-gray-500">Más Versiones</p>
+            <p className="text-base font-semibold">{masVersiones?.nombre ?? "-"}</p>
+            <p className="text-xs text-gray-400">
+              ({masVersiones?.versionesVigentes ?? 0} versiones)
+            </p>
           </div>
         </div>
 
         <div className="bg-white border rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">Borradores</p>
-              <p className="text-2xl font-bold text-gray-600">{documentos.filter(d => d.estado?.toLowerCase().includes("borrador")).length}</p>
-            </div>
-            <Clock className="h-7 w-7 text-gray-400" />
+          <div>
+            <p className="text-sm text-gray-500">Último Actualizado</p>
+            <p className="text-base font-semibold">{ultimoDocumento?.nombre ?? "-"}</p>
+            <p className="text-xs text-gray-400">{ultimoDocumento?.fecha}</p>
           </div>
         </div>
       </div>
 
-      {/* buscador + filtros (restaurado) */}
+      {/* Buscador + Filtros */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="flex items-center gap-2 w-full sm:w-2/3">
           <Input
@@ -178,7 +177,7 @@ export default function ControlVersiones() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full"
           />
-          <Button variant="outline" onClick={() => { /* si necesitas buscar remoto, invoca aquí */ }}>
+          <Button variant="outline">
             <Search className="h-4 w-4 mr-1" /> Buscar
           </Button>
 
@@ -193,14 +192,14 @@ export default function ControlVersiones() {
               <Input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
               <div className="mt-3 flex gap-2">
                 <Button variant="secondary" onClick={() => setFilterDate("")} className="w-full">Limpiar</Button>
-                <Button onClick={() => {/* opcional: aplicar (ya se aplica por estado) */}} className="w-full">Aplicar</Button>
+                <Button className="w-full">Aplicar</Button>
               </div>
             </PopoverContent>
           </Popover>
         </div>
       </div>
 
-      {/* tabla principal */}
+      {/* Tabla principal */}
       <div className="bg-white rounded-lg shadow-md p-4 border">
         <h2 className="text-lg font-semibold mb-4">Lista de Documentos</h2>
 
@@ -224,7 +223,6 @@ export default function ControlVersiones() {
                 <TableCell>{doc.autor ?? "-"}</TableCell>
                 <TableCell className="text-center">{doc.versionesVigentes}</TableCell>
                 <TableCell className="text-center">
-                  {/* botón 'Ver' — abre modal con info + historial */}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -242,7 +240,7 @@ export default function ControlVersiones() {
                       </DialogHeader>
 
                       <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        {/* izquierda: datos + historial (ocupa 1/2 o 2/3) */}
+                        {/* izquierda: info + historial */}
                         <div className="lg:col-span-2 space-y-4">
                           <div className="bg-gray-50 border rounded-lg p-4">
                             <p><strong>Nombre:</strong> {selectedDoc?.nombre}</p>
@@ -292,7 +290,7 @@ export default function ControlVersiones() {
                           </div>
                         </div>
 
-                        {/* derecha: visor PDF (iframe) */}
+                        {/* derecha: visor PDF */}
                         <div className="lg:col-span-1">
                           <div className="bg-white border rounded-lg overflow-hidden">
                             <div className="p-3 border-b">
@@ -300,7 +298,6 @@ export default function ControlVersiones() {
                               <p className="text-xs text-gray-500">Selecciona una versión para previsualizar</p>
                             </div>
 
-                            {/* si hay selectedVersion mostramos la url de esa versión; sino mostramos la url principal */}
                             <div style={{ height: 420 }} className="w-full">
                               {selectedVersion?.url || selectedDoc?.url ? (
                                 <iframe
@@ -316,7 +313,6 @@ export default function ControlVersiones() {
                             </div>
 
                             <div className="p-3 flex gap-2 border-t">
-                              {/* botón para descargar la versión seleccionada  */}
                               <a
                                 href={selectedVersion?.url || selectedDoc?.url || "#"}
                                 target="_blank"
@@ -328,10 +324,7 @@ export default function ControlVersiones() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  // cerrar la vista de versión si quieres
-                                  setSelectedVersion(null);
-                                }}
+                                onClick={() => setSelectedVersion(null)}
                               >
                                 Quitar versión
                               </Button>
