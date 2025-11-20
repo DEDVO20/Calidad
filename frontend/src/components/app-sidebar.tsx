@@ -250,15 +250,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Matriz de Riesgos",
-            url: "#",
+            url: "/riesgos/matriz",
           },
           {
             title: "Controles",
-            url: "#",
+            url: "/riesgos/controles",
           },
           {
             title: "Tratamiento",
-            url: "#",
+            url: "/riesgos/tratamiento",
           },
         ],
       },

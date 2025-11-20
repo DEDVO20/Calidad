@@ -51,6 +51,10 @@ import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
 import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
 import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
 
+import MatrizRiesgos from "./pages/riesgos/matriz";
+import ControlesRiesgos from "./pages/riesgos/controles";
+import TratamientoRiesgos from "./pages/riesgos/tratamiento";
+
 import { ProtectedLayout } from "./components/ProtectedLayout";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -125,6 +129,11 @@ function App() {
             <Route path="/indicadores/eficacia" element={<EficaciaIndicadores />} />
             <Route path="/indicadores/eficiencia" element={<EficienciaIndicadores />} />
             <Route path="/indicadores/cumplimiento" element={<CumplimientoIndicadores />} />
+
+            {/* Riesgos */}
+            <Route path="/riesgos/matriz" element={<MatrizRiesgos />} />
+            <Route path="/riesgos/controles" element={<ControlesRiesgos />} />
+            <Route path="/riesgos/tratamiento" element={<TratamientoRiesgos />} />
           </Route>
 
           {/* Catch-all */}
