@@ -1,16 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CheckCircle, Users, Monitor, Building, Download } from "lucide-react";
+import { capacitacionService, Capacitacion } from "@/services/capacitacion.service";
 
 const CapacitacionesAsistencia: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [selectedCapacitacion, setSelectedCapacitacion] = useState<any>(null);
+  const [asistencias, setAsistencias] = useState<Capacitacion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Datos simulados de asistencia
-  const asistencias = [
+  useEffect(() => {
+    cargarAsistencias();
+  }, []);
+
+  const cargarAsistencias = async () => {
+    try {
+      setLoading(true);
+      const data = await capacitacionService.getHistorial();
+      setAsistencias(data);
+    } catch (err: any) {
+      console.error("Error al cargar asistencias:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Datos simulados de asistencia (respaldo)
+  const asistenciasBackup = [
     {
       id: 1,
       nombre: "Seguridad Industrial Avanzada",
