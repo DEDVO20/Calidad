@@ -132,8 +132,8 @@ const AuditoriasPlanificacion = () => {
         auditoriaService.getAll({ tipo: filtroTipo, estado: filtroEstado })
       ]);
       
-      setUsuarios(usuariosData);
-      setAuditorias(auditoriasData.auditorias || auditoriasData);
+      setUsuarios(Array.isArray(usuariosData) ? usuariosData : []);
+      setAuditorias(Array.isArray(auditoriasData) ? auditoriasData : []);
     } catch (err) {
       console.error('Error al cargar datos:', err);
       setError('Error al cargar los datos. Por favor, intenta de nuevo.');
@@ -145,7 +145,7 @@ const AuditoriasPlanificacion = () => {
   const cargarAuditorias = async () => {
     try {
       const data = await auditoriaService.getAll({ tipo: filtroTipo, estado: filtroEstado });
-      setAuditorias(data.auditorias || data);
+      setAuditorias(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error al cargar auditorías:', err);
       setError('Error al cargar auditorías');

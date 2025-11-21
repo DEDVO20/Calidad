@@ -54,30 +54,9 @@ const MOCK_AUDITORIAS_COMPLETADAS: Auditoria[] = [
 ];
 
 // === INTERFACES ===
-interface Auditoria {
-  id: string;
-  codigo: string;
-  tipo: string;
-  objetivo?: string;
-  alcance?: string;
-  normaReferencia?: string;
-  fechaPlanificada?: string;
-  fechaInicio?: string;
-  fechaFin?: string;
-  estado: string;
-  creadoPor?: string;
-  creadoEn: string;
-  auditorLider?: {
-    id: string;
-    nombre: string;
-    email: string;
-  };
-  creadoPorUsuario?: {
-    id: string;
-    nombre: string;
-    email: string;
-  };
-}
+import { Auditoria as AuditoriaService } from '@/services/auditoria.service';
+
+type Auditoria = AuditoriaService;
 
 // === COMPONENTE: AUDITORÍAS COMPLETADAS ===
 const AuditoriasCompletadas: React.FC = () => {
@@ -97,6 +76,23 @@ const AuditoriasCompletadas: React.FC = () => {
   }, []);
 
   const cargarAuditorias = async () => {
+    try {
+      setLoading(true);
+      const data = await auditoriaService.getCompletadas();
+      const auditoriasList = Array.isArray(data) ? data : [];
+      setAuditorias(auditoriasList);
+      setFilteredAuditorias(auditoriasList);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error al cargar auditorías completadas:', err);
+      setError('No se pudieron cargar las auditorías. Usando datos de ejemplo.');
+      setAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
+      setFilteredAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
+      setLoading(false);
+    }
+  };
+
+  const cargarAuditorias_OLD = async () => {
     try {
       setLoading(true);
       const data = await auditoriaService.getCompletadas();
@@ -123,47 +119,11 @@ const AuditoriasCompletadas: React.FC = () => {
     estado: 'completada'
   });
 
-  // === TOKEN ===
-  const getAuthToken = () => localStorage.getItem('token') || 'demo-token';
 
-  // === FETCH CON FALLBACK A MOCK ===
-  const fetchAuditorias = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-      const response = await fetch('https://api.ejemplo.com/auditorias/completadas', {
-        signal: controller.signal,
-        headers: { 'Authorization': `Bearer ${getAuthToken()}` }
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const data = await response.json();
-      const completadas = (data.auditorias || data || []).filter((a: any) => a.estado === 'completada');
-
-      if (completadas.length === 0) throw new Error('No hay completadas');
-
-      setAuditorias(completadas);
-      setFilteredAuditorias(completadas);
-    } catch (err: any) {
-      console.warn('API falló, usando datos completados:', err.message);
-      setError('Mostrando auditorías completadas (modo demo)');
-      setAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
-      setFilteredAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // === CARGA INICIAL ===
   useEffect(() => {
-    fetchAuditorias();
+    cargarAuditorias();
   }, []);
 
   // === FILTRADO ===
@@ -184,7 +144,7 @@ const AuditoriasCompletadas: React.FC = () => {
     e.preventDefault();
     try {
       alert('Auditoría completada actualizada (demo)');
-      await fetchAuditorias();
+      await cargarAuditorias();
       setShowModal(false);
       resetForm();
     } catch (err: any) {
