@@ -4,6 +4,7 @@ import {
   Users, CheckCircle2, AlertCircle, Clock, ChevronDown, ChevronUp,
   XCircle, Filter, FileText, Activity, CheckCircle
 } from 'lucide-react';
+import { auditoriaService } from '@/services/auditoria.service';
 
 // === MOCK DATA (Solo auditorías completadas) ===
 const MOCK_AUDITORIAS_COMPLETADAS: Auditoria[] = [
@@ -90,6 +91,25 @@ const AuditoriasCompletadas: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    cargarAuditorias();
+  }, []);
+
+  const cargarAuditorias = async () => {
+    try {
+      setLoading(true);
+      const data = await auditoriaService.getCompletadas();
+      setAuditorias(data);
+      setFilteredAuditorias(data);
+    } catch (error) {
+      console.error('Error al cargar auditorías:', error);
+      setAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
+      setFilteredAuditorias(MOCK_AUDITORIAS_COMPLETADAS);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     codigo: '',

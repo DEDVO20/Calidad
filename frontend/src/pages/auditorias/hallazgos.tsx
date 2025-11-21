@@ -3,6 +3,7 @@ import {
   Search, Filter, Plus, Calendar, FileText, AlertTriangle, CheckCircle, XCircle,
   Eye, Edit, Trash2, Users, Clock, TrendingUp, ChevronDown, ChevronUp, AlertCircle, X
 } from 'lucide-react';
+import { auditoriaService } from '@/services/auditoria.service';
 
 const API_URL = 'http://localhost:3000/api';
 
