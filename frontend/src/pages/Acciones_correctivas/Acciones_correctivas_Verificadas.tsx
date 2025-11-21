@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import NuevasAccionesCorrectivas from "./nuevas";
+import { accionCorrectivaService } from "@/services/accionCorrectiva.service";
 
 interface AccionCorrectiva {
   id: number;
@@ -57,22 +58,7 @@ export default function AccionesCorrectivasVerificadas() {
 
   const fetchAccionesCorrectivasVerificadas = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/acciones-correctivas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener acciones correctivas");
-      }
-
-      const data = await response.json();
-
-      // Filtrar solo las verificadas (eficacia verificada = true)
-      const todas = Array.isArray(data) ? data : [];
-      const accionesVerificadas = todas.filter(
-        (ac: AccionCorrectivaAPI) => ac.eficaciaVerificada === true
-      );
+      const accionesVerificadas = await accionCorrectivaService.getVerificadas();
 
       // Transformar los datos para el DataTable (adaptando a schema)
       const transformedData = accionesVerificadas.map((ac: AccionCorrectivaAPI, index: number) => {
