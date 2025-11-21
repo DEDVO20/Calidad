@@ -106,7 +106,7 @@ export const objetivoCalidadService = {
   // Obtener seguimientos de un objetivo
   async getSeguimientos(objetivoId: string): Promise<SeguimientoObjetivo[]> {
     const response = await fetch(
-      `${API_URL}/seguimiento-objetivo?objetivoId=${objetivoId}`,
+      `${API_URL}/seguimientos-objetivo?objetivoId=${objetivoId}`,
       {
         headers: getAuthHeaders(),
       }
@@ -119,7 +119,7 @@ export const objetivoCalidadService = {
   async createSeguimiento(
     data: Partial<SeguimientoObjetivo>
   ): Promise<SeguimientoObjetivo> {
-    const response = await fetch(`${API_URL}/seguimiento-objetivo`, {
+    const response = await fetch(`${API_URL}/seguimientos-objetivo`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -133,7 +133,7 @@ export const objetivoCalidadService = {
     id: string,
     data: Partial<SeguimientoObjetivo>
   ): Promise<SeguimientoObjetivo> {
-    const response = await fetch(`${API_URL}/seguimiento-objetivo/${id}`, {
+    const response = await fetch(`${API_URL}/seguimientos-objetivo/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),

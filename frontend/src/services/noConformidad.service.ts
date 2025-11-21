@@ -43,7 +43,7 @@ export const noConformidadService = {
   },
 
   // Obtener no conformidades abiertas
-  async getAbiertas(): Promise<{ data: NoConformidad[]; total: number }> {
+  async getAbiertas(): Promise<NoConformidad[]> {
     const response = await fetch(`${API_URL}/noconformidades/abiertas`, {
       headers: getAuthHeaders(),
     });
@@ -52,7 +52,7 @@ export const noConformidadService = {
   },
 
   // Obtener no conformidades en tratamiento
-  async getEnTratamiento(): Promise<{ data: NoConformidad[]; total: number }> {
+  async getEnTratamiento(): Promise<NoConformidad[]> {
     const response = await fetch(`${API_URL}/noconformidades/en-tratamiento`, {
       headers: getAuthHeaders(),
     });
@@ -62,7 +62,7 @@ export const noConformidadService = {
   },
 
   // Obtener no conformidades cerradas
-  async getCerradas(): Promise<{ data: NoConformidad[]; total: number }> {
+  async getCerradas(): Promise<NoConformidad[]> {
     const response = await fetch(`${API_URL}/noconformidades/cerradas`, {
       headers: getAuthHeaders(),
     });

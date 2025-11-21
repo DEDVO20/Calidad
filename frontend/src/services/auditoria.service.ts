@@ -3,22 +3,32 @@ const API_URL = "http://localhost:3000/api";
 export interface Auditoria {
   id: string;
   codigo: string;
-  nombre: string;
+  nombre?: string;
   tipo: string;
   fechaInicio: string;
   fechaFin: string;
   estado: string;
   alcance?: string;
+  objetivo?: string;
   objetivos?: string;
+  normaReferencia?: string;
   auditorLiderId?: string;
+  creadoPor?: string;
   equipoAuditor?: string[];
   areasAuditadas?: string[];
+  fechaPlanificada?: string;
   creadoEn?: string;
   actualizadoEn?: string;
   auditorLider?: {
     id: string;
     nombre: string;
-    primerApellido: string;
+    primerApellido?: string;
+    email?: string;
+  };
+  creadoPorUsuario?: {
+    id: string;
+    nombre: string;
+    email?: string;
   };
 }
 
