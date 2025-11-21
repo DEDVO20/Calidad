@@ -58,9 +58,10 @@ export default function NoConformidadesAbiertas() {
       }
 
       const data = await response.json();
+      const dataArray = Array.isArray(data) ? data : [];
 
       // Transformar los datos para que coincidan con el formato de la tabla
-      const transformedData = data.data.map((nc: NoConformidadAPI) => ({
+      const transformedData = dataArray.map((nc: NoConformidadAPI) => ({
         id: nc.id,
         codigo: nc.codigo,
         tipo: nc.tipo || "No Conformidad",
@@ -76,7 +77,7 @@ export default function NoConformidadesAbiertas() {
       }));
 
       setNoConformidades(transformedData);
-      setTotal(data.total);
+      setTotal(transformedData.length);
     } catch (error) {
       console.error("Error:", error);
       // Datos de ejemplo para desarrollo
