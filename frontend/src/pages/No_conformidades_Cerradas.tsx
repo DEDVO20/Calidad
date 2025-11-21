@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { noConformidadService } from "@/services/noConformidad.service";
 
 interface NoConformidad {
   id: number;
@@ -46,16 +47,7 @@ export default function NoConformidadesCerradas() {
 
   const fetchNoConformidadesCerradas = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/noconformidades/cerradas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener no conformidades cerradas");
-      }
-
-      const data = await response.json();
+      const data = await noConformidadService.getCerradas();
 
       // Transformar los datos para que coincidan con el formato de la tabla
       const transformedData = data.data.map((nc: NoConformidadAPI) => ({
