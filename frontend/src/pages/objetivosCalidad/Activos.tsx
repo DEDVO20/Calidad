@@ -1,30 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Target, TrendingUp, Calendar, User, Filter, Search, Edit, Trash2, Eye, AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
-
-// Tipos
-interface ObjetivoCalidad {
-  id: string;
-  codigo: string;
-  descripcion: string;
-  procesoId?: string;
-  areaId?: string;
-  responsableId?: string;
-  meta?: string;
-  indicadorId?: string;
-  valorMeta?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
-  estado?: string;
-  creadoEn: string;
-  proceso?: { id: string; nombre: string };
-  area?: { id: string; nombre: string };
-  responsable?: { id: string; nombre: string };
-  indicador?: { id: string; nombre: string };
-}
+import { objetivoCalidadService, ObjetivoCalidad } from '@/services/objetivoCalidad.service';
 
 const ObjetivosActivos: React.FC = () => {
   const [objetivos, setObjetivos] = useState<ObjetivoCalidad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState<string>('todos');
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -54,70 +35,12 @@ const ObjetivosActivos: React.FC = () => {
   const cargarObjetivos = async () => {
     setLoading(true);
     try {
-      // Simular llamada a API
-      setTimeout(() => {
-        const objetivosMock: ObjetivoCalidad[] = [
-          {
-            id: '1',
-            codigo: 'OBJ-2024-001',
-            descripcion: 'Incrementar la satisfacción del cliente al 90%',
-            meta: 'Alcanzar 90% de satisfacción en encuestas',
-            valorMeta: 90,
-            estado: 'en_curso',
-            periodoInicio: '2024-01-01',
-            periodoFin: '2024-12-31',
-            creadoEn: '2024-01-01',
-            area: { id: '1', nombre: 'Gestión de Calidad' },
-            responsable: { id: '1', nombre: 'Juan Pérez' },
-            indicador: { id: '1', nombre: 'Satisfacción del Cliente' }
-          },
-          {
-            id: '2',
-            codigo: 'OBJ-2024-002',
-            descripcion: 'Reducir no conformidades en un 20%',
-            meta: 'Disminuir NC de 50 a 40 por mes',
-            valorMeta: 40,
-            estado: 'en_curso',
-            periodoInicio: '2024-01-01',
-            periodoFin: '2024-12-31',
-            creadoEn: '2024-01-01',
-            area: { id: '2', nombre: 'Operaciones' },
-            responsable: { id: '2', nombre: 'María García' },
-            indicador: { id: '2', nombre: 'Índice de No Conformidades' }
-          },
-          {
-            id: '3',
-            codigo: 'OBJ-2024-003',
-            descripcion: 'Implementar programa de desarrollo de competencias',
-            meta: 'Capacitar al 100% del personal',
-            valorMeta: 100,
-            estado: 'cumplido',
-            periodoInicio: '2024-01-01',
-            periodoFin: '2024-06-30',
-            creadoEn: '2024-01-01',
-            area: { id: '3', nombre: 'Recursos Humanos' },
-            responsable: { id: '3', nombre: 'Carlos López' },
-            indicador: { id: '3', nombre: 'Eficacia de Capacitación' }
-          },
-          {
-            id: '4',
-            codigo: 'OBJ-2024-004',
-            descripcion: 'Optimizar tiempo de respuesta al cliente',
-            meta: 'Reducir tiempo de respuesta a 24 horas',
-            valorMeta: 24,
-            estado: 'planificado',
-            periodoInicio: '2024-07-01',
-            periodoFin: '2024-12-31',
-            creadoEn: '2024-01-01',
-            area: { id: '4', nombre: 'Comercial' },
-            responsable: { id: '4', nombre: 'Ana Martínez' }
-          }
-        ];
-        setObjetivos(objetivosMock);
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
+      const data = await objetivoCalidadService.getActivos();
+      setObjetivos(data);
+    } catch (error: any) {
       console.error('Error al cargar objetivos:', error);
+      setError(error.message);
+    } finally {
       setLoading(false);
     }
   };

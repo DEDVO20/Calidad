@@ -14,34 +14,9 @@ import {
   Eye,
   X
 } from 'lucide-react';
+import { objetivoCalidadService, ObjetivoCalidad, SeguimientoObjetivo } from '@/services/objetivoCalidad.service';
 
-// Tipos
-interface ObjetivoCalidad {
-  id: string;
-  codigo: string;
-  descripcion: string;
-  procesoId?: string;
-  areaId?: string;
-  responsableId?: string;
-  meta?: string;
-  indicadorId?: string;
-  valorMeta?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
-  estado?: string;
-  creadoEn: string;
-}
-
-interface Seguimiento {
-  id: string;
-  objetivoId: string;
-  periodo?: string;
-  valorAlcanzado?: number;
-  porcentajeCumplimiento?: number;
-  observaciones?: string;
-  registradoPor?: string;
-  creadoEn: string;
-}
+interface Seguimiento extends SeguimientoObjetivo {}
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -89,26 +64,20 @@ const ObjetivosCalidadSeguimiento: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      const [objetivosRes, seguimientosRes] = await Promise.all([
-        fetch(`${API_URL}/objetivos-calidad`, { headers }),
-        fetch(`${API_URL}/seguimientos-objetivo`, { headers })
-      ]);
-
-      if (!objetivosRes.ok || !seguimientosRes.ok) {
-        throw new Error('Error al cargar los datos');
-      }
-
-      const objetivosData = await objetivosRes.json();
-      const seguimientosData = await seguimientosRes.json();
-
+      const objetivosData = await objetivoCalidadService.getAll();
       setObjetivos(objetivosData);
-      setSeguimientos(seguimientosData);
+      
+      // Cargar todos los seguimientos
+      const allSeguimientos: Seguimiento[] = [];
+      for (const obj of objetivosData) {
+        try {
+          const segs = await objetivoCalidadService.getSeguimientos(obj.id);
+          allSeguimientos.push(...segs);
+        } catch (err) {
+          console.error(`Error al cargar seguimientos del objetivo ${obj.id}:`, err);
+        }
+      }
+      setSeguimientos(allSeguimientos);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
