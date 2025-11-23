@@ -44,6 +44,11 @@ import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
 import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
 import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
 
+//procesos ----------------------
+import MapaProcesos from "./pages/MapaProcesos";
+import GestionarProcesos from "./pages/GestionarProcesos";
+import InstanciasActivas from "./pages/InstanciasActivas";
+
 
 import "./App.css";
 
@@ -126,6 +131,18 @@ function App() {
               path="/Acciones_correctivas_EnProceso"
               element={<EnProcesoAccionesCorrectivas />}
             />
+
+            <Route path="/capacitaciones/programadas" element={<CapacitacionesProgramadas />} />
+            <Route path="/capacitaciones/historial" element={<CapacitacionesHistorial />} />
+            <Route path="/capacitaciones/asistencias" element={<CapacitacionesAsistencia />} />
+            <Route path="/capacitaciones/competencias" element={<CapacitacionesCompetencia />} />
+
+            <Route path="/procesos/MapaProcesos" element={<MapaProcesos />} />
+            <Route path="/procesos/GestionarProcesos" element={<GestionarProcesos />} />
+            <Route path="/procesos/InstanciasActivas" element={<InstanciasActivas />} />
+
+
+
           </Route>
 
           {/* Ruta catch-all para manejar errores de tipeo */}
