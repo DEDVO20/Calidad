@@ -55,6 +55,7 @@ import CapacitacionesHistorial from "./pages/CapacitacionesHistorial";
 import CapacitacionesAsistencia from "./pages/CapacitacionesAsistencia";
 import CapacitacionesCompetencia from "./pages/CapacitacionesCompetencia";
 
+import ReportesView from "./pages/reportes";
 
 import "./App.css";
 
@@ -100,6 +101,7 @@ function App() {
               path="/Asignar_Responsables"
               element={<AreasResponsables />}
             />
+            <Route path="/reportes" element={<ReportesView />} />
 
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
