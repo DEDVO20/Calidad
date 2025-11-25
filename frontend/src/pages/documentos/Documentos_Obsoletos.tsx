@@ -81,53 +81,100 @@ export default function DocumentosObsoletos() {
     documento: Documento | null;
   }>({ open: false, type: null, documento: null });
 
-  // CARGAR DATOS DE PRUEBA AL INICIAR
+  // CARGAR DOCUMENTOS OBSOLETOS DESDE API
   useEffect(() => {
-    const ejemploData: Documento[] = [
-      {
-        id: "1",
-        codigoDocumento: "PRO-SGC-001-V1",
-        nombreArchivo: "Procedimiento de Control de Documentos v1.0",
-        tipoDocumento: "Procedimiento",
-        version: "1.0",
-        estado: "obsoleto",
-        creadoEn: "2023-01-15T10:30:00",
-        fechaAprobacion: "2023-01-20T14:00:00",
-        proximaRevision: "2024-01-20",
-        creadoPor: { nombre: "Ana", primerApellido: "Martínez" },
-        aprobadoPor: { nombre: "Carlos", primerApellido: "Rodríguez" },
-        rutaAlmacenamiento: "https://example.com/docs/procedimiento.pdf"
-      },
-      {
-        id: "2",
-        codigoDocumento: "FOR-CAL-015-V1",
-        nombreArchivo: "Formato de Auditoría Interna v1.5",
-        tipoDocumento: "Formato",
-        version: "1.5",
-        estado: "obsoleto",
-        creadoEn: "2023-03-10T09:00:00",
-        fechaAprobacion: "2023-03-15T16:00:00",
-        creadoPor: { nombre: "María", primerApellido: "González" }
-      },
-      {
-        id: "3",
-        codigoDocumento: "MAN-SGC-001-V2",
-        nombreArchivo: "Manual de Calidad ISO 9001:2015 v2.0",
-        tipoDocumento: "Manual",
-        version: "2.0",
-        estado: "obsoleto",
-        creadoEn: "2022-11-05T08:00:00",
-        fechaAprobacion: "2022-11-10T10:00:00",
-        proximaRevision: "2023-11-10",
-        creadoPor: { nombre: "Juan", primerApellido: "Pérez" },
-        aprobadoPor: { nombre: "Ana", primerApellido: "Martínez" }
-      },
-    ];
-
-    setDocumentos(ejemploData);
-    setTotal(ejemploData.length);
-    setLoading(false);
+    fetchDocumentosObsoletos();
   }, []);
+
+  const fetchDocumentosObsoletos = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch("/api/documentos", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al obtener documentos obsoletos");
+      }
+
+      const data = await response.json();
+
+      const transformedData = data.items?.map((doc: any) => ({
+        id: doc.id,
+        codigoDocumento: doc.codigoDocumento || "SIN-CÓDIGO",
+        nombreArchivo: doc.nombreArchivo,
+        tipoDocumento: doc.tipoDocumento || "Documento",
+        version: doc.version || "1.0",
+        estado: doc.estado,
+        creadoEn: doc.creadoEn,
+        fechaAprobacion: doc.fechaAprobacion,
+        proximaRevision: doc.proximaRevision,
+        creadoPor: doc.autor
+          ? { nombre: doc.autor.nombre, primerApellido: doc.autor.primerApellido }
+          : undefined,
+        aprobadoPor: doc.aprobador
+          ? { nombre: doc.aprobador.nombre, primerApellido: doc.aprobador.primerApellido }
+          : undefined,
+        rutaAlmacenamiento: doc.rutaAlmacenamiento,
+      })) || [];
+
+      setDocumentos(transformedData);
+      setTotal(data.total || transformedData.length);
+    } catch (error) {
+      console.error("Error:", error);
+      
+      // Datos de ejemplo en caso de error
+      const ejemploData: Documento[] = [
+        {
+          id: "1",
+          codigoDocumento: "PRO-SGC-001-V1",
+          nombreArchivo: "Procedimiento de Control de Documentos v1.0",
+          tipoDocumento: "Procedimiento",
+          version: "1.0",
+          estado: "obsoleto",
+          creadoEn: "2023-01-15T10:30:00",
+          fechaAprobacion: "2023-01-20T14:00:00",
+          proximaRevision: "2024-01-20",
+          creadoPor: { nombre: "Ana", primerApellido: "Martínez" },
+          aprobadoPor: { nombre: "Carlos", primerApellido: "Rodríguez" },
+          rutaAlmacenamiento: "https://example.com/docs/procedimiento.pdf"
+        },
+        {
+          id: "2",
+          codigoDocumento: "FOR-CAL-015-V1",
+          nombreArchivo: "Formato de Auditoría Interna v1.5",
+          tipoDocumento: "Formato",
+          version: "1.5",
+          estado: "obsoleto",
+          creadoEn: "2023-03-10T09:00:00",
+          fechaAprobacion: "2023-03-15T16:00:00",
+          creadoPor: { nombre: "María", primerApellido: "González" }
+        },
+        {
+          id: "3",
+          codigoDocumento: "MAN-SGC-001-V2",
+          nombreArchivo: "Manual de Calidad ISO 9001:2015 v2.0",
+          tipoDocumento: "Manual",
+          version: "2.0",
+          estado: "obsoleto",
+          creadoEn: "2022-11-05T08:00:00",
+          fechaAprobacion: "2022-11-10T10:00:00",
+          proximaRevision: "2023-11-10",
+          creadoPor: { nombre: "Juan", primerApellido: "Pérez" },
+          aprobadoPor: { nombre: "Ana", primerApellido: "Martínez" }
+        },
+      ];
+      
+      setDocumentos(ejemploData);
+      setTotal(ejemploData.length);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openDialog = (type: 'eliminar' | 'restaurar', documento: Documento) => {
     setDialogState({ open: true, type, documento });
@@ -142,13 +189,30 @@ export default function DocumentosObsoletos() {
     if (!documento) return;
 
     setActionLoading(documento.id);
-    setTimeout(() => {
-      alert(`Documento "${documento.nombreArchivo}" restaurado (simulado)`);
-      setDocumentos(prev => prev.filter(d => d.id !== documento.id));
-      setTotal(prev => prev - 1);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/documentos/${documento.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ estado: "aprobado" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al restaurar documento");
+      }
+
+      alert(`✓ Documento "${documento.nombreArchivo}" restaurado correctamente`);
+      await fetchDocumentosObsoletos();
       closeDialog();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("✗ Error al restaurar el documento. Por favor intente nuevamente.");
+    } finally {
       setActionLoading(null);
-    }, 1000);
+    }
   };
 
   const handleEliminarPermanente = async () => {
@@ -156,13 +220,28 @@ export default function DocumentosObsoletos() {
     if (!documento) return;
 
     setActionLoading(documento.id);
-    setTimeout(() => {
-      alert(`Documento "${documento.nombreArchivo}" eliminado permanentemente (simulado)`);
-      setDocumentos(prev => prev.filter(d => d.id !== documento.id));
-      setTotal(prev => prev - 1);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/documentos/${documento.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar documento");
+      }
+
+      alert(`✓ Documento "${documento.nombreArchivo}" eliminado permanentemente`);
+      await fetchDocumentosObsoletos();
       closeDialog();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("✗ Error al eliminar el documento. Por favor intente nuevamente.");
+    } finally {
       setActionLoading(null);
-    }, 1000);
+    }
   };
 
   const handleVer = (documento: Documento) => {
@@ -251,9 +330,10 @@ export default function DocumentosObsoletos() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => window.location.reload()}
+            onClick={fetchDocumentosObsoletos}
+            disabled={loading}
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
         </div>

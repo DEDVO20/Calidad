@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { accionCorrectivaService } from "@/services/accionCorrectiva.service";
+import { noConformidadService } from "@/services/noConformidad.service";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -71,26 +73,22 @@ export default function NuevasAccionesCorrectivas() {
         throw new Error("No hay sesión activa");
       }
 
+      const noConformidadesData = await noConformidadService.getAll();
+      const noConformidadesFormatted = noConformidadesData.map(nc => ({
+        id: nc.id.toString(),
+        codigo: nc.codigo,
+        descripcion: nc.descripcion
+      }));
+
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
+      const usuariosRes = await fetch(`${API_URL}/usuarios`, { headers });
+      if (!usuariosRes.ok) throw new Error("Error al cargar usuarios");
+      const usuariosData = await usuariosRes.json();
 
-      const [noConformidadesRes, usuariosRes] = await Promise.all([
-        fetch(`${API_URL}/no-conformidades`, { headers }),
-        fetch(`${API_URL}/usuarios`, { headers }),
-      ]);
-
-      if (!noConformidadesRes.ok || !usuariosRes.ok) {
-        throw new Error("Error al cargar datos");
-      }
-
-      const [noConformidadesData, usuariosData] = await Promise.all([
-        noConformidadesRes.json(),
-        usuariosRes.json(),
-      ]);
-
-      setNoConformidades(noConformidadesData);
+      setNoConformidades(noConformidadesFormatted);
       setUsuarios(usuariosData);
     } catch (error: any) {
       console.error("Error:", error);
@@ -116,20 +114,7 @@ export default function NuevasAccionesCorrectivas() {
         throw new Error("No hay sesión activa");
       }
 
-      const response = await fetch(`${API_URL}/acciones-correctivas`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Error al crear acción correctiva");
-      }
-
+      await accionCorrectivaService.create(formData);
       alert("Acción correctiva creada exitosamente");
       
       // Limpiar formulario
