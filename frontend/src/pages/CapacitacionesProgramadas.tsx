@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle,
   Laptop,
@@ -9,52 +9,42 @@ import {
   Link as LinkIcon,
   Tag,
 } from "lucide-react";
-
-interface Capacitacion {
-  id: number;
-  titulo: string;
-  modalidad: "Virtual" | "Presencial";
-  encargado: string;
-  categoria: string;
-  fecha: string;
-  hora: string;
-  ubicacion?: string;
-  enlace?: string;
-  estado: "Pendiente" | "Completada";
-}
+import { capacitacionService, Capacitacion } from "@/services/capacitacion.service";
 
 const CapacitacionesProgramadas = () => {
-  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([
-    {
-      id: 1,
-      titulo: "Capacitación en Seguridad Laboral",
-      modalidad: "Presencial",
-      encargado: "Carlos Castro",
-      categoria: "Seguridad",
-      fecha: "2025-11-20",
-      hora: "09:00 AM",
-      ubicacion: "Sede 2 - salon 302",
-      estado: "Pendiente",
-    },
-    {
-      id: 2,
-      titulo: "Uso de Herramientas Digitales",
-      modalidad: "Virtual",
-      encargado: "María López",
-      categoria: "Tecnología",
-      fecha: "2025-11-25",
-      hora: "02:00 PM",
-      enlace: "https://meet.google.com/abc-123",
-      estado: "Pendiente",
-    },
-  ]);
+  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const marcarCompletada = (id: number) => {
-    setCapacitaciones((prev) =>
-      prev.map((cap) =>
-        cap.id === id ? { ...cap, estado: "Completada" } : cap
-      )
-    );
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, []);
+
+  const cargarCapacitaciones = async () => {
+    try {
+      setLoading(true);
+      const data = await capacitacionService.getProgramadas();
+      setCapacitaciones(data);
+    } catch (err: any) {
+      console.error("Error al cargar capacitaciones:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const marcarCompletada = async (id: number) => {
+    try {
+      await capacitacionService.marcarCompletada(id);
+      setCapacitaciones((prev) =>
+        prev.map((cap) =>
+          cap.id === id ? { ...cap, estado: "Completada" } : cap
+        )
+      );
+    } catch (err: any) {
+      console.error("Error al marcar como completada:", err);
+      alert("Error al marcar la capacitación como completada");
+    }
   };
 
   const total = capacitaciones.length;
@@ -64,6 +54,24 @@ const CapacitacionesProgramadas = () => {
   const presenciales = capacitaciones.filter(
     (c) => c.modalidad === "Presencial"
   ).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Cargando capacitaciones...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

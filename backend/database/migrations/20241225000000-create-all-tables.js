@@ -155,8 +155,8 @@ module.exports = {
       },
     });
 
-    // Create usuario_roles junction table
-    await queryInterface.createTable("usuario_roles", {
+    // Create usuarios_roles junction table
+    await queryInterface.createTable("usuarios_roles", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -182,15 +182,29 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      creado_en: {
+      area_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "areas",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      asignado_por: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      asignado_en: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
         defaultValue: Sequelize.NOW,
       },
     });
 
-    // Create rol_permisos junction table
-    await queryInterface.createTable("rol_permisos", {
+    // Create roles_permisos junction table
+    await queryInterface.createTable("roles_permisos", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -215,11 +229,6 @@ module.exports = {
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
     });
 
@@ -332,46 +341,23 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      nombre: {
-        type: Sequelize.STRING(300),
+      nombre_archivo: {
+        type: Sequelize.STRING(500),
         allowNull: false,
       },
-      descripcion: {
+      ruta_almacenamiento: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      tipo_documento: {
+      tipo_mime: {
         type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      ruta_archivo: {
-        type: Sequelize.TEXT,
         allowNull: true,
       },
-      version_actual: {
-        type: Sequelize.STRING(20),
-        allowNull: false,
-        defaultValue: "1.0",
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "borrador",
-      },
-      fecha_aprobacion: {
-        type: Sequelize.DATE,
+      tamaño_bytes: {
+        type: Sequelize.BIGINT,
         allowNull: true,
       },
-      fecha_vigencia: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      creado_por: {
+      subido_por: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
@@ -380,6 +366,50 @@ module.exports = {
         },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
+      },
+      creado_por: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      revisado_por: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      creado_en: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      visibilidad: {
+        type: Sequelize.STRING(50),
+        defaultValue: "privado",
+      },
+      tipo_documento: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
+      codigo_documento: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
+      version: {
+        type: Sequelize.STRING(20),
+        allowNull: true,
+      },
+      estado: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
       },
       aprobado_por: {
         type: Sequelize.UUID,
@@ -391,20 +421,22 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+      fecha_aprobacion: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
       },
-      actualizado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+      proxima_revision: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      contenido_html: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
     });
 
-    // Create version_documentos table
-    await queryInterface.createTable("version_documentos", {
+    // Create versiones_documento table
+    await queryInterface.createTable("versiones_documento", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -420,11 +452,25 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      version: {
-        type: Sequelize.STRING(20),
+      numero_version: {
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
-      descripcion_cambios: {
+      subido_en: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
+      },
+      subido_por: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      cambios: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
@@ -432,15 +478,50 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      creado_por: {
+    });
+
+    // Create etapa_proceso table
+    await queryInterface.createTable("etapa_proceso", {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
+      },
+      proceso_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "procesos",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      orden: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+      },
+      nombre: {
+        type: Sequelize.STRING(200),
+        allowNull: false,
+      },
+      rol_id: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
-          model: "usuarios",
+          model: "roles",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
+      },
+      horas_maximas: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      permite_reapertura: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
       },
       creado_en: {
         type: Sequelize.DATE,
@@ -449,12 +530,88 @@ module.exports = {
       },
     });
 
-    // Create documento_procesos junction table
-    await queryInterface.createTable("documento_procesos", {
+    // Create instancias_proceso table
+    await queryInterface.createTable("instancias_proceso", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
+      },
+      proceso_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "procesos",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      iniciado_por: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      estado: {
+        type: Sequelize.STRING,
+        defaultValue: "borrador",
+        allowNull: false,
+      },
+      iniciado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      completado_en: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      etapa_actual_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "etapa_proceso",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      datos_dinamicos: {
+        type: Sequelize.JSONB,
+        allowNull: true,
+      },
+      bloqueado: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+      },
+      razon_bloqueo: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      creado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      actualizado_en: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+    });
+
+    // Create documento_proceso junction table
+    await queryInterface.createTable("documento_proceso", {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
+      },
+      instancia_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "instancias_proceso",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       documento_id: {
         type: Sequelize.UUID,
@@ -466,145 +623,11 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      proceso_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "procesos",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      tipo_relacion: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "asociado",
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-    });
-
-    // Create etapa_procesos table
-    await queryInterface.createTable("etapa_procesos", {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
-      proceso_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "procesos",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      nombre: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
-      },
-      descripcion: {
+      nota: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      orden: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1,
-      },
-      responsable_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "usuarios",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      tiempo_estimado: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-      },
-      activa: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-    });
-
-    // Create instancia_procesos table
-    await queryInterface.createTable("instancia_procesos", {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
-      proceso_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "procesos",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      codigo_instancia: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      descripcion: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "iniciado",
-      },
-      fecha_inicio: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      fecha_fin: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      iniciado_por: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "usuarios",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
+      adjuntado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -618,11 +641,11 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      instancia_proceso_id: {
+      instancia_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "instancia_procesos",
+          model: "instancias_proceso",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -638,23 +661,12 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      rol_participacion: {
+      rol: {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
-      fecha_asignacion: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      activo: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
       creado_en: {
         type: Sequelize.DATE,
-        allowNull: false,
         defaultValue: Sequelize.NOW,
       },
     });
@@ -668,18 +680,13 @@ module.exports = {
       },
       proceso_id: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "procesos",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
-      },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
       },
       nombre: {
         type: Sequelize.STRING(200),
@@ -689,44 +696,19 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      formula: {
-        type: Sequelize.TEXT,
+      valor: {
+        type: Sequelize.DECIMAL,
         allowNull: true,
       },
-      unidad_medida: {
-        type: Sequelize.STRING(50),
+      periodo_inicio: {
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
-      meta: {
-        type: Sequelize.DECIMAL(10, 2),
+      periodo_fin: {
+        type: Sequelize.DATEONLY,
         allowNull: true,
-      },
-      frecuencia_medicion: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "mensual",
-      },
-      responsable_medicion_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "usuarios",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      activo: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
       },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -741,13 +723,21 @@ module.exports = {
         primaryKey: true,
       },
       codigo: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
       },
+      tipo: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       descripcion: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
+      },
+      origen: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       proceso_id: {
         type: Sequelize.UUID,
@@ -759,16 +749,15 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      tipo: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["mayor", "menor", "observacion"]],
+      area_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "areas",
+          key: "id",
         },
-      },
-      fuente: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       detectado_por: {
         type: Sequelize.UUID,
@@ -780,28 +769,6 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      fecha_deteccion: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "abierta",
-      },
-      analisis_causa: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      plan_accion: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      fecha_cierre: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
       responsable_id: {
         type: Sequelize.UUID,
         allowNull: true,
@@ -812,14 +779,32 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      estado: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
+      gravedad: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
+      fecha_deteccion: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      fecha_limite: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      fecha_cierre: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
       creado_en: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+        allowNull: true,
       },
       actualizado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
+        type: Sequelize.DATEONLY,
         defaultValue: Sequelize.NOW,
       },
     });
@@ -918,6 +903,46 @@ module.exports = {
       },
     });
 
+    // Create auditoria table (audit log)
+    await queryInterface.createTable("auditoria", {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
+      },
+      usuario_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      tipo_entidad: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
+      entidad_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+      },
+      accion: {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
+      cambios: {
+        type: Sequelize.JSON,
+        allowNull: true,
+      },
+      creado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
+    });
+
     // Create auditorias table
     await queryInterface.createTable("auditorias", {
       id: {
@@ -926,20 +951,13 @@ module.exports = {
         primaryKey: true,
       },
       codigo: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
       },
-      nombre: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
-      },
-      tipo_auditoria: {
+      tipo: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["interna", "externa", "certificacion"]],
-        },
+        allowNull: true,
       },
       alcance: {
         type: Sequelize.TEXT,
@@ -949,25 +967,8 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      fecha_planificada: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      fecha_inicio: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      fecha_fin: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "planificada",
-      },
-      equipo_auditor: {
-        type: Sequelize.TEXT,
+      norma_referencia: {
+        type: Sequelize.STRING(100),
         allowNull: true,
       },
       auditor_lider_id: {
@@ -980,6 +981,22 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      fecha_planificada: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      fecha_inicio: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      fecha_fin: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      estado: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       creado_por: {
         type: Sequelize.UUID,
         allowNull: true,
@@ -990,24 +1007,15 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      informe_final: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
     });
 
-    // Create hallazgo_auditorias table
-    await queryInterface.createTable("hallazgo_auditorias", {
+    // Create hallazgos_auditoria table
+    await queryInterface.createTable("hallazgos_auditoria", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -1023,28 +1031,17 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
+      tipo: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
       },
       descripcion: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
-      tipo_hallazgo: {
+      clausula_iso: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [
-            [
-              "conformidad",
-              "no_conformidad_mayor",
-              "no_conformidad_menor",
-              "observacion",
-              "oportunidad_mejora",
-            ],
-          ],
-        },
+        allowNull: true,
       },
       proceso_id: {
         type: Sequelize.UUID,
@@ -1056,15 +1053,21 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      clausula_norma: {
-        type: Sequelize.STRING(100),
+      area_id: {
+        type: Sequelize.UUID,
         allowNull: true,
+        references: {
+          model: "areas",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       evidencia: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      responsable_respuesta_id: {
+      responsable_id: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
@@ -1074,21 +1077,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      fecha_respuesta: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "abierto",
-      },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1102,9 +1091,22 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
+      codigo: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+        unique: true,
+      },
+      descripcion: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      categoria: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       proceso_id: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "procesos",
           key: "id",
@@ -1112,59 +1114,29 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      descripcion: {
-        type: Sequelize.TEXT,
-        allowNull: false,
-      },
-      categoria: {
-        type: Sequelize.STRING(100),
+      area_id: {
+        type: Sequelize.UUID,
         allowNull: true,
-      },
-      tipo_riesgo: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [
-            [
-              "operacional",
-              "financiero",
-              "estrategico",
-              "cumplimiento",
-              "reputacional",
-            ],
-          ],
+        references: {
+          model: "areas",
+          key: "id",
         },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       probabilidad: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        validate: {
-          min: 1,
-          max: 5,
-        },
       },
       impacto: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        validate: {
-          min: 1,
-          max: 5,
-        },
       },
       nivel_riesgo: {
-        type: Sequelize.STRING(50),
+        type: Sequelize.INTEGER,
         allowNull: true,
       },
-      causas: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      consecuencias: {
+      controles: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
@@ -1180,8 +1152,15 @@ module.exports = {
       },
       estado: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "activo",
+        allowNull: true,
+      },
+      fecha_identificacion: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      fecha_revision: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
       },
       creado_en: {
         type: Sequelize.DATE,
@@ -1195,8 +1174,8 @@ module.exports = {
       },
     });
 
-    // Create control_riesgos table
-    await queryInterface.createTable("control_riesgos", {
+    // Create controles_riesgo table
+    await queryInterface.createTable("controles_riesgo", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -1214,16 +1193,9 @@ module.exports = {
       },
       descripcion: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
-      tipo_control: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["preventivo", "detectivo", "correctivo"]],
-        },
-      },
-      frecuencia: {
+      tipo: {
         type: Sequelize.STRING(50),
         allowNull: true,
       },
@@ -1237,21 +1209,15 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      frecuencia: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       efectividad: {
         type: Sequelize.STRING(50),
         allowNull: true,
       },
-      activo: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1266,13 +1232,23 @@ module.exports = {
         primaryKey: true,
       },
       codigo: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(50),
         allowNull: false,
         unique: true,
       },
       descripcion: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
+      },
+      proceso_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "procesos",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       area_id: {
         type: Sequelize.UUID,
@@ -1294,30 +1270,37 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      fecha_inicio: {
-        type: Sequelize.DATE,
-        allowNull: false,
+      meta: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
-      fecha_fin: {
-        type: Sequelize.DATE,
-        allowNull: false,
+      indicador_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "indicadores",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      valor_meta: {
+        type: Sequelize.DECIMAL,
+        allowNull: true,
+      },
+      periodo_inicio: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
+      periodo_fin: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
       },
       estado: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "planificado",
-      },
-      progreso: {
-        type: Sequelize.DECIMAL(5, 2),
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
       },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1331,7 +1314,7 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      objetivo_calidad_id: {
+      objetivo_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -1341,19 +1324,23 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      fecha_seguimiento: {
-        type: Sequelize.DATE,
-        allowNull: false,
+      periodo: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
       },
-      valor_actual: {
-        type: Sequelize.DECIMAL(10, 2),
+      valor_alcanzado: {
+        type: Sequelize.DECIMAL,
+        allowNull: true,
+      },
+      porcentaje_cumplimiento: {
+        type: Sequelize.DECIMAL,
         allowNull: true,
       },
       observaciones: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      responsable_id: {
+      registrado_por: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
@@ -1377,61 +1364,36 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      nombre: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
+      titulo: {
+        type: Sequelize.STRING(300),
+        allowNull: true,
       },
       descripcion: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      tipo_capacitacion: {
+      tipo: {
         type: Sequelize.STRING(50),
-        allowNull: false,
-      },
-      modalidad: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["presencial", "virtual", "mixta"]],
-        },
-      },
-      duracion_horas: {
-        type: Sequelize.INTEGER,
         allowNull: true,
       },
       instructor: {
         type: Sequelize.STRING(200),
         allowNull: true,
       },
+      duracion_horas: {
+        type: Sequelize.DECIMAL,
+        allowNull: true,
+      },
       fecha_programada: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
       fecha_realizacion: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
       lugar: {
         type: Sequelize.STRING(200),
-        allowNull: true,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "programada",
-      },
-      objetivo: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      contenido: {
-        type: Sequelize.TEXT,
         allowNull: true,
       },
       responsable_id: {
@@ -1444,12 +1406,11 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+      estado: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
       },
-      actualizado_en: {
+      creado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1485,26 +1446,23 @@ module.exports = {
       },
       asistio: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
-      calificacion: {
-        type: Sequelize.DECIMAL(3, 1),
         allowNull: true,
       },
-      observaciones: {
+      calificacion: {
+        type: Sequelize.DECIMAL,
+        allowNull: true,
+      },
+      aprobado: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+      },
+      comentarios: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      certificado: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
-      fecha_registro: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
+      certificado_url: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       creado_en: {
         type: Sequelize.DATE,
@@ -1513,91 +1471,52 @@ module.exports = {
       },
     });
 
-    // Create accion_procesos table
-    await queryInterface.createTable("accion_procesos", {
+    // Create acciones_proceso table
+    await queryInterface.createTable("acciones_proceso", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      proceso_id: {
+      instancia_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "procesos",
+          model: "instancias_proceso",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      nombre: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
-      },
-      descripcion: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      tipo_accion: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["correctiva", "preventiva", "mejora"]],
-        },
-      },
-      origen: {
-        type: Sequelize.STRING(100),
-        allowNull: true,
-      },
-      responsable_id: {
+      etapa_id: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
-          model: "usuarios",
+          model: "etapa_proceso",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       },
-      fecha_planificada: {
-        type: Sequelize.DATE,
+      ejecutado_por: {
+        type: Sequelize.STRING,
         allowNull: true,
       },
-      fecha_implementacion: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      fecha_verificacion: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      estado: {
-        type: Sequelize.STRING(50),
+      tipo_accion: {
+        type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: "planificada",
       },
-      efectividad: {
-        type: Sequelize.STRING(50),
-        allowNull: true,
-      },
-      observaciones: {
+      comentario: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      creado_en: {
+      ejecutado_en: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
-      actualizado_en: {
-        type: Sequelize.DATE,
+      tiempo_respuesta_segundos: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
     });
 
@@ -1618,36 +1537,21 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      titulo: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
-      },
       mensaje: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING,
         allowNull: false,
       },
-      tipo: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        validate: {
-          isIn: [["info", "warning", "error", "success"]],
-        },
+      datos: {
+        type: Sequelize.JSON,
+        allowNull: true,
       },
       leida: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
       },
-      fecha_lectura: {
+      entregado_en: {
         type: Sequelize.DATE,
-        allowNull: true,
-      },
-      referencia_tipo: {
-        type: Sequelize.STRING(50),
-        allowNull: true,
-      },
-      referencia_id: {
-        type: Sequelize.UUID,
         allowNull: true,
       },
       creado_en: {
@@ -1659,45 +1563,18 @@ module.exports = {
 
     // Create configuraciones table
     await queryInterface.createTable("configuraciones", {
-      id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-      },
       clave: {
-        type: Sequelize.STRING(100),
+        type: Sequelize.STRING(200),
+        primaryKey: true,
         allowNull: false,
-        unique: true,
       },
       valor: {
-        type: Sequelize.TEXT,
-        allowNull: true,
+        type: Sequelize.JSON,
+        allowNull: false,
       },
       descripcion: {
         type: Sequelize.TEXT,
         allowNull: true,
-      },
-      tipo_dato: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "string",
-        validate: {
-          isIn: [["string", "number", "boolean", "json"]],
-        },
-      },
-      categoria: {
-        type: Sequelize.STRING(100),
-        allowNull: true,
-      },
-      activa: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
       actualizado_en: {
         type: Sequelize.DATE,
@@ -1706,8 +1583,8 @@ module.exports = {
       },
     });
 
-    // Create campo_formularios table
-    await queryInterface.createTable("campo_formularios", {
+    // Create campos_formulario table
+    await queryInterface.createTable("campos_formulario", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -1715,7 +1592,7 @@ module.exports = {
       },
       proceso_id: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: "procesos",
           key: "id",
@@ -1723,89 +1600,56 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      nombre: {
+      etiqueta: {
         type: Sequelize.STRING(200),
         allowNull: false,
       },
-      etiqueta: {
+      clave_campo: {
         type: Sequelize.STRING(200),
         allowNull: false,
       },
       tipo_campo: {
         type: Sequelize.STRING(50),
         allowNull: false,
-        validate: {
-          isIn: [
-            [
-              "text",
-              "textarea",
-              "number",
-              "date",
-              "select",
-              "checkbox",
-              "radio",
-              "file",
-            ],
-          ],
-        },
       },
       requerido: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
       },
+      orden: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+        defaultValue: 0,
+      },
       opciones: {
         type: Sequelize.JSON,
         allowNull: true,
       },
-      orden: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1,
-      },
-      activo: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
-      validaciones: {
-        type: Sequelize.JSON,
-        allowNull: true,
-      },
-      creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
     });
 
-    // Create respuesta_formularios table
-    await queryInterface.createTable("respuesta_formularios", {
+    // Create respuestas_formulario table
+    await queryInterface.createTable("respuestas_formulario", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      campo_formulario_id: {
+      instancia_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "campo_formularios",
+          model: "instancias_proceso",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      instancia_proceso_id: {
+      campo_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "instancia_procesos",
+          model: "campos_formulario",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -1815,26 +1659,7 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      archivo_adjunto: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      usuario_respuesta_id: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "usuarios",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
       creado_en: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.NOW,
-      },
-      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1848,48 +1673,25 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      codigo: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      titulo: {
-        type: Sequelize.STRING(200),
-        allowNull: false,
-      },
-      descripcion: {
-        type: Sequelize.TEXT,
-        allowNull: false,
-      },
-      categoria: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      prioridad: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "media",
-        validate: {
-          isIn: [["baja", "media", "alta", "critica"]],
-        },
-      },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        defaultValue: "abierto",
-        validate: {
-          isIn: [["abierto", "en_proceso", "resuelto", "cerrado", "cancelado"]],
-        },
-      },
-      solicitante_id: {
+      instancia_id: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
+        references: {
+          model: "instancias_proceso",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      creado_por: {
+        type: Sequelize.UUID,
+        allowNull: false,
         references: {
           model: "usuarios",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       },
       asignado_a: {
         type: Sequelize.UUID,
@@ -1901,29 +1703,60 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      fecha_limite: {
-        type: Sequelize.DATE,
+      estado: {
+        type: Sequelize.STRING(50),
+        defaultValue: "abierto",
         allowNull: true,
       },
-      fecha_resolucion: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      solucion: {
+      descripcion: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      tiempo_resolucion: {
-        type: Sequelize.INTEGER,
+      comentario: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
-      satisfaccion_cliente: {
-        type: Sequelize.INTEGER,
+      creado_en: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
+      },
+      resuelto_en: {
+        type: Sequelize.DATE,
         allowNull: true,
-        validate: {
-          min: 1,
-          max: 5,
+      },
+    });
+
+    // Create asignaciones table
+    await queryInterface.createTable("asignaciones", {
+      id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true,
+      },
+      area_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "areas",
+          key: "id",
         },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      usuario_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      es_principal: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
       creado_en: {
         type: Sequelize.DATE,
@@ -1938,26 +1771,20 @@ module.exports = {
     });
 
     // Add unique constraints
-    await queryInterface.addConstraint("usuario_roles", {
+    await queryInterface.addConstraint("usuarios_roles", {
       fields: ["usuario_id", "rol_id"],
       type: "unique",
       name: "usuario_roles_unique_constraint",
     });
 
-    await queryInterface.addConstraint("rol_permisos", {
+    await queryInterface.addConstraint("roles_permisos", {
       fields: ["rol_id", "permiso_id"],
       type: "unique",
-      name: "rol_permisos_unique_constraint",
-    });
-
-    await queryInterface.addConstraint("documento_procesos", {
-      fields: ["documento_id", "proceso_id"],
-      type: "unique",
-      name: "documento_procesos_unique_constraint",
+      name: "roles_permisos_unique_constraint",
     });
 
     await queryInterface.addConstraint("participante_procesos", {
-      fields: ["instancia_proceso_id", "usuario_id"],
+      fields: ["instancia_id", "usuario_id"],
       type: "unique",
       name: "participante_procesos_unique_constraint",
     });
@@ -1976,9 +1803,6 @@ module.exports = {
     await queryInterface.addIndex("procesos", ["codigo"]);
     await queryInterface.addIndex("procesos", ["area_id"]);
     await queryInterface.addIndex("procesos", ["estado"]);
-    await queryInterface.addIndex("documentos", ["codigo"]);
-    await queryInterface.addIndex("documentos", ["tipo_documento"]);
-    await queryInterface.addIndex("documentos", ["estado"]);
     await queryInterface.addIndex("no_conformidades", ["codigo"]);
     await queryInterface.addIndex("no_conformidades", ["proceso_id"]);
     await queryInterface.addIndex("no_conformidades", ["estado"]);
@@ -1986,50 +1810,55 @@ module.exports = {
     await queryInterface.addIndex("auditorias", ["estado"]);
     await queryInterface.addIndex("riesgos", ["codigo"]);
     await queryInterface.addIndex("riesgos", ["proceso_id"]);
-    await queryInterface.addIndex("indicadores", ["codigo"]);
-    await queryInterface.addIndex("indicadores", ["proceso_id"]);
     await queryInterface.addIndex("objetivos_calidad", ["codigo"]);
-    await queryInterface.addIndex("capacitaciones", ["codigo"]);
-    await queryInterface.addIndex("capacitaciones", ["estado"]);
-    await queryInterface.addIndex("tickets", ["codigo"]);
-    await queryInterface.addIndex("tickets", ["estado"]);
     await queryInterface.addIndex("notificaciones", ["usuario_id"]);
     await queryInterface.addIndex("notificaciones", ["leida"]);
+    await queryInterface.addIndex("instancias_proceso", ["estado"], {
+      name: "idx_instancia_estado",
+    });
+    await queryInterface.addIndex("acciones_proceso", ["instancia_id"], {
+      name: "idx_acciones_instancias",
+    });
+    await queryInterface.addIndex("auditoria", ["tipo_entidad", "entidad_id"], {
+      name: "idx_auditoria_entidad",
+    });
   },
 
   async down(queryInterface, Sequelize) {
     // Drop tables in reverse order to handle foreign key constraints
     const tables = [
-      "respuesta_formularios",
-      "campo_formularios",
+      "respuestas_formulario",
+      "campos_formulario",
+      "tickets",
+      "documento_proceso",
+      "acciones_proceso",
+      "participante_procesos",
+      "instancias_proceso",
+      "etapa_proceso",
       "configuraciones",
       "notificaciones",
-      "accion_procesos",
       "asistencia_capacitaciones",
       "capacitaciones",
       "seguimiento_objetivos",
       "objetivos_calidad",
-      "control_riesgos",
+      "controles_riesgo",
       "riesgos",
-      "hallazgo_auditorias",
+      "hallazgos_auditoria",
       "auditorias",
+      "auditoria",
       "acciones_correctivas",
       "no_conformidades",
       "indicadores",
-      "participante_procesos",
-      "instancia_procesos",
-      "etapa_procesos",
-      "documento_procesos",
-      "version_documentos",
+      "versiones_documento",
       "documentos",
       "procesos",
-      "rol_permisos",
-      "usuario_roles",
+      "roles_permisos",
+      "usuarios_roles",
       "permisos",
       "roles",
+      "asignaciones",
       "usuarios",
       "areas",
-      "tickets",
     ];
 
     for (const table of tables) {

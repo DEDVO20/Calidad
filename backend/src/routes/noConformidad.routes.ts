@@ -98,6 +98,74 @@ router.get("/", getNoConformidades);
 
 /**
  * @swagger
+ * /api/noconformidades/abiertas:
+ *   get:
+ *     summary: Obtener no conformidades abiertas
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de no conformidades abiertas
+ */
+router.get("/abiertas", (req, res) => {
+  req.query.estado = 'abierta';
+  return getNoConformidades(req, res);
+});
+
+/**
+ * @swagger
+ * /api/noconformidades/en-tratamiento:
+ *   get:
+ *     summary: Obtener no conformidades en tratamiento
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de no conformidades en tratamiento
+ */
+router.get("/en-tratamiento", (req, res) => {
+  req.query.estado = 'en_tratamiento';
+  return getNoConformidades(req, res);
+});
+
+/**
+ * @swagger
+ * /api/noconformidades/en-analisis:
+ *   get:
+ *     summary: Obtener no conformidades en análisis
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de no conformidades en análisis
+ */
+router.get("/en-analisis", (req, res) => {
+  req.query.estado = 'en_analisis';
+  return getNoConformidades(req, res);
+});
+
+/**
+ * @swagger
+ * /api/noconformidades/cerradas:
+ *   get:
+ *     summary: Obtener no conformidades cerradas
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de no conformidades cerradas
+ */
+router.get("/cerradas", (req, res) => {
+  req.query.estado = 'cerrada';
+  return getNoConformidades(req, res);
+});
+
+/**
+ * @swagger
  * /api/noconformidades/{id}:
  *   get:
  *     summary: Obtener no conformidad por ID

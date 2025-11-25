@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -9,64 +9,62 @@ import {
   CheckCircle,
   BarChart2,
 } from "lucide-react";
-
-interface HistorialCapacitacion {
-  id: number;
-  titulo: string;
-  modalidad: "Virtual" | "Presencial";
-  encargado: string;
-  categoria: string;
-  fecha: string;
-  duracion: string;
-  calificacion: number;
-}
+import { capacitacionService, Capacitacion } from "@/services/capacitacion.service";
 
 const CapacitacionesHistorial = () => {
-  const [historial] = useState<HistorialCapacitacion[]>([
-    {
-      id: 1,
-      titulo: "Gestión Efectiva del Tiempo",
-      modalidad: "Virtual",
-      encargado: "Laura Torres",
-      categoria: "Desarrollo Personal",
-      fecha: "2025-08-10",
-      duracion: "2 horas",
-      calificacion: 5,
-    },
-    {
-      id: 2,
-      titulo: "Seguridad Industrial",
-      modalidad: "Presencial",
-      encargado: "Carlos Ríos",
-      categoria: "Seguridad",
-      fecha: "2025-09-22",
-      duracion: "3 horas",
-      calificacion: 4,
-    },
-    {
-      id: 3,
-      titulo: "Manejo de Herramientas Digitales",
-      modalidad: "Virtual",
-      encargado: "María López",
-      categoria: "Tecnología",
-      fecha: "2025-10-14",
-      duracion: "2 horas",
-      calificacion: 5,
-    },
-  ]);
+  const [historial, setHistorial] = useState<Capacitacion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    cargarHistorial();
+  }, []);
+
+  const cargarHistorial = async () => {
+    try {
+      setLoading(true);
+      const data = await capacitacionService.getHistorial();
+      setHistorial(data);
+    } catch (err: any) {
+      console.error("Error al cargar historial:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Indicadores
   const total = historial.length;
   const virtuales = historial.filter((c) => c.modalidad === "Virtual").length;
   const presenciales = historial.filter((c) => c.modalidad === "Presencial").length;
   const horasTotales = historial.reduce((acc, cap) => {
-    const horas = parseInt(cap.duracion);
+    const horas = parseInt(cap.duracion || "0");
     return acc + (isNaN(horas) ? 0 : horas);
   }, 0);
 
-  const ultimaFecha = historial
-    .map((c) => new Date(c.fecha))
-    .sort((a, b) => b.getTime() - a.getTime())[0];
+  const ultimaFecha = historial.length > 0
+    ? historial
+        .map((c) => new Date(c.fecha))
+        .sort((a, b) => b.getTime() - a.getTime())[0]
+    : null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Cargando historial...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

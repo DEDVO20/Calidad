@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { noConformidadService } from "@/services/noConformidad.service";
 
 interface NoConformidad {
   id: number;
@@ -46,21 +47,11 @@ export default function NoConformidadesEnTratamiento() {
 
   const fetchNoConformidadesEnTratamiento = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/noconformidades/en-tratamiento", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener no conformidades");
-      }
-
-      const data = await response.json();
+      const data = await noConformidadService.getEnTratamiento();
+      const dataArray = Array.isArray(data) ? data : [];
 
       // Transformar los datos para que coincidan con el formato de la tabla
-      const transformedData = data.data.map((nc: NoConformidadAPI) => ({
+      const transformedData = dataArray.map((nc: NoConformidadAPI) => ({
         id: nc.id,
         codigo: nc.codigo,
         tipo: nc.tipo || "No Conformidad",
@@ -76,7 +67,7 @@ export default function NoConformidadesEnTratamiento() {
       }));
 
       setNoConformidades(transformedData);
-      setTotal(data.total);
+      setTotal(transformedData.length);
     } catch (error) {
       console.error("Error:", error);
       const ejemploData = [

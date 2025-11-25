@@ -12,6 +12,28 @@ import Asignacion from "../models/asignacion.model";
 import Documento from "../models/documento.model";
 import VersionDocumento from "../models/versionDocumento.model";
 import DocumentoProceso from "../models/documentoProceso.model";
+import Auditorias from "../models/auditorias.model";
+import Auditoria from "../models/auditoria.model";
+import AccionProceso from "../models/accionProceso.model";
+import AsistenciaCapacitacion from "../models/asistenciaCapacitacion.model";
+import CampoFormulario from "../models/campoFormulario.model";
+import Capacitacion from "../models/capacitacion.model";
+import Configuracion from "../models/configuracion.model";
+import ControlRiesgo from "../models/controlRiesgo.model";
+import EtapaProceso from "../models/etapaProceso.model";
+import HallazgoAuditoria from "../models/hallazgoAuditoria.model";
+import Indicador from "../models/indicador.model";
+import InstanciaProceso from "../models/instanciaProceso.model";
+import Notificacion from "../models/notificacion.model";
+import ObjetivoCalidad from "../models/objetivoCalidad.model";
+import ParticipanteProceso from "../models/participanteProceso.model";
+import Proceso from "../models/proceso.model";
+import RespuestaFormulario from "../models/respuestaFormulario.model";
+import Riesgo from "../models/riesgo.model";
+import RolPermiso from "../models/rolPermiso.model";
+import SeguimientoObjetivo from "../models/seguimientoObjetivo.model";
+import Ticket from "../models/tickets.model";
+import UsuarioRol from "../models/usuarioRol.model";
 
 // Crear instancia de Sequelize
 const sequelize = new Sequelize({
@@ -48,9 +70,31 @@ const initModels = () => {
   NoConformidad.initModel(sequelize);
   AccionCorrectiva.initModel(sequelize);
   Asignacion.initModel(sequelize);
+  Auditorias.initModel(sequelize);
+  Auditoria.initModel(sequelize);
   Documento.initModel(sequelize);
   VersionDocumento.initModel(sequelize);
   DocumentoProceso.initModel(sequelize);
+  AccionProceso.initModel(sequelize);
+  AsistenciaCapacitacion.initModel(sequelize);
+  CampoFormulario.initModel(sequelize);
+  Capacitacion.initModel(sequelize);
+  Configuracion.initModel(sequelize);
+  ControlRiesgo.initModel(sequelize);
+  EtapaProceso.initModel(sequelize);
+  HallazgoAuditoria.initModel(sequelize);
+  Indicador.initModel(sequelize);
+  InstanciaProceso.initModel(sequelize);
+  Notificacion.initModel(sequelize);
+  ObjetivoCalidad.initModel(sequelize);
+  ParticipanteProceso.initModel(sequelize);
+  Proceso.initModel(sequelize);
+  RespuestaFormulario.initModel(sequelize);
+  Riesgo.initModel(sequelize);
+  RolPermiso.initModel(sequelize);
+  SeguimientoObjetivo.initModel(sequelize);
+  Ticket.initModel(sequelize);
+  UsuarioRol.initModel(sequelize);
 
   // Solo configurar asociaciones básicas que existen
   // Usuario <-> Area
@@ -103,6 +147,28 @@ const initModels = () => {
     Documento,
     VersionDocumento,
     DocumentoProceso,
+    Auditorias,
+    Auditoria,
+    AccionProceso,
+    AsistenciaCapacitacion,
+    CampoFormulario,
+    Capacitacion,
+    Configuracion,
+    ControlRiesgo,
+    EtapaProceso,
+    HallazgoAuditoria,
+    Indicador,
+    InstanciaProceso,
+    Notificacion,
+    ObjetivoCalidad,
+    ParticipanteProceso,
+    Proceso,
+    RespuestaFormulario,
+    Riesgo,
+    RolPermiso,
+    SeguimientoObjetivo,
+    Ticket,
+    UsuarioRol,
   };
 
   return models;
@@ -173,6 +239,28 @@ export {
   Documento,
   VersionDocumento,
   DocumentoProceso,
+  Auditorias,
+  Auditoria,
+  AccionProceso,
+  AsistenciaCapacitacion,
+  CampoFormulario,
+  Capacitacion,
+  Configuracion,
+  ControlRiesgo,
+  EtapaProceso,
+  HallazgoAuditoria,
+  Indicador,
+  InstanciaProceso,
+  Notificacion,
+  ObjetivoCalidad,
+  ParticipanteProceso,
+  Proceso,
+  RespuestaFormulario,
+  Riesgo,
+  RolPermiso,
+  SeguimientoObjetivo,
+  Ticket,
+  UsuarioRol,
 };
 
 export default sequelize;

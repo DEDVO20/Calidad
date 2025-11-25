@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
+import { auditoriaService } from "@/services/auditoria.service";
 
 interface Auditoria {
   id: string;
@@ -46,85 +47,12 @@ export default function AuditoriasEnCurso() {
 
   const fetchAuditorias = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/auditorias?estado=en_curso", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      let data: Auditoria[] = [];
-
-      if (response.ok) {
-        data = await response.json();
-      } else {
-        console.warn("API no disponible, usando datos de ejemplo");
-      }
-
-      // Datos de ejemplo como fallback
-      const ejemploData: Auditoria[] = [
-        {
-          id: "1",
-          codigo: "AUD-2024-015",
-          nombre: "Auditoría Interna ISO 9001:2015",
-          tipo: "interna",
-          alcance: "Procesos de producción y control de calidad",
-          objetivo: "Verificar cumplimiento de requisitos ISO 9001:2015",
-          fechaPlanificada: "2024-11-01",
-          fechaInicio: "2024-11-05",
-          fechaFin: "2024-11-15",
-          estado: "en_curso",
-          auditorLider: {
-            id: "u1",
-            nombre: "Carlos",
-            apellido: "Mendoza"
-          },
-          hallazgosCount: 5,
-          progreso: 65
-        },
-        {
-          id: "2",
-          codigo: "AUD-2024-016",
-          nombre: "Auditoría de Seguimiento Certificación",
-          tipo: "seguimiento",
-          alcance: "Acciones correctivas del periodo anterior",
-          objetivo: "Validar implementación de acciones correctivas",
-          fechaPlanificada: "2024-11-03",
-          fechaInicio: "2024-11-06",
-          fechaFin: "2024-11-13",
-          estado: "en_curso",
-          auditorLider: {
-            id: "u2",
-            nombre: "Ana María",
-            apellido: "Torres"
-          },
-          hallazgosCount: 2,
-          progreso: 40
-        },
-        {
-          id: "3",
-          codigo: "AUD-2024-017",
-          nombre: "Auditoría Procesos de Compras",
-          tipo: "interna",
-          alcance: "Área de compras y gestión de proveedores",
-          objetivo: "Evaluar eficacia del proceso de compras",
-          fechaPlanificada: "2024-11-04",
-          fechaInicio: "2024-11-07",
-          fechaFin: "2024-11-14",
-          estado: "en_curso",
-          auditorLider: {
-            id: "u3",
-            nombre: "Roberto",
-            apellido: "Silva"
-          },
-          hallazgosCount: 8,
-          progreso: 75
-        }
-      ];
-
-      setAuditorias(data.length > 0 ? data : ejemploData);
+      const data = await auditoriaService.getEnCurso();
+      setAuditorias(data);
+      setLoading(false);
     } catch (error) {
       console.error("Error al cargar auditorías:", error);
+      console.warn("Usando datos de ejemplo");
       // Fallback a datos de ejemplo
       const ejemploData: Auditoria[] = [
         {
