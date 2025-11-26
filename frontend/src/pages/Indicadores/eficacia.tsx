@@ -14,11 +14,7 @@ const API_URL = "http://localhost:3000/api";
 interface Indicador {
   id: string;
   procesoId?: string;
-  clave: string;
   descripcion?: string;
-  valor?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
   creadoEn: string;
 }
 
@@ -58,8 +54,7 @@ export default function EficaciaIndicadores() {
 
       const data = await response.json();
       // Filtrar indicadores de eficacia (puedes ajustar este filtro según tu lógica)
-      const indicadoresEficacia = data.filter((ind: Indicador) => 
-        ind.clave.toLowerCase().includes('eficacia') || 
+      const indicadoresEficacia = data.filter((ind: Indicador) =>
         ind.descripcion?.toLowerCase().includes('eficacia') ||
         ind.descripcion?.toLowerCase().includes('objetivo')
       );
@@ -72,13 +67,11 @@ export default function EficaciaIndicadores() {
     }
   };
 
-  const promedioEficacia = indicadores.length > 0 
-    ? indicadores.reduce((sum, ind) => sum + (ind.valor || 0), 0) / indicadores.length 
-    : 0;
-  
-  const objetivosCumplidos = indicadores.filter(ind => (ind.valor || 0) >= 80).length;
-  const objetivosEnRiesgo = indicadores.filter(ind => (ind.valor || 0) < 80 && (ind.valor || 0) >= 50).length;
-  const objetivosIncumplidos = indicadores.filter(ind => (ind.valor || 0) < 50).length;
+  // Como no tenemos campo valor, mostraremos todos los indicadores sin cálculos
+  const totalIndicadores = indicadores.length;
+  const objetivosCumplidos = 0; // Sin campo valor no podemos calcular
+  const objetivosEnRiesgo = 0;
+  const objetivosIncumplidos = 0;
 
   if (loading) {
     return (
@@ -113,7 +106,7 @@ export default function EficaciaIndicadores() {
               <div>
                 <p className="font-medium">Error de conexión</p>
                 <p className="text-sm">{error}</p>
-                <button 
+                <button
                   className="text-sm underline mt-1 inline-block"
                   onClick={fetchIndicadores}
                 >
@@ -133,8 +126,8 @@ export default function EficaciaIndicadores() {
               <CardTitle className="text-sm font-medium">Eficacia Promedio</CardTitle>
               <Target className="h-4 w-4 text-blue-500" />
             </div>
-            <div className="text-2xl font-bold">{promedioEficacia.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">Del total de objetivos</p>
+            <div className="text-2xl font-bold">{totalIndicadores}</div>
+            <p className="text-xs text-gray-500 mt-1">Total de indicadores</p>
           </CardHeader>
         </Card>
 
@@ -201,39 +194,17 @@ export default function EficaciaIndicadores() {
                     </tr>
                   ) : (
                     indicadores.map((indicador) => {
-                      const valor = indicador.valor || 0;
-                      let badgeColor = "bg-red-500";
-                      let estado = "Incumplido";
-                      
-                      if (valor >= 80) {
-                        badgeColor = "bg-green-500";
-                        estado = "Cumplido";
-                      } else if (valor >= 50) {
-                        badgeColor = "bg-amber-500";
-                        estado = "En Riesgo";
-                      }
-
                       return (
                         <tr key={indicador.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium">{indicador.clave}</td>
+                          <td className="p-3 font-medium">{indicador.id.substring(0, 8)}...</td>
                           <td className="p-3">
                             {indicador.descripcion || "Sin descripción"}
                           </td>
                           <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className={`h-2 rounded-full ${badgeColor}`}
-                                  style={{ width: `${Math.min(valor, 100)}%` }}
-                                />
-                              </div>
-                              <span className="text-sm font-bold w-12">
-                                {valor.toFixed(0)}%
-                              </span>
-                            </div>
+                            <span className="text-sm">N/A</span>
                           </td>
                           <td className="p-3">
-                            <Badge className={badgeColor}>{estado}</Badge>
+                            <Badge className="bg-gray-500">Pendiente</Badge>
                           </td>
                         </tr>
                       );

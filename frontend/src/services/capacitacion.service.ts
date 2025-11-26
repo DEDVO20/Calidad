@@ -1,26 +1,37 @@
 const API_URL = "http://localhost:3000/api";
 
 export interface Capacitacion {
-  id: number;
-  titulo: string;
-  modalidad: "Virtual" | "Presencial";
-  encargado: string;
-  categoria: string;
-  fecha: string;
-  hora?: string;
-  duracion?: string;
-  ubicacion?: string;
-  enlace?: string;
-  estado: "Pendiente" | "Completada" | "En Curso";
-  calificacion?: number;
+  id: string;                      // UUID from backend
+  codigo: string;                  // Required, unique identifier
+  nombre: string;                  // Required, training name
   descripcion?: string;
-  responsableId?: number;
+  tipoCapacitacion: string;        // interna, externa, online
+  modalidad: string;               // Virtual, Presencial
+  duracionHoras?: number;          // Duration in hours
+  instructor?: string;
+  fechaProgramada?: string;        // ISO date string
+  fechaRealizacion?: string;       // ISO date string
+  lugar?: string;
+  estado: "programada" | "en_curso" | "completada" | "cancelada";
+  objetivo?: string;
+  contenido?: string;
+  responsableId?: string;          // UUID
+  creadoEn?: string;
+  actualizadoEn?: string;
+  // Populated from relations
+  responsable?: {
+    id: string;
+    nombre: string;
+    primerApellido: string;
+    segundoApellido: string;
+    email: string;
+  };
 }
 
 export interface AsistenciaCapacitacion {
-  id: number;
-  capacitacionId: number;
-  usuarioId: number;
+  id: string;
+  capacitacionId: string;
+  usuarioId: string;
   asistio: boolean;
   observaciones?: string;
   calificacion?: number;
@@ -51,7 +62,7 @@ export const capacitacionService = {
 
   // Obtener capacitaciones programadas (pendientes)
   async getProgramadas(): Promise<Capacitacion[]> {
-    const response = await fetch(`${API_URL}/capacitaciones?estado=Pendiente`, {
+    const response = await fetch(`${API_URL}/capacitaciones?estado=programada`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Error al obtener capacitaciones programadas");
@@ -60,7 +71,7 @@ export const capacitacionService = {
 
   // Obtener historial de capacitaciones (completadas)
   async getHistorial(): Promise<Capacitacion[]> {
-    const response = await fetch(`${API_URL}/capacitaciones?estado=Completada`, {
+    const response = await fetch(`${API_URL}/capacitaciones?estado=completada`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error("Error al obtener historial");
@@ -68,7 +79,7 @@ export const capacitacionService = {
   },
 
   // Obtener una capacitación por ID
-  async getById(id: number): Promise<Capacitacion> {
+  async getById(id: string): Promise<Capacitacion> {
     const response = await fetch(`${API_URL}/capacitaciones/${id}`, {
       headers: getAuthHeaders(),
     });
@@ -88,7 +99,7 @@ export const capacitacionService = {
   },
 
   // Actualizar capacitación
-  async update(id: number, data: Partial<Capacitacion>): Promise<Capacitacion> {
+  async update(id: string, data: Partial<Capacitacion>): Promise<Capacitacion> {
     const response = await fetch(`${API_URL}/capacitaciones/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
@@ -99,18 +110,18 @@ export const capacitacionService = {
   },
 
   // Marcar como completada
-  async marcarCompletada(id: number): Promise<Capacitacion> {
+  async marcarCompletada(id: string): Promise<Capacitacion> {
     const response = await fetch(`${API_URL}/capacitaciones/${id}`, {
-      method: "PATCH",
+      method: "PUT",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ estado: "Completada" }),
+      body: JSON.stringify({ estado: "completada" }),
     });
     if (!response.ok) throw new Error("Error al marcar como completada");
     return response.json();
   },
 
   // Eliminar capacitación
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     const response = await fetch(`${API_URL}/capacitaciones/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
@@ -119,7 +130,7 @@ export const capacitacionService = {
   },
 
   // Obtener asistencias de una capacitación
-  async getAsistencias(capacitacionId: number): Promise<AsistenciaCapacitacion[]> {
+  async getAsistencias(capacitacionId: string): Promise<AsistenciaCapacitacion[]> {
     const response = await fetch(
       `${API_URL}/asistencias-capacitacion?capacitacionId=${capacitacionId}`,
       {

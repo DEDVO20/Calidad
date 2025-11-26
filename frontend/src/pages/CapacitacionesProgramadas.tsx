@@ -33,12 +33,12 @@ const CapacitacionesProgramadas = () => {
     }
   };
 
-  const marcarCompletada = async (id: number) => {
+  const marcarCompletada = async (id: string) => {
     try {
       await capacitacionService.marcarCompletada(id);
       setCapacitaciones((prev) =>
         prev.map((cap) =>
-          cap.id === id ? { ...cap, estado: "Completada" } : cap
+          cap.id === id ? { ...cap, estado: "completada" } : cap
         )
       );
     } catch (err: any) {
@@ -102,12 +102,12 @@ const CapacitacionesProgramadas = () => {
           >
             <div className="flex-1 w-full">
               <h2 className="text-lg font-semibold text-gray-800">
-                {cap.titulo}
+                {cap.nombre}
               </h2>
               <div className="mt-2 text-sm text-gray-600 space-y-1">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-indigo-500" />
-                  <span>{cap.categoria}</span>
+                  <span>{cap.tipoCapacitacion}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {cap.modalidad === "Virtual" ? (
@@ -117,51 +117,44 @@ const CapacitacionesProgramadas = () => {
                   )}
                   <span>{cap.modalidad}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{new Date(cap.fecha).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span>{cap.hora}</span>
-                </div>
-                {cap.modalidad === "Presencial" ? (
+                {cap.fechaProgramada && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span>{cap.ubicacion}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4 text-gray-500" />
-                    <a
-                      href={cap.enlace}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Acceder a la reunión
-                    </a>
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span>{new Date(cap.fechaProgramada).toLocaleDateString()}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  <span>Encargado: {cap.encargado}</span>
-                </div>
+                {cap.duracionHoras && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span>{cap.duracionHoras} horas</span>
+                  </div>
+                )}
+                {cap.lugar && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span>{cap.lugar}</span>
+                  </div>
+                )}
+                {cap.instructor && (
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <span>Instructor: {cap.instructor}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="mt-4 md:mt-0 flex flex-col items-center">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold mb-2 ${
-                  cap.estado === "Pendiente"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-green-100 text-green-700"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold mb-2 ${cap.estado === "programada"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+                  }`}
               >
-                {cap.estado}
+                {cap.estado === "programada" ? "Pendiente" : cap.estado === "completada" ? "Completada" : cap.estado}
               </span>
 
-              {cap.estado === "Pendiente" ? (
+              {cap.estado === "programada" ? (
                 <button
                   onClick={() => marcarCompletada(cap.id)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
