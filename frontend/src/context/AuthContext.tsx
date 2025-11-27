@@ -31,10 +31,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Verificar si hay un token guardado y obtener el usuario
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+        const token = localStorage.getItem("token");
         if (token) {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/auth/me`,
+            `http://localhost:3000/api/auth/me`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -46,12 +46,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const data = await response.json();
             setUser(data.user);
           } else {
-            localStorage.removeItem("authToken");
+            localStorage.removeItem("token");
           }
         }
       } catch (error) {
         console.error("Error al verificar autenticación:", error);
-        localStorage.removeItem("authToken");
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+    const response = await fetch(`http://localhost:3000/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,12 +75,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     const data = await response.json();
-    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("token", data.token);
     setUser(data.user);
   };
 
   const logout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     setUser(null);
   };
 

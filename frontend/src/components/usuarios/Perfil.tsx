@@ -35,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getToken } from "@/services/auth";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:3000/api";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -270,9 +270,9 @@ export default function ProfilePage() {
                 <AvatarFallback>
                   {profile.nombre
                     ? profile.nombre
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
                     : "?"}
                 </AvatarFallback>
               )}
@@ -386,7 +386,7 @@ export default function ProfilePage() {
                 <Input
                   name="areaId"
                   value={profile.areaNombre}
-                  //onChange={handleChange}
+                //onChange={handleChange}
                 />
               </FieldContent>
             </Field>

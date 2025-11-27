@@ -24,8 +24,8 @@ interface Documento {
   version: string;
   estado: string;
   visibilidad: string;
-  createdAt: string;
-  updatedAt: string;
+  creadoEn: string;
+  actualizadoEn: string;
 }
 
 export default function Documentos() {
@@ -378,7 +378,7 @@ export default function Documentos() {
                 <div className="flex justify-between">
                   <span>Actualizado:</span>
                   <span className="font-medium">
-                    {new Date(documento.updatedAt).toLocaleDateString("es-ES")}
+                    {new Date(documento.actualizadoEn).toLocaleDateString("es-ES")}
                   </span>
                 </div>
               </div>
