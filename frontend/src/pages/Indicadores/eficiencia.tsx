@@ -14,11 +14,7 @@ const API_URL = "http://localhost:3000/api";
 interface Indicador {
   id: string;
   procesoId?: string;
-  clave: string;
   descripcion?: string;
-  valor?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
   creadoEn: string;
 }
 
@@ -58,8 +54,7 @@ export default function EficienciaIndicadores() {
 
       const data = await response.json();
       // Filtrar indicadores de eficiencia
-      const indicadoresEficiencia = data.filter((ind: Indicador) => 
-        ind.clave.toLowerCase().includes('eficiencia') || 
+      const indicadoresEficiencia = data.filter((ind: Indicador) =>
         ind.descripcion?.toLowerCase().includes('eficiencia') ||
         ind.descripcion?.toLowerCase().includes('recurso') ||
         ind.descripcion?.toLowerCase().includes('productividad')
@@ -73,13 +68,7 @@ export default function EficienciaIndicadores() {
     }
   };
 
-  const promedioEficiencia = indicadores.length > 0 
-    ? indicadores.reduce((sum, ind) => sum + (ind.valor || 0), 0) / indicadores.length 
-    : 0;
-  
-  const altaEficiencia = indicadores.filter(ind => (ind.valor || 0) >= 85).length;
-  const eficienciaMedia = indicadores.filter(ind => (ind.valor || 0) >= 60 && (ind.valor || 0) < 85).length;
-  const bajaEficiencia = indicadores.filter(ind => (ind.valor || 0) < 60).length;
+  const totalIndicadores = indicadores.length;
 
   if (loading) {
     return (
@@ -114,7 +103,7 @@ export default function EficienciaIndicadores() {
               <div>
                 <p className="font-medium">Error de conexión</p>
                 <p className="text-sm">{error}</p>
-                <button 
+                <button
                   className="text-sm underline mt-1 inline-block"
                   onClick={fetchIndicadores}
                 >
@@ -131,11 +120,11 @@ export default function EficienciaIndicadores() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Eficiencia Promedio</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Indicadores</CardTitle>
               <Activity className="h-4 w-4 text-purple-500" />
             </div>
-            <div className="text-2xl font-bold">{promedioEficiencia.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">Uso de recursos</p>
+            <div className="text-2xl font-bold">{totalIndicadores}</div>
+            <p className="text-xs text-gray-500 mt-1">Indicadores de eficiencia</p>
           </CardHeader>
         </Card>
 
@@ -145,8 +134,8 @@ export default function EficienciaIndicadores() {
               <CardTitle className="text-sm font-medium text-green-800">Alta Eficiencia</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-green-700">{altaEficiencia}</div>
-            <p className="text-xs text-green-600 mt-1">≥ 85% optimización</p>
+            <div className="text-2xl font-bold text-green-700">0</div>
+            <p className="text-xs text-green-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
 
@@ -156,8 +145,8 @@ export default function EficienciaIndicadores() {
               <CardTitle className="text-sm font-medium text-blue-800">Eficiencia Media</CardTitle>
               <Activity className="h-4 w-4 text-blue-600" />
             </div>
-            <div className="text-2xl font-bold text-blue-700">{eficienciaMedia}</div>
-            <p className="text-xs text-blue-600 mt-1">60-84% optimización</p>
+            <div className="text-2xl font-bold text-blue-700">0</div>
+            <p className="text-xs text-blue-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
 
@@ -167,8 +156,8 @@ export default function EficienciaIndicadores() {
               <CardTitle className="text-sm font-medium text-red-800">Baja Eficiencia</CardTitle>
               <AlertCircle className="h-4 w-4 text-red-600" />
             </div>
-            <div className="text-2xl font-bold text-red-700">{bajaEficiencia}</div>
-            <p className="text-xs text-red-600 mt-1">&lt; 60% optimización</p>
+            <div className="text-2xl font-bold text-red-700">0</div>
+            <p className="text-xs text-red-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
       </div>
@@ -187,10 +176,10 @@ export default function EficienciaIndicadores() {
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-left p-3 text-sm font-medium">Indicador</th>
+                    <th className="text-left p-3 text-sm font-medium">ID</th>
                     <th className="text-left p-3 text-sm font-medium">Descripción</th>
                     <th className="text-left p-3 text-sm font-medium w-32">Valor</th>
-                    <th className="text-left p-3 text-sm font-medium w-32">Nivel</th>
+                    <th className="text-left p-3 text-sm font-medium w-32">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -201,44 +190,20 @@ export default function EficienciaIndicadores() {
                       </td>
                     </tr>
                   ) : (
-                    indicadores.map((indicador) => {
-                      const valor = indicador.valor || 0;
-                      let badgeColor = "bg-red-500";
-                      let nivel = "Bajo";
-                      
-                      if (valor >= 85) {
-                        badgeColor = "bg-green-500";
-                        nivel = "Alto";
-                      } else if (valor >= 60) {
-                        badgeColor = "bg-blue-500";
-                        nivel = "Medio";
-                      }
-
-                      return (
-                        <tr key={indicador.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium">{indicador.clave}</td>
-                          <td className="p-3">
-                            {indicador.descripcion || "Sin descripción"}
-                          </td>
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
-                                <div 
-                                  className={`h-2 rounded-full ${badgeColor}`}
-                                  style={{ width: `${Math.min(valor, 100)}%` }}
-                                />
-                              </div>
-                              <span className="text-lg font-bold">
-                                {valor.toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <Badge className={badgeColor}>{nivel}</Badge>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    indicadores.map((indicador) => (
+                      <tr key={indicador.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3 font-medium">{indicador.id.substring(0, 8)}...</td>
+                        <td className="p-3">
+                          {indicador.descripcion || "Sin descripción"}
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">N/A</span>
+                        </td>
+                        <td className="p-3">
+                          <Badge className="bg-gray-500">Pendiente</Badge>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
@@ -255,7 +220,7 @@ export default function EficienciaIndicadores() {
             <div>
               <h3 className="font-semibold text-blue-900 mb-2">¿Qué mide la eficiencia?</h3>
               <p className="text-sm text-blue-800">
-                Los indicadores de eficiencia miden la relación entre los recursos utilizados y los resultados obtenidos. 
+                Los indicadores de eficiencia miden la relación entre los recursos utilizados y los resultados obtenidos.
                 Un proceso eficiente maximiza la producción minimizando el uso de recursos (tiempo, dinero, materiales, personal).
               </p>
             </div>

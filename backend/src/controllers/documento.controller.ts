@@ -10,6 +10,9 @@ import {
 export const createDocumento = async (req: Request, res: Response) => {
   try {
     const {
+      codigo,
+      nombre,
+      descripcion,
       nombreArchivo,
       rutaAlmacenamiento,
       tipoMime,
@@ -21,21 +24,38 @@ export const createDocumento = async (req: Request, res: Response) => {
       tipoDocumento,
       codigoDocumento,
       version,
+      versionActual,
       estado,
       aprobadoPor,
       fechaAprobacion,
+      fechaVigencia,
       proximaRevision,
       contenidoHtml,
+      rutaArchivo,
     } = req.body;
 
-    if (!nombreArchivo) {
+    // Validar campos obligatorios
+    if (!codigo) {
       return res
         .status(400)
-        .json({ message: "El campo 'nombreArchivo' es obligatorio." });
+        .json({ message: "El campo 'codigo' es obligatorio." });
+    }
+    if (!nombre) {
+      return res
+        .status(400)
+        .json({ message: "El campo 'nombre' es obligatorio." });
+    }
+    if (!tipoDocumento) {
+      return res
+        .status(400)
+        .json({ message: "El campo 'tipoDocumento' es obligatorio." });
     }
 
     const doc = await Documento.create({
-      nombreArchivo,
+      codigo,
+      nombre,
+      descripcion,
+      nombreArchivo: nombreArchivo || nombre,
       rutaAlmacenamiento,
       tipoMime,
       tamañoBytes,
@@ -44,18 +64,23 @@ export const createDocumento = async (req: Request, res: Response) => {
       revisadoPor: revisadoPor || null,
       visibilidad: visibilidad || "privado",
       tipoDocumento,
-      codigoDocumento,
+      codigoDocumento: codigoDocumento || codigo,
       version,
+      versionActual: versionActual || "1.0",
       estado: estado || "borrador",
       aprobadoPor,
       fechaAprobacion,
+      fechaVigencia,
       proximaRevision,
-
-      // creadoEn lo maneja el modelo si corresponde
+      contenidoHtml,
+      rutaArchivo,
+      creadoEn: new Date(),
+      actualizadoEn: new Date(),
     });
 
     return res.status(201).json(doc);
   } catch (error: any) {
+    console.error("Error al crear documento:", error);
     return res
       .status(500)
       .json({ message: "Error al crear documento", error: error.message });
@@ -65,6 +90,7 @@ export const createDocumento = async (req: Request, res: Response) => {
 /** Listar documentos con filtros y paginación */
 export const getDocumentos = async (req: Request, res: Response) => {
   try {
+    console.log("🔍 getDocumentos - Iniciando...");
     const {
       q, // búsqueda por nombre/código (texto)
       estado,
@@ -91,21 +117,26 @@ export const getDocumentos = async (req: Request, res: Response) => {
       ];
     }
 
+    console.log("🔍 Where clause:", JSON.stringify(where, null, 2));
+    console.log("🔍 Ejecutando findAndCountAll...");
+
     const { rows, count } = await Documento.findAndCountAll({
       where,
       limit: limitNum,
       offset,
       order: [["creadoEn", "DESC"]],
-      include: [
-        // usa los alias definidos en el modelo
-        { association: "autor" },
-        { association: "revisor" },
-        { association: "aprobador" },
-        { association: "subidor" },
-        { association: "versiones" },
-        { association: "procesosRelacionados" },
-      ],
+      // TODO: Re-enable when associations are properly configured
+      // include: [
+      //   { association: "autor" },
+      //   { association: "revisor" },
+      //   { association: "aprobador" },
+      //   { association: "subidor" },
+      //   { association: "versiones" },
+      //   { association: "procesosRelacionados" },
+      // ],
     });
+
+    console.log("✅ Query exitosa. Count:", count, "Rows:", rows.length);
 
     return res.json({
       items: rows,
@@ -115,6 +146,10 @@ export const getDocumentos = async (req: Request, res: Response) => {
       limit: limitNum,
     });
   } catch (error: any) {
+    console.error("❌ ERROR en getDocumentos:");
+    console.error("❌ Message:", error.message);
+    console.error("❌ Stack:", error.stack);
+    console.error("❌ Full error:", error);
     return res
       .status(500)
       .json({ message: "Error al obtener documentos", error: error.message });
@@ -125,14 +160,14 @@ export const getDocumentos = async (req: Request, res: Response) => {
 export const getDocumentoById = async (req: Request, res: Response) => {
   try {
     const doc = await Documento.findByPk(req.params.id, {
-      include: [
-        { association: "autor" },
-        { association: "revisor" },
-        { association: "aprobador" },
-        { association: "subidor" },
-        { association: "versiones" },
-        { association: "procesosRelacionados" },
-      ],
+      // include: [
+      //   { association: "autor" },
+      //   { association: "revisor" },
+      //   { association: "aprobador" },
+      //   { association: "subidor" },
+      //   { association: "versiones" },
+      //   { association: "procesosRelacionados" },
+      // ],
     });
 
     if (!doc)

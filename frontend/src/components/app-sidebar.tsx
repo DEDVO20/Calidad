@@ -15,6 +15,7 @@ import {
   FileCheck,
   BookOpen,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -30,7 +31,7 @@ import {
 import { getCurrentUser, getToken } from "@/services/auth";
 import axios from "axios";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:3000/api";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
@@ -357,7 +358,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="hover:bg-white/10 data-[state=open]:bg-white/10">
-              <a href="/dashboard">
+              <Link to="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-blue-600 shadow-lg">
                   <Building2 className="size-4" />
                 </div>
@@ -365,7 +366,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-bold text-white">SGC ISO 9001</span>
                   <span className="truncate text-xs text-blue-100">Sistema de Calidad</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -375,14 +376,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Gestión</p>
         </div>
         <NavMain items={data.navMain} />
-        
+
         <div className="my-4 mx-3 border-t border-sidebar-border/50" />
-        
+
         <div className="mb-3 px-3">
           <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Calidad</p>
         </div>
         <NavMain items={data.navQuality} />
-        
+
         <div className="mt-6">
           <NavSecondary items={data.navSecondary} className="mt-auto" />
         </div>

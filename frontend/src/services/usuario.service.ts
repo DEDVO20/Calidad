@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://localhost:3000/api";
 
 export interface Usuario {
   id: string;
@@ -22,7 +22,7 @@ export interface UsuariosListResponse {
 
 class UsuarioService {
   private getAuthHeader() {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
     return {
       Authorization: `Bearer ${token}`,
     };
@@ -126,8 +126,17 @@ class UsuarioService {
    * Obtiene todos los usuarios activos para selects
    */
   async getAllActive(): Promise<Usuario[]> {
-    const response = await this.getAll({ activo: true, limit: 1000 });
-    return response.usuarios;
+    console.log("🔍 getAllActive - calling getAll...");
+    const response: any = await this.getAll({ activo: true, limit: 1000 });
+    console.log("✅ getAllActive - response:", response);
+
+    // Si la respuesta es un array, devolverlo directamente
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    // Si es un objeto paginado, devolver la propiedad usuarios
+    return response.usuarios || [];
   }
 }
 

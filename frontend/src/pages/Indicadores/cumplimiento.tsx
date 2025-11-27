@@ -14,11 +14,7 @@ const API_URL = "http://localhost:3000/api";
 interface Indicador {
   id: string;
   procesoId?: string;
-  clave: string;
   descripcion?: string;
-  valor?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
   creadoEn: string;
 }
 
@@ -58,9 +54,7 @@ export default function CumplimientoIndicadores() {
 
       const data = await response.json();
       // Filtrar indicadores de cumplimiento
-      const indicadoresCumplimiento = data.filter((ind: Indicador) => 
-        ind.clave.toLowerCase().includes('cumplimiento') || 
-        ind.clave.toLowerCase().includes('cumpl') ||
+      const indicadoresCumplimiento = data.filter((ind: Indicador) =>
         ind.descripcion?.toLowerCase().includes('cumplimiento') ||
         ind.descripcion?.toLowerCase().includes('normativa') ||
         ind.descripcion?.toLowerCase().includes('regulación') ||
@@ -75,13 +69,7 @@ export default function CumplimientoIndicadores() {
     }
   };
 
-  const promedioCumplimiento = indicadores.length > 0 
-    ? indicadores.reduce((sum, ind) => sum + (ind.valor || 0), 0) / indicadores.length 
-    : 0;
-  
-  const cumplidos = indicadores.filter(ind => (ind.valor || 0) >= 95).length;
-  const cumplimientoParcial = indicadores.filter(ind => (ind.valor || 0) >= 70 && (ind.valor || 0) < 95).length;
-  const incumplidos = indicadores.filter(ind => (ind.valor || 0) < 70).length;
+  const totalIndicadores = indicadores.length;
 
   if (loading) {
     return (
@@ -116,7 +104,7 @@ export default function CumplimientoIndicadores() {
               <div>
                 <p className="font-medium">Error de conexión</p>
                 <p className="text-sm">{error}</p>
-                <button 
+                <button
                   className="text-sm underline mt-1 inline-block"
                   onClick={fetchIndicadores}
                 >
@@ -133,11 +121,11 @@ export default function CumplimientoIndicadores() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Cumplimiento Promedio</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Indicadores</CardTitle>
               <FileCheck className="h-4 w-4 text-blue-500" />
             </div>
-            <div className="text-2xl font-bold">{promedioCumplimiento.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">De estándares y normas</p>
+            <div className="text-2xl font-bold">{totalIndicadores}</div>
+            <p className="text-xs text-gray-500 mt-1">Indicadores de cumplimiento</p>
           </CardHeader>
         </Card>
 
@@ -147,8 +135,8 @@ export default function CumplimientoIndicadores() {
               <CardTitle className="text-sm font-medium text-green-800">Totalmente Cumplidos</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-green-700">{cumplidos}</div>
-            <p className="text-xs text-green-600 mt-1">≥ 95% cumplimiento</p>
+            <div className="text-2xl font-bold text-green-700">0</div>
+            <p className="text-xs text-green-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
 
@@ -158,8 +146,8 @@ export default function CumplimientoIndicadores() {
               <CardTitle className="text-sm font-medium text-amber-800">Cumplimiento Parcial</CardTitle>
               <AlertTriangle className="h-4 w-4 text-amber-600" />
             </div>
-            <div className="text-2xl font-bold text-amber-700">{cumplimientoParcial}</div>
-            <p className="text-xs text-amber-600 mt-1">70-94% cumplimiento</p>
+            <div className="text-2xl font-bold text-amber-700">0</div>
+            <p className="text-xs text-amber-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
 
@@ -169,8 +157,8 @@ export default function CumplimientoIndicadores() {
               <CardTitle className="text-sm font-medium text-red-800">Incumplidos</CardTitle>
               <XCircle className="h-4 w-4 text-red-600" />
             </div>
-            <div className="text-2xl font-bold text-red-700">{incumplidos}</div>
-            <p className="text-xs text-red-600 mt-1">&lt; 70% cumplimiento</p>
+            <div className="text-2xl font-bold text-red-700">0</div>
+            <p className="text-xs text-red-600 mt-1">Sin datos</p>
           </CardHeader>
         </Card>
       </div>
@@ -189,7 +177,7 @@ export default function CumplimientoIndicadores() {
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-left p-3 text-sm font-medium">Indicador</th>
+                    <th className="text-left p-3 text-sm font-medium">ID</th>
                     <th className="text-left p-3 text-sm font-medium">Descripción</th>
                     <th className="text-left p-3 text-sm font-medium w-32">Cumplimiento</th>
                     <th className="text-left p-3 text-sm font-medium w-32">Estado</th>
@@ -203,50 +191,23 @@ export default function CumplimientoIndicadores() {
                       </td>
                     </tr>
                   ) : (
-                    indicadores.map((indicador) => {
-                      const valor = indicador.valor || 0;
-                      let badgeColor = "bg-red-500";
-                      let estado = "Incumplido";
-                      let Icon = XCircle;
-                      
-                      if (valor >= 95) {
-                        badgeColor = "bg-green-500";
-                        estado = "Cumplido";
-                        Icon = CheckCircle;
-                      } else if (valor >= 70) {
-                        badgeColor = "bg-amber-500";
-                        estado = "Parcial";
-                        Icon = AlertTriangle;
-                      }
-
-                      return (
-                        <tr key={indicador.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium">{indicador.clave}</td>
-                          <td className="p-3">
-                            {indicador.descripcion || "Sin descripción"}
-                          </td>
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
-                                <div 
-                                  className={`h-2 rounded-full ${badgeColor}`}
-                                  style={{ width: `${Math.min(valor, 100)}%` }}
-                                />
-                              </div>
-                              <span className="text-lg font-bold">
-                                {valor.toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <Badge className={`${badgeColor} flex items-center gap-1 w-fit`}>
-                              <Icon className="h-3 w-3" />
-                              {estado}
-                            </Badge>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    indicadores.map((indicador) => (
+                      <tr key={indicador.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3 font-medium">{indicador.id.substring(0, 8)}...</td>
+                        <td className="p-3">
+                          {indicador.descripcion || "Sin descripción"}
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">N/A</span>
+                        </td>
+                        <td className="p-3">
+                          <Badge className="bg-gray-500 flex items-center gap-1 w-fit">
+                            <FileCheck className="h-3 w-3" />
+                            Pendiente
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
@@ -263,8 +224,8 @@ export default function CumplimientoIndicadores() {
             <div>
               <h3 className="font-semibold text-purple-900 mb-2">Importancia del Cumplimiento</h3>
               <p className="text-sm text-purple-800">
-                Los indicadores de cumplimiento verifican que la organización sigue las normativas, estándares 
-                y regulaciones aplicables (ISO 9001, leyes laborales, normas ambientales, etc.). 
+                Los indicadores de cumplimiento verifican que la organización sigue las normativas, estándares
+                y regulaciones aplicables (ISO 9001, leyes laborales, normas ambientales, etc.).
                 Un alto cumplimiento reduce riesgos legales y mejora la reputación organizacional.
               </p>
             </div>

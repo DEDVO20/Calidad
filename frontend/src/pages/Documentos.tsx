@@ -24,8 +24,8 @@ interface Documento {
   version: string;
   estado: string;
   visibilidad: string;
-  createdAt: string;
-  updatedAt: string;
+  creadoEn: string;
+  actualizadoEn: string;
 }
 
 export default function Documentos() {
@@ -44,7 +44,7 @@ export default function Documentos() {
     try {
       setLoading(true);
       const data = await documentoService.getAll();
-      setDocumentos(data.documentos || []);
+      setDocumentos(data.items || []);
     } catch (error) {
       console.error("Error al cargar documentos:", error);
       toast.error("Error al cargar documentos");
@@ -378,7 +378,7 @@ export default function Documentos() {
                 <div className="flex justify-between">
                   <span>Actualizado:</span>
                   <span className="font-medium">
-                    {new Date(documento.updatedAt).toLocaleDateString("es-ES")}
+                    {new Date(documento.actualizadoEn).toLocaleDateString("es-ES")}
                   </span>
                 </div>
               </div>

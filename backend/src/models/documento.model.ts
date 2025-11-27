@@ -2,22 +2,29 @@ import { DataTypes, Model, Sequelize, Optional } from "sequelize";
 
 interface DocumentoAttributes {
   id: string;
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  tipoDocumento: string;
+  rutaArchivo?: string;
+  versionActual: string;
+  estado: string;
+  fechaAprobacion?: Date;
+  fechaVigencia?: Date;
+  creadoPor?: string;
+  aprobadoPor?: string;
+  creadoEn: Date;
+  actualizadoEn: Date;
   nombreArchivo: string;
   rutaAlmacenamiento?: string;
   tipoMime?: string;
   tamañoBytes?: number;
   subidoPor?: string;
-  creadoEn?: Date;
+  revisadoPor?: string;
   visibilidad?: string;
-  tipoDocumento?: string;
   codigoDocumento?: string;
   version?: string;
-  estado?: string;
-  aprobadoPor?: string;
-  fechaAprobacion?: Date;
   proximaRevision?: Date;
-  creadoPor?: string;
-  revisadoPor?: string;
   contenidoHtml?: string;
 }
 
@@ -25,45 +32,55 @@ interface DocumentoCreationAttributes
   extends Optional<
     DocumentoAttributes,
     | "id"
+    | "descripcion"
+    | "rutaArchivo"
+    | "versionActual"
+    | "estado"
+    | "fechaAprobacion"
+    | "fechaVigencia"
+    | "creadoPor"
+    | "aprobadoPor"
+    | "creadoEn"
+    | "actualizadoEn"
     | "rutaAlmacenamiento"
     | "tipoMime"
     | "tamañoBytes"
     | "subidoPor"
-    | "creadoEn"
+    | "revisadoPor"
     | "visibilidad"
-    | "tipoDocumento"
     | "codigoDocumento"
     | "version"
-    | "estado"
-    | "aprobadoPor"
-    | "fechaAprobacion"
     | "proximaRevision"
-    | "creadoPor"
-    | "revisadoPor"
     | "contenidoHtml"
-  > {}
+  > { }
 
 class Documento
   extends Model<DocumentoAttributes, DocumentoCreationAttributes>
-  implements DocumentoAttributes
-{
+  implements DocumentoAttributes {
   id!: string;
+  codigo!: string;
+  nombre!: string;
+  descripcion?: string;
+  tipoDocumento!: string;
+  rutaArchivo?: string;
+  versionActual!: string;
+  estado!: string;
+  fechaAprobacion?: Date;
+  fechaVigencia?: Date;
+  creadoPor?: string;
+  aprobadoPor?: string;
+  creadoEn!: Date;
+  actualizadoEn!: Date;
   nombreArchivo!: string;
   rutaAlmacenamiento?: string;
   tipoMime?: string;
   tamañoBytes?: number;
   subidoPor?: string;
-  creadoEn?: Date;
+  revisadoPor?: string;
   visibilidad?: string;
-  tipoDocumento?: string;
   codigoDocumento?: string;
   version?: string;
-  estado?: string;
-  aprobadoPor?: string;
-  fechaAprobacion?: Date;
   proximaRevision?: Date;
-  creadoPor?: string;
-  revisadoPor?: string;
   contenidoHtml?: string;
 
   public static initModel(sequelize: Sequelize): typeof Documento {
@@ -74,9 +91,82 @@ class Documento
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
+        codigo: {
+          type: DataTypes.STRING(100),
+          allowNull: false,
+          unique: true,
+        },
+        nombre: {
+          type: DataTypes.STRING(300),
+          allowNull: false,
+        },
+        descripcion: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        tipoDocumento: {
+          type: DataTypes.STRING(100),
+          allowNull: false,
+          field: "tipo_documento",
+        },
+        rutaArchivo: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "ruta_archivo",
+        },
+        versionActual: {
+          type: DataTypes.STRING(20),
+          allowNull: false,
+          defaultValue: "1.0",
+          field: "version_actual",
+        },
+        estado: {
+          type: DataTypes.STRING(50),
+          allowNull: false,
+          defaultValue: "borrador",
+        },
+        fechaAprobacion: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_aprobacion",
+        },
+        fechaVigencia: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_vigencia",
+        },
+        creadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "creado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
+        },
+        aprobadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "aprobado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
+        },
+        creadoEn: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          field: "creado_en",
+        },
+        actualizadoEn: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          field: "actualizado_en",
+        },
         nombreArchivo: {
           type: DataTypes.STRING(500),
           allowNull: false,
+          defaultValue: "documento",
           field: "nombre_archivo",
         },
         rutaAlmacenamiento: {
@@ -98,19 +188,12 @@ class Documento
           type: DataTypes.UUID,
           allowNull: true,
           field: "subido_por",
-        },
-        creadoPor: {
-          // ← Nuevo
-          type: DataTypes.UUID,
-          allowNull: false,
-          field: "creado_por",
           references: {
             model: "usuarios",
             key: "id",
           },
         },
         revisadoPor: {
-          // ← Nuevo
           type: DataTypes.UUID,
           allowNull: true,
           field: "revisado_por",
@@ -119,19 +202,10 @@ class Documento
             key: "id",
           },
         },
-        creadoEn: {
-          type: DataTypes.DATE,
-          allowNull: true,
-          field: "creado_en",
-        },
         visibilidad: {
           type: DataTypes.STRING(50),
-          defaultValue: "privado",
-        },
-        tipoDocumento: {
-          type: DataTypes.STRING(50),
           allowNull: true,
-          field: "tipo_documento",
+          defaultValue: "privado",
         },
         codigoDocumento: {
           type: DataTypes.STRING(100),
@@ -141,19 +215,6 @@ class Documento
         version: {
           type: DataTypes.STRING(20),
           allowNull: true,
-        },
-        estado: {
-          type: DataTypes.STRING(50),
-          allowNull: true,
-        },
-        aprobadoPor: {
-          type: DataTypes.UUID,
-          allowNull: true,
-        },
-        fechaAprobacion: {
-          type: DataTypes.DATEONLY,
-          allowNull: true,
-          field: "fecha_aprobacion",
         },
         proximaRevision: {
           type: DataTypes.DATEONLY,
@@ -171,7 +232,6 @@ class Documento
         tableName: "documentos",
         modelName: "Documento",
         timestamps: false,
-        underscored: true,
       },
     );
   }
