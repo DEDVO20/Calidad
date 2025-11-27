@@ -29,7 +29,7 @@ export interface DocumentoResponse {
 }
 
 export interface DocumentosListResponse {
-  documentos: DocumentoResponse[];
+  items: DocumentoResponse[];
   total: number;
   page: number;
   limit: number;

@@ -62,10 +62,7 @@ export const DocumentFormWithTipTap = ({
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        console.log("🔍 Fetching usuarios...");
         const usuarios = await usuarioService.getAllActive();
-        console.log("✅ Usuarios received:", usuarios);
-        console.log("✅ Usuarios length:", usuarios?.length);
         setUsuarios(usuarios);
       } catch (error) {
         console.error("❌ Error al cargar usuarios:", error);

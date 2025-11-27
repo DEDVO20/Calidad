@@ -44,7 +44,7 @@ export default function Documentos() {
     try {
       setLoading(true);
       const data = await documentoService.getAll();
-      setDocumentos(data.documentos || []);
+      setDocumentos(data.items || []);
     } catch (error) {
       console.error("Error al cargar documentos:", error);
       toast.error("Error al cargar documentos");

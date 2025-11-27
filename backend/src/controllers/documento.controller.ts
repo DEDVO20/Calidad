@@ -160,14 +160,14 @@ export const getDocumentos = async (req: Request, res: Response) => {
 export const getDocumentoById = async (req: Request, res: Response) => {
   try {
     const doc = await Documento.findByPk(req.params.id, {
-      include: [
-        { association: "autor" },
-        { association: "revisor" },
-        { association: "aprobador" },
-        { association: "subidor" },
-        { association: "versiones" },
-        { association: "procesosRelacionados" },
-      ],
+      // include: [
+      //   { association: "autor" },
+      //   { association: "revisor" },
+      //   { association: "aprobador" },
+      //   { association: "subidor" },
+      //   { association: "versiones" },
+      //   { association: "procesosRelacionados" },
+      // ],
     });
 
     if (!doc)
