@@ -15,6 +15,7 @@ import {
   FileCheck,
   BookOpen,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -30,10 +31,11 @@ import {
 import { getCurrentUser, getToken } from "@/services/auth";
 import axios from "axios";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:3000/api";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [user, setUser] = React.useState(getCurrentUser());
+  const [pendingCount] = React.useState(5); // Simulado, conecta a tu API
 
   // Cargar perfil completo del usuario al montar
   React.useEffect(() => {
@@ -47,7 +49,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               Authorization: `Bearer ${token}`,
             },
           });
-          // Actualizar localStorage con datos frescos (solo fotoUrl en camelCase)
           const updatedUser = {
             ...currentUser,
             ...res.data,
@@ -69,10 +70,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       setUser(getCurrentUser());
     };
 
-    // Escuchar cambios en localStorage
     window.addEventListener("storage", handleStorageChange);
 
-    // Polling para detectar cambios internos (mismo tab)
     const interval = setInterval(() => {
       const updatedUser = getCurrentUser();
       if (JSON.stringify(updatedUser) !== JSON.stringify(user)) {
@@ -98,6 +97,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Dashboard",
         url: "/dashboard",
         icon: LayoutDashboard,
+        badge: "Nuevo",
+        badgeVariant: "default" as const,
       },
       {
         title: "Áreas",
@@ -137,6 +138,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Documentos",
         url: "#",
         icon: FileText,
+        badge: pendingCount > 0 ? pendingCount.toString() : undefined,
+        badgeVariant: "destructive" as const,
         items: [
           {
             title: "Gestión Documental",
@@ -145,11 +148,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "Control de Versiones",
             url: "/control-versiones",
-            
           },
           {
             title: "Aprobaciones Pendientes",
             url: "/Aprobaciones_Pendientes",
+            badge: pendingCount > 0 ? pendingCount.toString() : undefined,
           },
           {
             title: "Documentos Obsoletos",
@@ -182,10 +185,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Acciones Correctivas",
         icon: AlertTriangle,
         url: "#",
+        badge: "3",
+        badgeVariant: "destructive" as const,
         items: [
           {
             title: "Nuevas",
             url: "/Acciones_correctivas_Nuevas",
+            badge: "3",
           },
           {
             title: "En Proceso",
@@ -205,10 +211,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "No Conformidades",
         icon: ClipboardCheck,
         url: "#",
+        badge: "2",
+        badgeVariant: "default" as const,
         items: [
           {
             title: "Abiertas",
             url: "/No_conformidades_Abiertas",
+            badge: "2",
           },
           {
             title: "En Tratamiento",
@@ -232,6 +241,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {
             title: "En Curso",
             url: "/AuditoriasEnCurso",
+            badge: "1",
           },
           {
             title: "Completadas",
@@ -250,15 +260,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Matriz de Riesgos",
-            url: "#",
+            url: "/riesgos/matriz",
           },
           {
             title: "Controles",
-            url: "#",
+            url: "/riesgos/controles",
           },
           {
             title: "Tratamiento",
-            url: "#",
+            url: "/riesgos/tratamiento",
           },
         ],
       },
@@ -288,19 +298,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Tablero de Indicadores",
-            url: "#",
+            url: "/indicadores/tablero",
           },
           {
             title: "Eficacia",
-            url: "#",
+            url: "/indicadores/eficacia",
           },
           {
             title: "Eficiencia",
-            url: "#",
+            url: "/indicadores/eficiencia",
           },
           {
             title: "Cumplimiento",
-            url: "#",
+            url: "/indicadores/cumplimiento",
           },
         ],
       },
@@ -331,7 +341,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     navSecondary: [
       {
         title: "Reportes",
-        url: "#",
+        url: "/reportes",
         icon: BarChart3,
       },
       {
@@ -343,30 +353,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" {...props} className="border-r border-sidebar-border bg-gradient-to-b from-sidebar to-sidebar/95">
+      <SidebarHeader className="border-b border-sidebar-border/50 bg-gradient-to-r from-blue-600 to-cyan-600">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            <SidebarMenuButton size="lg" asChild className="hover:bg-white/10 data-[state=open]:bg-white/10">
+              <Link to="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-blue-600 shadow-lg">
                   <Building2 className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">SGC ISO 9001</span>
-                  <span className="truncate text-xs">Sistema de Calidad</span>
+                  <span className="truncate font-bold text-white">SGC ISO 9001</span>
+                  <span className="truncate text-xs text-blue-100">Sistema de Calidad</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} title="Gestión" />
-        <NavMain items={data.navQuality} title="Calidad" />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      <SidebarContent className="px-2 py-4">
+        <div className="mb-3 px-3">
+          <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Gestión</p>
+        </div>
+        <NavMain items={data.navMain} />
+
+        <div className="my-4 mx-3 border-t border-sidebar-border/50" />
+
+        <div className="mb-3 px-3">
+          <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Calidad</p>
+        </div>
+        <NavMain items={data.navQuality} />
+
+        <div className="mt-6">
+          <NavSecondary items={data.navSecondary} className="mt-auto" />
+        </div>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/50 bg-sidebar/50">
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>

@@ -38,14 +38,15 @@ const CapacitacionesHistorial = () => {
   const virtuales = historial.filter((c) => c.modalidad === "Virtual").length;
   const presenciales = historial.filter((c) => c.modalidad === "Presencial").length;
   const horasTotales = historial.reduce((acc, cap) => {
-    const horas = parseInt(cap.duracion || "0");
-    return acc + (isNaN(horas) ? 0 : horas);
+    const horas = cap.duracionHoras || 0;
+    return acc + horas;
   }, 0);
 
   const ultimaFecha = historial.length > 0
     ? historial
-        .map((c) => new Date(c.fecha))
-        .sort((a, b) => b.getTime() - a.getTime())[0]
+      .filter(c => c.fechaProgramada)
+      .map((c) => new Date(c.fechaProgramada!))
+      .sort((a, b) => b.getTime() - a.getTime())[0]
     : null;
 
   if (loading) {
@@ -109,11 +110,11 @@ const CapacitacionesHistorial = () => {
             className="bg-white shadow rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center border hover:shadow-md transition"
           >
             <div className="flex-1 w-full">
-              <h2 className="text-lg font-semibold text-gray-800">{cap.titulo}</h2>
+              <h2 className="text-lg font-semibold text-gray-800">{cap.nombre}</h2>
               <div className="mt-2 text-sm text-gray-600 space-y-1">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-indigo-500" />
-                  <span>{cap.categoria}</span>
+                  <span>{cap.tipoCapacitacion}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {cap.modalidad === "Virtual" ? (
@@ -123,35 +124,29 @@ const CapacitacionesHistorial = () => {
                   )}
                   <span>{cap.modalidad}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{new Date(cap.fecha).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span>{cap.duracion}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  <span>Encargado: {cap.encargado}</span>
-                </div>
+                {cap.fechaProgramada && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span>{new Date(cap.fechaProgramada).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {cap.duracionHoras && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span>{cap.duracionHoras} horas</span>
+                  </div>
+                )}
+                {cap.instructor && (
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <span>Instructor: {cap.instructor}</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Calificación */}
+            {/* Estado completada - sin calificación por ahora */}
             <div className="mt-4 md:mt-0 flex flex-col items-center">
-              <div className="flex items-center text-yellow-500 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < cap.calificacion
-                        ? "fill-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-              </div>
               <div className="flex items-center text-green-600 font-medium text-sm">
                 <CheckCircle className="w-5 h-5 mr-1" />
                 Completada

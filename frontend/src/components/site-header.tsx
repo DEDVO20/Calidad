@@ -20,7 +20,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 export function SiteHeader() {
   const location = useLocation();
@@ -35,7 +35,7 @@ export function SiteHeader() {
     if (path.includes("/control-versiones")) return "Control de Versiones";
     if (path.includes("/procesos")) return "Procesos";
     if (path.includes("/auditorias")) return "Auditorías";
-    
+
     // Gestión de Áreas
     if (path.includes("/gestionar_areas")) return "Gestionar Áreas";
     if (path.includes("/Asignar_Responsables")) return "Asignar Responsables";
@@ -43,7 +43,7 @@ export function SiteHeader() {
     //usuarios 
     if (path.includes("/ListaDeUsuarios")) return "Lista de Usuarios";
     if (path.includes("/NuevoUsuario")) return "Nuevo Usuario";
-    
+
     // No Conformidades - rutas específicas
     if (path.includes("/No_conformidades_Abiertas"))
       return "No Conformidades Abiertas";
@@ -78,12 +78,11 @@ export function SiteHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink
-                href="/dashboard"
-                className="flex items-center gap-1"
-              >
-                <Home className="h-3.5 w-3.5" />
-                SGC ISO 9001
+              <BreadcrumbLink asChild>
+                <Link to="/dashboard" className="flex items-center gap-1">
+                  <Home className="h-3.5 w-3.5" />
+                  SGC ISO 9001
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />

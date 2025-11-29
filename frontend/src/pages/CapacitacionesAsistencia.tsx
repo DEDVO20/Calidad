@@ -135,8 +135,8 @@ const CapacitacionesAsistencia: React.FC = () => {
                 <th className="p-3">Nombre</th>
                 <th className="p-3">Modalidad</th>
                 <th className="p-3">Fecha</th>
-                <th className="p-3">Hora</th>
-                <th className="p-3">Encargado</th>
+                <th className="p-3">Duración</th>
+                <th className="p-3">Instructor</th>
                 <th className="p-3">Estado</th>
                 <th className="p-3">Acciones</th>
               </tr>
@@ -149,9 +149,9 @@ const CapacitacionesAsistencia: React.FC = () => {
                 >
                   <td className="p-3 font-medium text-gray-700">{item.nombre}</td>
                   <td className="p-3">{item.modalidad}</td>
-                  <td className="p-3">{item.fecha}</td>
-                  <td className="p-3">{item.hora}</td>
-                  <td className="p-3">{item.encargado}</td>
+                  <td className="p-3">{item.fechaProgramada ? new Date(item.fechaProgramada).toLocaleDateString() : 'N/A'}</td>
+                  <td className="p-3">{item.duracionHoras ? `${item.duracionHoras}h` : 'N/A'}</td>
+                  <td className="p-3">{item.instructor || 'N/A'}</td>
                   <td className="p-3">
                     <Badge variant="secondary" className="bg-green-100 text-green-700">
                       {item.estado}
@@ -189,13 +189,17 @@ const CapacitacionesAsistencia: React.FC = () => {
 
           <div className="mt-4 text-gray-700 text-sm space-y-2">
             <p>
-              <strong>Fecha:</strong> {selectedCapacitacion?.fecha} a las{" "}
-              {selectedCapacitacion?.hora}
+              <strong>Fecha:</strong> {selectedCapacitacion?.fechaProgramada ? new Date(selectedCapacitacion.fechaProgramada).toLocaleString() : 'N/A'}
             </p>
             <p>
-              <strong>Encargado:</strong> {selectedCapacitacion?.encargado}
+              <strong>Instructor:</strong> {selectedCapacitacion?.instructor || 'N/A'}
             </p>
-            <p>{selectedCapacitacion?.observaciones}</p>
+            <p>
+              <strong>Duración:</strong> {selectedCapacitacion?.duracionHoras ? `${selectedCapacitacion.duracionHoras} horas` : 'N/A'}
+            </p>
+            {selectedCapacitacion?.descripcion && (
+              <p>{selectedCapacitacion.descripcion}</p>
+            )}
           </div>
 
           <div className="mt-6 flex justify-end">

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://localhost:3000/api";
 
 export interface DocumentoData {
   nombreArchivo: string;
@@ -24,12 +24,12 @@ export interface DocumentoResponse {
   visibilidad: string;
   estado: string;
   contenidoHtml?: string;
-  createdAt: string;
-  updatedAt: string;
+  creadoEn: string;
+  actualizadoEn: string;
 }
 
 export interface DocumentosListResponse {
-  documentos: DocumentoResponse[];
+  items: DocumentoResponse[];
   total: number;
   page: number;
   limit: number;
@@ -37,7 +37,7 @@ export interface DocumentosListResponse {
 
 class DocumentoService {
   private getAuthHeader() {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
     return {
       Authorization: `Bearer ${token}`,
     };
