@@ -432,6 +432,74 @@ export const logout = async (req: Request, res: Response) => {
   });
 };
 
+/** Obtener información del usuario autenticado */
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Token no proporcionado",
+      });
+    }
+
+    const token = authHeader.substring(7); // Remover "Bearer "
+    const decoded = jwt.verify(token, config.jwt.secret) as any;
+
+    // Buscar usuario con todos sus datos
+    const usuario = await Usuario.findByPk(decoded.id, {
+      attributes: [
+        "id",
+        "documento",
+        "nombre",
+        "segundoNombre",
+        "primerApellido",
+        "segundoApellido",
+        "correoElectronico",
+        "nombreUsuario",
+        "areaId",
+        "activo",
+        "fotoUrl",
+      ],
+    });
+
+    if (!usuario || !usuario.activo) {
+      return res.status(401).json({
+        message: "Usuario no válido o inactivo",
+      });
+    }
+
+    return res.status(200).json({
+      user: {
+        id: usuario.id,
+        documento: usuario.documento,
+        nombre: usuario.nombre,
+        segundoNombre: usuario.segundoNombre,
+        primerApellido: usuario.primerApellido,
+        segundoApellido: usuario.segundoApellido,
+        correoElectronico: usuario.correoElectronico,
+        nombreUsuario: usuario.nombreUsuario,
+        areaId: usuario.areaId,
+        activo: usuario.activo,
+        fotoUrl: (usuario as any).fotoUrl || null,
+      },
+    });
+  } catch (error: any) {
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({
+        message: "Token inválido o expirado",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Error interno del servidor",
+    });
+  }
+};
+
 /** Verificar token (middleware helper) */
 export const verifyToken = async (req: Request, res: Response) => {
   try {
@@ -489,5 +557,6 @@ export default {
   forgotPassword,
   resetPassword,
   logout,
+  getMe,
   verifyToken,
 };
