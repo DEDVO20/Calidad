@@ -6,6 +6,11 @@ export const createRiesgo = async (req: Request, res: Response) => {
   try {
     const payload = req.body ?? {};
 
+    // Mapear 'tipo' del frontend a 'tipoRiesgo' del modelo
+    if (payload.tipo && !payload.tipoRiesgo) {
+      payload.tipoRiesgo = payload.tipo;
+    }
+
     if (!payload.codigo) {
       return res
         .status(400)
@@ -67,6 +72,12 @@ export const updateRiesgo = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Riesgo no encontrado" });
 
     const payload = req.body ?? {};
+
+    // Mapear 'tipo' del frontend a 'tipoRiesgo' del modelo
+    if (payload.tipo && !payload.tipoRiesgo) {
+      payload.tipoRiesgo = payload.tipo;
+    }
+
     await riesgo.update(payload);
     return res.json(riesgo);
   } catch (error: any) {
