@@ -6,6 +6,11 @@ export const createControlRiesgo = async (req: Request, res: Response) => {
   try {
     const payload = req.body ?? {};
 
+    // Mapear 'tipo' del frontend a 'tipoControl' del modelo
+    if (payload.tipo && !payload.tipoControl) {
+      payload.tipoControl = payload.tipo;
+    }
+
     if (!payload.riesgoId) {
       return res
         .status(400)
@@ -67,6 +72,12 @@ export const updateControlRiesgo = async (req: Request, res: Response) => {
         .json({ message: "Control de riesgo no encontrado" });
 
     const payload = req.body ?? {};
+
+    // Mapear 'tipo' del frontend a 'tipoControl' del modelo
+    if (payload.tipo && !payload.tipoControl) {
+      payload.tipoControl = payload.tipo;
+    }
+
     await control.update(payload);
     return res.json(control);
   } catch (error: any) {

@@ -6,8 +6,12 @@ import {
   updateRiesgo,
   deleteRiesgo,
 } from "../controllers/riesgo.controller";
+import { optionalAuthMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
+
+// Aplicar middleware opcional de autenticación a todas las rutas
+router.use(optionalAuthMiddleware);
 
 /**
  * @swagger

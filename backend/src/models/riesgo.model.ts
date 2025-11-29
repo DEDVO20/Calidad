@@ -2,19 +2,18 @@ import { DataTypes, Model, Optional, Sequelize } from "sequelize";
 
 interface RiesgoAttributes {
 	id: string;
+	procesoId?: string;
 	codigo: string;
 	descripcion?: string;
-	tipo?: string;
-	procesoId?: string;
-	areaId?: string;
+	categoria?: string;
+	tipoRiesgo?: string;
 	probabilidad?: number;
 	impacto?: number;
 	nivelRiesgo?: number;
-	tratamiento?: string;
+	causas?: string;
+	consecuencias?: string;
 	responsableId?: string;
 	estado?: string;
-	fechaIdentificacion?: Date;
-	fechaRevision?: Date;
 	creadoEn: Date;
 	actualizadoEn: Date;
 }
@@ -23,40 +22,37 @@ interface RiesgoCreationAttributes
 	extends Optional<
 		RiesgoAttributes,
 		| "id"
-		| "descripcion"
-		| "tipo"
 		| "procesoId"
-		| "areaId"
+		| "descripcion"
+		| "categoria"
+		| "tipoRiesgo"
 		| "probabilidad"
 		| "impacto"
 		| "nivelRiesgo"
-		| "tratamiento"
+		| "causas"
+		| "consecuencias"
 		| "responsableId"
 		| "estado"
-		| "fechaIdentificacion"
-		| "fechaRevision"
 		| "creadoEn"
 		| "actualizadoEn"
-	> {}
+	> { }
 
 class Riesgo
 	extends Model<RiesgoAttributes, RiesgoCreationAttributes>
-	implements RiesgoAttributes
-{
+	implements RiesgoAttributes {
 	public id!: string;
+	public procesoId?: string;
 	public codigo!: string;
 	public descripcion?: string;
-	public tipo?: string;
-	public procesoId?: string;
-	public areaId?: string;
+	public categoria?: string;
+	public tipoRiesgo?: string;
 	public probabilidad?: number;
 	public impacto?: number;
 	public nivelRiesgo?: number;
-	public tratamiento?: string;
+	public causas?: string;
+	public consecuencias?: string;
 	public responsableId?: string;
 	public estado?: string;
-	public fechaIdentificacion?: Date;
-	public fechaRevision?: Date;
 	public readonly creadoEn!: Date;
 	public readonly actualizadoEn!: Date;
 
@@ -68,6 +64,11 @@ class Riesgo
 					defaultValue: DataTypes.UUIDV4,
 					primaryKey: true,
 				},
+				procesoId: {
+					type: DataTypes.UUID,
+					allowNull: true,
+					field: "proceso_id",
+				},
 				codigo: {
 					type: DataTypes.STRING(50),
 					allowNull: false,
@@ -77,19 +78,14 @@ class Riesgo
 					type: DataTypes.TEXT,
 					allowNull: true,
 				},
-				tipo: {
+				categoria: {
 					type: DataTypes.STRING(50),
 					allowNull: true,
 				},
-				procesoId: {
-					type: DataTypes.UUID,
+				tipoRiesgo: {
+					type: DataTypes.STRING(50),
 					allowNull: true,
-					field: "proceso_id",
-				},
-				areaId: {
-					type: DataTypes.UUID,
-					allowNull: true,
-					field: "area_id",
+					field: "tipo_riesgo",
 				},
 				probabilidad: {
 					type: DataTypes.INTEGER,
@@ -104,7 +100,11 @@ class Riesgo
 					allowNull: true,
 					field: "nivel_riesgo",
 				},
-				tratamiento: {
+				causas: {
+					type: DataTypes.TEXT,
+					allowNull: true,
+				},
+				consecuencias: {
 					type: DataTypes.TEXT,
 					allowNull: true,
 				},
@@ -116,16 +116,6 @@ class Riesgo
 				estado: {
 					type: DataTypes.STRING(50),
 					allowNull: true,
-				},
-				fechaIdentificacion: {
-					type: DataTypes.DATEONLY,
-					allowNull: true,
-					field: "fecha_identificacion",
-				},
-				fechaRevision: {
-					type: DataTypes.DATEONLY,
-					allowNull: true,
-					field: "fecha_revision",
 				},
 				creadoEn: {
 					type: DataTypes.DATE,
@@ -152,9 +142,7 @@ class Riesgo
 
 	public static associate(models: any): void {
 		Riesgo.belongsTo(models.Proceso, { foreignKey: "procesoId", as: "proceso" });
-		Riesgo.belongsTo(models.Area, { foreignKey: "areaId", as: "area" });
 		Riesgo.belongsTo(models.Usuario, { foreignKey: "responsableId", as: "responsable" });
-		Riesgo.hasMany(models.ControlRiesgo, { foreignKey: "riesgoId", as: "controles" });
 	}
 }
 
