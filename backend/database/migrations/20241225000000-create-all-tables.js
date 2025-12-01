@@ -341,9 +341,26 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
+      codigo: {
+        type: Sequelize.STRING(100),
+        allowNull: false,
+        unique: true,
+      },
+      nombre: {
+        type: Sequelize.STRING(300),
+        allowNull: false,
+      },
+      descripcion: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       nombre_archivo: {
         type: Sequelize.STRING(500),
         allowNull: false,
+      },
+      ruta_archivo: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       ruta_almacenamiento: {
         type: Sequelize.TEXT,
@@ -389,15 +406,16 @@ module.exports = {
       },
       creado_en: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
       visibilidad: {
         type: Sequelize.STRING(50),
         defaultValue: "privado",
       },
       tipo_documento: {
-        type: Sequelize.STRING(50),
-        allowNull: true,
+        type: Sequelize.STRING(100),
+        allowNull: false,
       },
       codigo_documento: {
         type: Sequelize.STRING(100),
@@ -407,9 +425,15 @@ module.exports = {
         type: Sequelize.STRING(20),
         allowNull: true,
       },
+      version_actual: {
+        type: Sequelize.STRING(20),
+        allowNull: false,
+        defaultValue: "1.0",
+      },
       estado: {
         type: Sequelize.STRING(50),
-        allowNull: true,
+        allowNull: false,
+        defaultValue: "borrador",
       },
       aprobado_por: {
         type: Sequelize.UUID,
@@ -422,7 +446,11 @@ module.exports = {
         onDelete: "SET NULL",
       },
       fecha_aprobacion: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+      fecha_vigencia: {
+        type: Sequelize.DATE,
         allowNull: true,
       },
       proxima_revision: {
@@ -432,6 +460,11 @@ module.exports = {
       contenido_html: {
         type: Sequelize.TEXT,
         allowNull: true,
+      },
+      actualizado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
     });
 
@@ -1104,6 +1137,10 @@ module.exports = {
         type: Sequelize.STRING(50),
         allowNull: true,
       },
+      tipo_riesgo: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
       proceso_id: {
         type: Sequelize.UUID,
         allowNull: true,
@@ -1134,6 +1171,14 @@ module.exports = {
       },
       nivel_riesgo: {
         type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      causas: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      consecuencias: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       controles: {
@@ -1174,8 +1219,8 @@ module.exports = {
       },
     });
 
-    // Create controles_riesgo table
-    await queryInterface.createTable("controles_riesgo", {
+    // Create control_riesgos table
+    await queryInterface.createTable("control_riesgos", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -1195,7 +1240,11 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      tipo: {
+      tipo_control: {
+        type: Sequelize.STRING(50),
+        allowNull: true,
+      },
+      frecuencia: {
         type: Sequelize.STRING(50),
         allowNull: true,
       },
@@ -1209,15 +1258,21 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      frecuencia: {
-        type: Sequelize.STRING(50),
-        allowNull: true,
-      },
       efectividad: {
         type: Sequelize.STRING(50),
         allowNull: true,
       },
+      activo: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        defaultValue: true,
+      },
       creado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
+      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1364,36 +1419,58 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      titulo: {
-        type: Sequelize.STRING(300),
-        allowNull: true,
+      codigo: {
+        type: Sequelize.STRING(100),
+        allowNull: false,
+        unique: true,
+      },
+      nombre: {
+        type: Sequelize.STRING(200),
+        allowNull: false,
       },
       descripcion: {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      tipo: {
+      tipo_capacitacion: {
         type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+      modalidad: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+      duracion_horas: {
+        type: Sequelize.INTEGER,
         allowNull: true,
       },
       instructor: {
         type: Sequelize.STRING(200),
         allowNull: true,
       },
-      duracion_horas: {
-        type: Sequelize.DECIMAL,
-        allowNull: true,
-      },
       fecha_programada: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.DATE,
         allowNull: true,
       },
       fecha_realizacion: {
-        type: Sequelize.DATEONLY,
+        type: Sequelize.DATE,
         allowNull: true,
       },
       lugar: {
         type: Sequelize.STRING(200),
+        allowNull: true,
+      },
+      estado: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
+        defaultValue: "programada",
+      },
+      objetivo: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      contenido: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       responsable_id: {
@@ -1406,11 +1483,12 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      estado: {
-        type: Sequelize.STRING(50),
-        allowNull: true,
-      },
       creado_en: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
+      actualizado_en: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.NOW,
@@ -1841,7 +1919,7 @@ module.exports = {
       "capacitaciones",
       "seguimiento_objetivos",
       "objetivos_calidad",
-      "controles_riesgo",
+      "control_riesgos",
       "riesgos",
       "hallazgos_auditoria",
       "auditorias",
