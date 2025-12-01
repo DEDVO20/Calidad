@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Zap, TrendingUp, AlertCircle, Activity } from "lucide-react";
+import { Zap, AlertCircle, Activity, TrendingUp } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -8,15 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const API_URL = "http://localhost:3000/api";
-
-interface Indicador {
-  id: string;
-  procesoId?: string;
-  descripcion?: string;
-  creadoEn: string;
-}
+import { indicadorService, Indicador } from "@/services/indicador.service";
 
 export default function EficienciaIndicadores() {
   const [indicadores, setIndicadores] = useState<Indicador[]>([]);
@@ -27,39 +19,12 @@ export default function EficienciaIndicadores() {
     fetchIndicadores();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
   const fetchIndicadores = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
-      const response = await fetch(`${API_URL}/indicadores`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar indicadores");
-      }
-
-      const data = await response.json();
-      // Filtrar indicadores de eficiencia
-      const indicadoresEficiencia = data.filter((ind: Indicador) =>
-        ind.descripcion?.toLowerCase().includes('eficiencia') ||
-        ind.descripcion?.toLowerCase().includes('recurso') ||
-        ind.descripcion?.toLowerCase().includes('productividad')
-      );
-      setIndicadores(indicadoresEficiencia);
+      const data = await indicadorService.getAll({ tipo: "eficiencia" });
+      setIndicadores(data);
     } catch (error: any) {
       console.error("Error:", error);
       setError(error.message);
