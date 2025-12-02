@@ -8,15 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const API_URL = "http://localhost:3000/api";
-
-interface Indicador {
-  id: string;
-  procesoId?: string;
-  descripcion?: string;
-  creadoEn: string;
-}
+import { indicadorService, Indicador } from "@/services/indicador.service";
 
 export default function CumplimientoIndicadores() {
   const [indicadores, setIndicadores] = useState<Indicador[]>([]);
@@ -27,40 +19,12 @@ export default function CumplimientoIndicadores() {
     fetchIndicadores();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
   const fetchIndicadores = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
-      const response = await fetch(`${API_URL}/indicadores`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar indicadores");
-      }
-
-      const data = await response.json();
-      // Filtrar indicadores de cumplimiento
-      const indicadoresCumplimiento = data.filter((ind: Indicador) =>
-        ind.descripcion?.toLowerCase().includes('cumplimiento') ||
-        ind.descripcion?.toLowerCase().includes('normativa') ||
-        ind.descripcion?.toLowerCase().includes('regulación') ||
-        ind.descripcion?.toLowerCase().includes('estándar')
-      );
-      setIndicadores(indicadoresCumplimiento);
+      const data = await indicadorService.getAll({ tipo: "cumplimiento" });
+      setIndicadores(data);
     } catch (error: any) {
       console.error("Error:", error);
       setError(error.message);
@@ -69,18 +33,18 @@ export default function CumplimientoIndicadores() {
     }
   };
 
-  const totalIndicadores = indicadores.length;
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent" />
-          <p className="mt-4 text-sm text-gray-500">Cargando indicadores de cumplimiento...</p>
+          <p className="mt-4 text-sm text-gray-500">Cargando indicadores...</p>
         </div>
       </div>
     );
   }
+
+  const totalIndicadores = indicadores.length;
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">

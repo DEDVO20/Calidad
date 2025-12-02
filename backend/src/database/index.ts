@@ -135,6 +135,24 @@ const initModels = () => {
   AccionCorrectiva.belongsTo(NoConformidad, { foreignKey: "noConformidadId", as: "noConformidad" });
   NoConformidad.hasMany(AccionCorrectiva, { foreignKey: "noConformidadId", as: "accionesCorrectivas" });
 
+  // Indicador <-> Proceso
+  Indicador.belongsTo(Proceso, { foreignKey: "procesoId", as: "proceso" });
+  Proceso.hasMany(Indicador, { foreignKey: "procesoId", as: "indicadores" });
+
+  // Indicador <-> Usuario (responsable)
+  Indicador.belongsTo(Usuario, { foreignKey: "responsableId", as: "responsable" });
+  Usuario.hasMany(Indicador, { foreignKey: "responsableId", as: "indicadoresResponsable" });
+
+  // Auditorias <-> Usuario
+  Auditorias.belongsTo(Usuario, { foreignKey: "auditorLiderId", as: "auditorLider" });
+  Auditorias.belongsTo(Usuario, { foreignKey: "creadoPor", as: "creadoPorUsuario" });
+  Usuario.hasMany(Auditorias, { foreignKey: "auditorLiderId", as: "auditoriasComoLider" });
+  Usuario.hasMany(Auditorias, { foreignKey: "creadoPor", as: "auditoriasCreadas" });
+
+  // Auditorias <-> HallazgoAuditoria
+  Auditorias.hasMany(HallazgoAuditoria, { foreignKey: "auditoriaId", as: "hallazgos" });
+  HallazgoAuditoria.belongsTo(Auditorias, { foreignKey: "auditoriaId", as: "auditoria" });
+
   // Colección de modelos para exportar
   const models = {
     Usuario,

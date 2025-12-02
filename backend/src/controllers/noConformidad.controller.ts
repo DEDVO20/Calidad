@@ -122,3 +122,46 @@ export const deleteNoConformidad = async (req: Request, res: Response) => {
     });
   }
 };
+
+/** Iniciar tratamiento de no conformidad */
+export const iniciarTratamientoNoConformidad = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const nc = await NoConformidad.findByPk(id);
+
+    if (!nc)
+      return res.status(404).json({ message: "No conformidad no encontrada." });
+
+    await nc.update({ estado: "en_tratamiento" });
+    return res.json(nc);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al iniciar tratamiento",
+      error: error.message,
+    });
+  }
+};
+
+/** Cerrar no conformidad */
+export const cerrarNoConformidad = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { observaciones } = req.body;
+    const nc = await NoConformidad.findByPk(id);
+
+    if (!nc)
+      return res.status(404).json({ message: "No conformidad no encontrada." });
+
+    await nc.update({
+      estado: "cerrada",
+      fechaCierre: new Date(),
+    });
+    
+    return res.json(nc);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al cerrar la no conformidad",
+      error: error.message,
+    });
+  }
+};

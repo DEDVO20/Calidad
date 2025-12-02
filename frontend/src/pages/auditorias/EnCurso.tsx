@@ -26,10 +26,11 @@ interface Auditoria {
   fechaInicio: string;
   fechaFin: string;
   estado: string;
-  auditorLider: {
+  auditorLider?: {
     id: string;
     nombre: string;
-    apellido: string;
+    primerApellido: string;
+    segundoApellido?: string;
   };
   hallazgosCount: number;
   progreso: number;
@@ -69,7 +70,7 @@ export default function AuditoriasEnCurso() {
           auditorLider: {
             id: "u1",
             nombre: "Carlos",
-            apellido: "Mendoza"
+            primerApellido: "Mendoza"
           },
           hallazgosCount: 5,
           progreso: 65
@@ -88,7 +89,7 @@ export default function AuditoriasEnCurso() {
           auditorLider: {
             id: "u2",
             nombre: "Ana María",
-            apellido: "Torres"
+            primerApellido: "Torres"
           },
           hallazgosCount: 2,
           progreso: 40
@@ -107,7 +108,7 @@ export default function AuditoriasEnCurso() {
           auditorLider: {
             id: "u3",
             nombre: "Roberto",
-            apellido: "Silva"
+            primerApellido: "Silva"
           },
           hallazgosCount: 8,
           progreso: 75
@@ -338,7 +339,9 @@ export default function AuditoriasEnCurso() {
                       <div>
                         <p className="text-xs text-gray-500 font-medium">Auditor Líder</p>
                         <p className="text-sm font-semibold text-gray-900">
-                          {auditoria.auditorLider.nombre} {auditoria.auditorLider.apellido}
+                          {auditoria.auditorLider 
+                            ? `${auditoria.auditorLider.nombre} ${auditoria.auditorLider.primerApellido}`
+                            : 'No asignado'}
                         </p>
                       </div>
                     </div>

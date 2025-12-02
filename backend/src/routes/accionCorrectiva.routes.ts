@@ -4,6 +4,8 @@ import {
   getAccionesCorrectivas,
   getAccionCorrectivaById,
   updateAccionCorrectiva,
+  cambiarEstadoAccionCorrectiva,
+  verificarAccionCorrectiva,
 } from "../controllers/accionCorrectiva.controller";
 
 const router = Router();
@@ -156,5 +158,76 @@ router.get("/:id", getAccionCorrectivaById);
  *         description: No autorizado
  */
 router.put("/:id", updateAccionCorrectiva);
+
+/**
+ * @swagger
+ * /api/acciones-correctivas/{id}/estado:
+ *   patch:
+ *     summary: Cambiar estado de acción correctiva
+ *     tags: [Acciones Correctivas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - estado
+ *             properties:
+ *               estado:
+ *                 type: string
+ *                 enum: [abierta, en_proceso, cerrada, verificada]
+ *     responses:
+ *       200:
+ *         description: Estado actualizado
+ *       404:
+ *         description: No encontrada
+ *       401:
+ *         description: No autorizado
+ */
+router.patch("/:id/estado", cambiarEstadoAccionCorrectiva);
+
+/**
+ * @swagger
+ * /api/acciones-correctivas/{id}/verificar:
+ *   patch:
+ *     summary: Verificar acción correctiva
+ *     tags: [Acciones Correctivas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               observaciones:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Acción verificada
+ *       404:
+ *         description: No encontrada
+ *       401:
+ *         description: No autorizado
+ */
+router.patch("/:id/verificar", verificarAccionCorrectiva);
 
 export default router;

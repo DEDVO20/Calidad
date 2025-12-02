@@ -76,6 +76,12 @@ export const getAuditorias = async (req: Request, res: Response) => {
 
     const options: any = {
       order: [["creadoEn", "DESC"]],
+      include: [
+        {
+          association: "auditorLider",
+          attributes: ["id", "nombre", "primerApellido", "segundoApellido"],
+        },
+      ],
     };
 
     // Solo agregar where si hay filtros
@@ -97,7 +103,14 @@ export const getAuditorias = async (req: Request, res: Response) => {
 /** Obtener Auditoría por ID */
 export const getAuditoriaById = async (req: Request, res: Response) => {
   try {
-    const auditoria = await Auditorias.findByPk(req.params.id);
+    const auditoria = await Auditorias.findByPk(req.params.id, {
+      include: [
+        {
+          association: "auditorLider",
+          attributes: ["id", "nombre", "primerApellido", "segundoApellido"],
+        },
+      ],
+    });
     if (!auditoria)
       return res.status(404).json({ message: "Auditoría no encontrada" });
     return res.json(auditoria);

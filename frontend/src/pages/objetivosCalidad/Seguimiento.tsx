@@ -380,17 +380,17 @@ const ObjetivosCalidadSeguimiento: React.FC = () => {
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Último seguimiento:</span>
-                    <span className={`text-lg font-bold ${getCumplimientoColor(ultimoSeguimiento.porcentajeCumplimiento || 0)}`}>
-                      {ultimoSeguimiento.porcentajeCumplimiento?.toFixed(1)}%
+                    <span className={`text-lg font-bold ${getCumplimientoColor(Number(ultimoSeguimiento.porcentajeCumplimiento) || 0)}`}>
+                      {Number(ultimoSeguimiento.porcentajeCumplimiento || 0).toFixed(1)}%
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all ${
-                        (ultimoSeguimiento.porcentajeCumplimiento || 0) >= 90 ? 'bg-green-500' :
-                        (ultimoSeguimiento.porcentajeCumplimiento || 0) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                        (Number(ultimoSeguimiento.porcentajeCumplimiento) || 0) >= 90 ? 'bg-green-500' :
+                        (Number(ultimoSeguimiento.porcentajeCumplimiento) || 0) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
                       }`}
-                      style={{ width: `${Math.min(ultimoSeguimiento.porcentajeCumplimiento || 0, 100)}%` }}
+                      style={{ width: `${Math.min(Number(ultimoSeguimiento.porcentajeCumplimiento) || 0, 100)}%` }}
                     ></div>
                   </div>
                 </div>
