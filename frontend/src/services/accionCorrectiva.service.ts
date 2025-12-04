@@ -2,6 +2,7 @@ const API_URL = "http://localhost:3000/api";
 
 export interface AccionCorrectiva {
   id: string;
+  noConformidadId: string;
   codigo: string;
   tipo: string;
   descripcion: string;

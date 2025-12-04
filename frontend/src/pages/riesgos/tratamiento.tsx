@@ -17,24 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-
-const API_URL = "http://localhost:3000/api";
-
-interface Riesgo {
-  id: string;
-  codigo: string;
-  descripcion?: string;
-  tipo?: string;
-  probabilidad?: number;
-  impacto?: number;
-  nivelRiesgo?: number;
-  tratamiento?: string;
-  responsableId?: string;
-  estado?: string;
-  fechaIdentificacion?: string;
-  fechaRevision?: string;
-  creadoEn: string;
-}
+import { riesgoService, Riesgo } from "@/services/riesgo.service";
 
 export default function TratamientoRiesgos() {
   const [riesgos, setRiesgos] = useState<Riesgo[]>([]);
@@ -48,32 +31,11 @@ export default function TratamientoRiesgos() {
     fetchRiesgos();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
   const fetchRiesgos = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
-      const response = await fetch(`${API_URL}/riesgos`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar riesgos");
-      }
-
-      const data = await response.json();
+      const data = await riesgoService.getAll();
       setRiesgos(data);
     } catch (error: any) {
       console.error("Error:", error);

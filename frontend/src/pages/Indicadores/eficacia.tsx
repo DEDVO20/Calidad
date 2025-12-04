@@ -8,15 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const API_URL = "http://localhost:3000/api";
-
-interface Indicador {
-  id: string;
-  procesoId?: string;
-  descripcion?: string;
-  creadoEn: string;
-}
+import { indicadorService, Indicador } from "@/services/indicador.service";
 
 export default function EficaciaIndicadores() {
   const [indicadores, setIndicadores] = useState<Indicador[]>([]);
@@ -27,38 +19,12 @@ export default function EficaciaIndicadores() {
     fetchIndicadores();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
   const fetchIndicadores = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
-      const response = await fetch(`${API_URL}/indicadores`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar indicadores");
-      }
-
-      const data = await response.json();
-      // Filtrar indicadores de eficacia (puedes ajustar este filtro según tu lógica)
-      const indicadoresEficacia = data.filter((ind: Indicador) =>
-        ind.descripcion?.toLowerCase().includes('eficacia') ||
-        ind.descripcion?.toLowerCase().includes('objetivo')
-      );
-      setIndicadores(indicadoresEficacia);
+      const data = await indicadorService.getAll({ tipo: "eficacia" });
+      setIndicadores(data);
     } catch (error: any) {
       console.error("Error:", error);
       setError(error.message);

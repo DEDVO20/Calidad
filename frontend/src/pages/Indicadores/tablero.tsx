@@ -8,19 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const API_URL = "http://localhost:3000/api";
-
-interface Indicador {
-  id: string;
-  procesoId?: string;
-  clave: string;
-  descripcion?: string;
-  valor?: number;
-  periodoInicio?: string;
-  periodoFin?: string;
-  creadoEn: string;
-}
+import { indicadorService, Indicador } from "@/services/indicador.service";
 
 export default function TableroIndicadores() {
   const [indicadores, setIndicadores] = useState<Indicador[]>([]);
@@ -31,32 +19,11 @@ export default function TableroIndicadores() {
     fetchIndicadores();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
-
   const fetchIndicadores = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const token = getAuthToken();
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
-      const response = await fetch(`${API_URL}/indicadores`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar indicadores");
-      }
-
-      const data = await response.json();
+      const data = await indicadorService.getAll();
       setIndicadores(data);
     } catch (error: any) {
       console.error("Error:", error);
@@ -68,21 +35,21 @@ export default function TableroIndicadores() {
 
   // Calcular estadísticas
   const totalIndicadores = indicadores.length;
-  const promedioValor = indicadores.length > 0 
-    ? indicadores.reduce((sum, ind) => sum + (ind.valor || 0), 0) / indicadores.length 
+  const promedioMeta = indicadores.length > 0 
+    ? indicadores.reduce((sum, ind) => sum + (ind.meta || 0), 0) / indicadores.length 
     : 0;
-  const indicadoresActivos = indicadores.filter(ind => ind.valor !== null && ind.valor !== undefined).length;
+  const indicadoresActivos = indicadores.filter(ind => ind.estado === "activo").length;
 
-  // Clasificar por rangos de valor
-  const excelentes = indicadores.filter(ind => (ind.valor || 0) >= 90).length;
-  const buenos = indicadores.filter(ind => (ind.valor || 0) >= 70 && (ind.valor || 0) < 90).length;
-  const regulares = indicadores.filter(ind => (ind.valor || 0) >= 50 && (ind.valor || 0) < 70).length;
-  const bajos = indicadores.filter(ind => (ind.valor || 0) < 50).length;
+  // Clasificar por rangos de meta
+  const excelentes = indicadores.filter(ind => (ind.meta || 0) >= 90).length;
+  const buenos = indicadores.filter(ind => (ind.meta || 0) >= 70 && (ind.meta || 0) < 90).length;
+  const regulares = indicadores.filter(ind => (ind.meta || 0) >= 50 && (ind.meta || 0) < 70).length;
+  const bajos = indicadores.filter(ind => (ind.meta || 0) < 50).length;
 
-  const getValorBadge = (valor: number) => {
-    if (valor >= 90) return <Badge className="bg-green-500">Excelente</Badge>;
-    if (valor >= 70) return <Badge className="bg-blue-500">Bueno</Badge>;
-    if (valor >= 50) return <Badge className="bg-amber-500">Regular</Badge>;
+  const getMetaBadge = (meta: number) => {
+    if (meta >= 90) return <Badge className="bg-green-500">Excelente</Badge>;
+    if (meta >= 70) return <Badge className="bg-blue-500">Bueno</Badge>;
+    if (meta >= 50) return <Badge className="bg-amber-500">Regular</Badge>;
     return <Badge variant="destructive">Bajo</Badge>;
   };
 
@@ -149,7 +116,7 @@ export default function TableroIndicadores() {
               <CardTitle className="text-sm font-medium">Promedio General</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-500" />
             </div>
-            <div className="text-2xl font-bold">{promedioValor.toFixed(1)}%</div>
+            <div className="text-2xl font-bold">{promedioMeta.toFixed(1)}%</div>
           </CardHeader>
         </Card>
 

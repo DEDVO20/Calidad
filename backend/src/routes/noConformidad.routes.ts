@@ -4,7 +4,9 @@ import {
   getNoConformidades,
   getNoConformidadById,
   updateNoConformidad,
-  deleteNoConformidad
+  deleteNoConformidad,
+  iniciarTratamientoNoConformidad,
+  cerrarNoConformidad
 } from "../controllers/noConformidad.controller";
 
 const router = Router();
@@ -255,5 +257,64 @@ router.put("/:id", updateNoConformidad);
  *         description: No autorizado
  */
 router.delete("/:id", deleteNoConformidad);
+
+/**
+ * @swagger
+ * /api/noconformidades/{id}/iniciar-tratamiento:
+ *   patch:
+ *     summary: Iniciar tratamiento de no conformidad
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Tratamiento iniciado
+ *       404:
+ *         description: No encontrada
+ *       401:
+ *         description: No autorizado
+ */
+router.patch("/:id/iniciar-tratamiento", iniciarTratamientoNoConformidad);
+
+/**
+ * @swagger
+ * /api/noconformidades/{id}/cerrar:
+ *   patch:
+ *     summary: Cerrar no conformidad
+ *     tags: [No Conformidades]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               observaciones:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: No conformidad cerrada
+ *       404:
+ *         description: No encontrada
+ *       401:
+ *         description: No autorizado
+ */
+router.patch("/:id/cerrar", cerrarNoConformidad);
 
 export default router;

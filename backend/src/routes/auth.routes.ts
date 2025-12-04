@@ -6,10 +6,71 @@ import {
   forgotPassword,
   resetPassword,
   logout,
+  getMe,
   verifyToken,
 } from "../controllers/auth.controller";
 
 const router = Router();
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Obtener información del usuario autenticado
+ *     tags: [Autenticación]
+ *     description: Devuelve la información completa del usuario actualmente autenticado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Información del usuario
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     documento:
+ *                       type: integer
+ *                     nombre:
+ *                       type: string
+ *                     segundoNombre:
+ *                       type: string
+ *                     primerApellido:
+ *                       type: string
+ *                     segundoApellido:
+ *                       type: string
+ *                     correoElectronico:
+ *                       type: string
+ *                       format: email
+ *                     nombreUsuario:
+ *                       type: string
+ *                     areaId:
+ *                       type: string
+ *                       format: uuid
+ *                     activo:
+ *                       type: boolean
+ *                     fotoUrl:
+ *                       type: string
+ *       401:
+ *         description: Token no proporcionado, inválido o expirado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Token inválido o expirado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/me", getMe);
 
 /**
  * @swagger

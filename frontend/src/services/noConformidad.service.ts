@@ -1,25 +1,25 @@
 const API_URL = "http://localhost:3000/api";
 
 export interface NoConformidad {
-  id: number;
+  id: string;
   codigo: string;
   tipo?: string;
   descripcion: string;
   estado: string;
   gravedad?: string;
   fechaDeteccion: string;
-  responsableId?: number;
-  areaId?: number;
-  documentoId?: number;
+  responsableId?: string;
+  areaId?: string;
+  documentoId?: string;
   creadoEn?: string;
   actualizadoEn?: string;
   responsable?: {
-    id: number;
+    id: string;
     nombre: string;
     primerApellido: string;
   };
   area?: {
-    id: number;
+    id: string;
     nombre: string;
   };
 }
@@ -80,7 +80,7 @@ export const noConformidadService = {
   },
 
   // Obtener una no conformidad por ID
-  async getById(id: number): Promise<NoConformidad> {
+  async getById(id: string): Promise<NoConformidad> {
     const response = await fetch(`${API_URL}/noconformidades/${id}`, {
       headers: getAuthHeaders(),
     });
@@ -100,7 +100,7 @@ export const noConformidadService = {
   },
 
   // Actualizar no conformidad
-  async update(id: number, data: Partial<NoConformidad>): Promise<NoConformidad> {
+  async update(id: string, data: Partial<NoConformidad>): Promise<NoConformidad> {
     const response = await fetch(`${API_URL}/noconformidades/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
@@ -111,7 +111,7 @@ export const noConformidadService = {
   },
 
   // Iniciar tratamiento de no conformidad
-  async iniciarTratamiento(id: number): Promise<NoConformidad> {
+  async iniciarTratamiento(id: string): Promise<NoConformidad> {
     const response = await fetch(
       `${API_URL}/noconformidades/${id}/iniciar-tratamiento`,
       {
@@ -124,7 +124,7 @@ export const noConformidadService = {
   },
 
   // Cerrar no conformidad
-  async cerrar(id: number, observaciones?: string): Promise<NoConformidad> {
+  async cerrar(id: string, observaciones?: string): Promise<NoConformidad> {
     const response = await fetch(`${API_URL}/noconformidades/${id}/cerrar`, {
       method: "PATCH",
       headers: getAuthHeaders(),
@@ -135,7 +135,7 @@ export const noConformidadService = {
   },
 
   // Eliminar no conformidad
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     const response = await fetch(`${API_URL}/noconformidades/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
