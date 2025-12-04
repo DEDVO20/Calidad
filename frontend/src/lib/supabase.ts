@@ -19,10 +19,16 @@ export async function uploadFileToSupabase(
   filename: string,
   bucket: string = "documentos",
 ): Promise<{ path: string; url: string }> {
+  console.log("📦 Supabase Lib Upload:", { filename, bucket });
   try {
+    // Defensive fix: Ensure filename doesn't start with bucket name
+    const cleanFilename = filename.startsWith(`${bucket}/`)
+      ? filename.replace(`${bucket}/`, "")
+      : filename;
+
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(filename, file, {
+      .upload(cleanFilename, file, {
         cacheControl: "3600",
         upsert: false,
       });
