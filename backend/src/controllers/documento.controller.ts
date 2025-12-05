@@ -204,26 +204,59 @@ export const updateDocumento = async (req: Request, res: Response) => {
       fechaAprobacion,
       proximaRevision,
       contenidoHtml,
+      cambios, // Descripción de cambios para la versión
     } = req.body;
 
     const archivo = req.file;
 
-    //si ahy archivo nuevo, eliminar anterior y subir el nuevo
+    // Si hay archivo nuevo, crear versión del documento actual y subir el nuevo
     if (archivo) {
+      // 1. Crear versión del estado actual del documento (antes de actualizar)
       if (doc.rutaAlmacenamiento) {
-        try {
-          const oldPath = doc.rutaAlmacenamiento.split("/").pop();
-          if (oldPath) {
-            // await deleteFileFromSupabase(oldPath);
-          }
-        } catch (error) {
-          console.error("Error al eliminar archivo anterior:", error);
-        }
+        const VersionDocumento = require("../models/versionDocumento.model").default;
+
+        // Obtener el último número de versión
+        const ultimaVersion = await VersionDocumento.findOne({
+          where: { documentoId: doc.id },
+          order: [["numeroVersion", "DESC"]],
+        });
+
+        const nuevoNumeroVersion = ultimaVersion ? ultimaVersion.numeroVersion + 1 : 1;
+
+        // Calcular versión string (formato semántico)
+        const versionActualArray = (doc.versionActual || "1.0").split(".");
+        const major = parseInt(versionActualArray[0] || "1");
+        const minor = parseInt(versionActualArray[1] || "0");
+
+        // Incrementar versión (por ahora solo incrementamos el minor)
+        const nuevaVersionString = `${major}.${minor + 1}`;
+
+        // Crear registro de la versión anterior
+        await VersionDocumento.create({
+          documentoId: doc.id,
+          numeroVersion: nuevoNumeroVersion,
+          versionString: doc.versionActual || "1.0",
+          subidoPor: subidoPor || doc.subidoPor,
+          cambios: cambios || "Actualización de documento",
+          rutaArchivo: doc.rutaArchivo,
+          archivoUrl: doc.rutaAlmacenamiento,
+          estado: "historica",
+          nombreArchivo: doc.nombreArchivo,
+          tamañoBytes: doc.tamañoBytes,
+        });
+
+        console.log(`✅ Versión ${doc.versionActual} guardada en historial`);
       }
 
-      //Subir nuevo archivo
+      // 2. Subir nuevo archivo a Supabase con path versionado
       const extension = archivo.originalname.split(".").pop();
-      const filename = `${UUIDV4()}.${extension}`;
+      const versionActualArray = (doc.versionActual || "1.0").split(".");
+      const major = parseInt(versionActualArray[0] || "1");
+      const minor = parseInt(versionActualArray[1] || "0");
+      const nuevaVersionString = `${major}.${minor + 1}`;
+
+      // Path: documentos/{documentoId}/v{version}_{filename}
+      const filename = `${doc.id}/v${nuevaVersionString}_${UUIDV4()}.${extension}`;
 
       const { url } = await uploadFileToSupabase(
         filename,
@@ -231,16 +264,19 @@ export const updateDocumento = async (req: Request, res: Response) => {
         "documentos",
       );
 
+      // 3. Actualizar documento con nueva información
       await doc.update({
-        nombreArchivo,
+        nombreArchivo: nombreArchivo || archivo.originalname,
         rutaAlmacenamiento: url,
+        rutaArchivo: filename,
         tipoMime: archivo.mimetype,
         tamañoBytes: archivo.size,
+        versionActual: nuevaVersionString,
         subidoPor,
         visibilidad,
         tipoDocumento,
         codigoDocumento,
-        version,
+        version: nuevaVersionString,
         estado,
         aprobadoPor,
         fechaAprobacion,
@@ -248,8 +284,12 @@ export const updateDocumento = async (req: Request, res: Response) => {
         creadoPor,
         revisadoPor,
         contenidoHtml,
+        actualizadoEn: new Date(),
       });
+
+      console.log(`✅ Documento actualizado a versión ${nuevaVersionString}`);
     } else {
+      // Si no hay archivo, solo actualizar metadata
       await doc.update({
         nombreArchivo,
         tipoDocumento,
@@ -263,10 +303,12 @@ export const updateDocumento = async (req: Request, res: Response) => {
         aprobadoPor,
         fechaAprobacion,
         contenidoHtml,
+        actualizadoEn: new Date(),
       });
     }
     return res.json(doc);
   } catch (error: any) {
+    console.error("❌ Error al actualizar documento:", error);
     return res
       .status(500)
       .json({ message: "Error al actualizar documento", error: error.message });

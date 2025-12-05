@@ -8,6 +8,9 @@ import {
   getVersionesByUsuario,
   updateVersionDocumento,
   deleteVersionDocumento,
+  restoreVersion,
+  compareVersions,
+  downloadVersion,
 } from "../controllers/versionDocumento.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -235,5 +238,88 @@ router.put("/:id", updateVersionDocumento);
  *         description: Error al eliminar la versión del documento
  */
 router.delete("/:id", deleteVersionDocumento);
+
+/**
+ * @swagger
+ * /api/versiones-documento/{id}/restore:
+ *   post:
+ *     summary: Restaurar una versión como la versión actual
+ *     tags: [VersionesDocumento]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Versión restaurada exitosamente
+ *       404:
+ *         description: Versión no encontrada
+ *       500:
+ *         description: Error al restaurar la versión
+ */
+router.post("/:id/restore", restoreVersion);
+
+/**
+ * @swagger
+ * /api/versiones-documento/compare/{id1}/{id2}:
+ *   get:
+ *     summary: Comparar dos versiones de un documento
+ *     tags: [VersionesDocumento]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id1
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: id2
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Comparación exitosa
+ *       404:
+ *         description: Una o ambas versiones no encontradas
+ *       400:
+ *         description: Las versiones deben ser del mismo documento
+ *       500:
+ *         description: Error al comparar versiones
+ */
+router.get("/compare/:id1/:id2", compareVersions);
+
+/**
+ * @swagger
+ * /api/versiones-documento/{id}/download:
+ *   get:
+ *     summary: Obtener URL de descarga de una versión específica
+ *     tags: [VersionesDocumento]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: URL de descarga obtenida
+ *       404:
+ *         description: Versión no encontrada o sin archivo
+ *       500:
+ *         description: Error al obtener URL de descarga
+ */
+router.get("/:id/download", downloadVersion);
 
 export default router;

@@ -4,29 +4,38 @@ interface VersionDocumentoAttributes {
   id: string;
   documentoId: string;
   numeroVersion: number;
+  versionString: string; // Versión en formato "1.0", "1.1", etc.
   subidoEn?: Date;
   subidoPor?: string;
   cambios?: string;
   rutaArchivo?: string;
+  archivoUrl?: string; // URL completa del archivo en Supabase
+  estado?: string; // 'activa' o 'historica'
+  nombreArchivo?: string; // Nombre original del archivo
+  tamañoBytes?: number; // Tamaño del archivo
 }
 
 interface VersionDocumentoCreationAttributes
   extends Optional<
     VersionDocumentoAttributes,
-    "id" | "subidoEn" | "subidoPor" | "cambios" | "rutaArchivo"
-  > {}
+    "id" | "subidoEn" | "subidoPor" | "cambios" | "rutaArchivo" | "archivoUrl" | "estado" | "nombreArchivo" | "tamañoBytes"
+  > { }
 
 class VersionDocumento
   extends Model<VersionDocumentoAttributes, VersionDocumentoCreationAttributes>
-  implements VersionDocumentoAttributes
-{
+  implements VersionDocumentoAttributes {
   public id!: string;
   public documentoId!: string;
   public numeroVersion!: number;
+  public versionString!: string;
   public subidoEn?: Date;
   public subidoPor?: string;
   public cambios?: string;
   public rutaArchivo?: string;
+  public archivoUrl?: string;
+  public estado?: string;
+  public nombreArchivo?: string;
+  public tamañoBytes?: number;
 
   static initModel(sequelize: Sequelize): typeof VersionDocumento {
     return VersionDocumento.init(
@@ -46,6 +55,11 @@ class VersionDocumento
           allowNull: false,
           field: "numero_version",
         },
+        versionString: {
+          type: DataTypes.STRING(20),
+          allowNull: false,
+          field: "version_string",
+        },
         subidoEn: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
@@ -64,6 +78,26 @@ class VersionDocumento
           type: DataTypes.TEXT,
           allowNull: true,
           field: "ruta_archivo",
+        },
+        archivoUrl: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "archivo_url",
+        },
+        estado: {
+          type: DataTypes.STRING(20),
+          allowNull: true,
+          defaultValue: "historica",
+        },
+        nombreArchivo: {
+          type: DataTypes.STRING(500),
+          allowNull: true,
+          field: "nombre_archivo",
+        },
+        tamañoBytes: {
+          type: DataTypes.BIGINT,
+          allowNull: true,
+          field: "tamaño_bytes",
         },
       },
       {
