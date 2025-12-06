@@ -102,7 +102,7 @@ class VersionDocumento
       },
       {
         sequelize,
-        tableName: "versiones_documento",
+        tableName: "version_documentos", // Nombre real de la tabla en la BD
         modelName: "VersionDocumento",
         timestamps: false,
         underscored: true,

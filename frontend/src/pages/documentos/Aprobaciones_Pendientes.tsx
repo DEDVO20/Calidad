@@ -8,12 +8,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  FileCheck, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle, 
-  X, 
+import { Textarea } from "@/components/ui/textarea";
+import {
+  FileCheck,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  X,
   Eye,
   FileText,
   Calendar,
@@ -31,6 +32,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { aprobacionesService } from "@/services/aprobaciones.service";
+import { toast } from "sonner";
 
 interface Documento {
   id: string;
@@ -64,6 +67,7 @@ export default function AprobacionesPendientes() {
   const [total, setTotal] = useState(0);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<string>("todos");
+  const [comentarios, setComentarios] = useState("");
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     type: 'aprobar' | 'rechazar' | null;
@@ -77,20 +81,7 @@ export default function AprobacionesPendientes() {
   const fetchAprobacionesPendientes = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      
-      // Endpoint correcto según tu backend
-      const response = await fetch("/api/documentos", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener documentos pendientes");
-      }
-
-      const data = await response.json();
+      const data = await aprobacionesService.getPendientes();
 
       // Transformar datos según la estructura de tu API
       const transformedData = data.items?.map((doc: DocumentoAPI) => ({
@@ -111,45 +102,9 @@ export default function AprobacionesPendientes() {
       setTotal(data.total || transformedData.length);
     } catch (error) {
       console.error("Error:", error);
-      
-      // Datos de ejemplo para desarrollo/testing
-      const ejemploData: Documento[] = [
-        {
-          id: "1",
-          codigo: "PRO-SGC-001",
-          nombreArchivo: "Procedimiento de Control de Documentos",
-          tipo: "Procedimiento",
-          version: "2.0",
-          estado: "Pendiente de Aprobación",
-          fechaSolicitud: "2024-10-20T10:30:00",
-          solicitadoPor: "Ana Martínez",
-          prioridad: "Alta",
-        },
-        {
-          id: "2",
-          codigo: "FOR-CAL-015",
-          nombreArchivo: "Formato de Auditoría Interna",
-          tipo: "Formato",
-          version: "1.5",
-          estado: "Pendiente de Aprobación",
-          fechaSolicitud: "2024-10-22T14:20:00",
-          solicitadoPor: "Carlos Rodríguez",
-          prioridad: "Media",
-        },
-        {
-          id: "3",
-          codigo: "MAN-SGC-001",
-          nombreArchivo: "Manual de Calidad ISO 9001:2015",
-          tipo: "Manual",
-          version: "3.0",
-          estado: "Pendiente de Aprobación",
-          fechaSolicitud: "2024-10-18T09:00:00",
-          solicitadoPor: "María González",
-          prioridad: "Urgente",
-        },
-      ];
-      setDocumentos(ejemploData);
-      setTotal(ejemploData.length);
+      toast.error("Error al cargar documentos pendientes");
+      setDocumentos([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -166,6 +121,7 @@ export default function AprobacionesPendientes() {
 
   const openDialog = (type: 'aprobar' | 'rechazar', documento: Documento) => {
     setDialogState({ open: true, type, documento });
+    setComentarios(""); // Limpiar comentarios
   };
 
   const closeDialog = () => {
@@ -178,29 +134,15 @@ export default function AprobacionesPendientes() {
 
     setActionLoading(documento.id);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/documentos/${documento.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ estado: "aprobado" }),
-      });
+      await aprobacionesService.aprobar(documento.id);
 
-      if (!response.ok) {
-        throw new Error("Error al aprobar documento");
-      }
+      toast.success(`Documento "${documento.nombreArchivo}" aprobado correctamente`);
 
-      // Mostrar mensaje de éxito
-      alert(`✓ Documento "${documento.nombreArchivo}" aprobado correctamente`);
-      
-      // Recargar datos
       await fetchAprobacionesPendientes();
       closeDialog();
     } catch (error) {
       console.error("Error:", error);
-      alert("✗ Error al aprobar el documento. Por favor intente nuevamente.");
+      toast.error("Error al aprobar el documento. Por favor intente nuevamente.");
     } finally {
       setActionLoading(null);
     }
@@ -210,31 +152,23 @@ export default function AprobacionesPendientes() {
     const documento = dialogState.documento;
     if (!documento) return;
 
+    // Validar comentarios (mínimo 10 caracteres)
+    if (!comentarios || comentarios.trim().length < 10) {
+      toast.error("Los comentarios son obligatorios y deben tener al menos 10 caracteres");
+      return;
+    }
+
     setActionLoading(documento.id);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/documentos/${documento.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ estado: "borrador" }),
-      });
+      await aprobacionesService.rechazar(documento.id, comentarios);
 
-      if (!response.ok) {
-        throw new Error("Error al rechazar documento");
-      }
+      toast.success(`Documento "${documento.nombreArchivo}" rechazado. Devuelto a borrador.`);
 
-      // Mostrar mensaje de éxito
-      alert(`✓ Documento "${documento.nombreArchivo}" rechazado. Devuelto a borrador.`);
-      
-      // Recargar datos
       await fetchAprobacionesPendientes();
       closeDialog();
     } catch (error) {
       console.error("Error:", error);
-      alert("✗ Error al rechazar el documento. Por favor intente nuevamente.");
+      toast.error("Error al rechazar el documento. Por favor intente nuevamente.");
     } finally {
       setActionLoading(null);
     }
@@ -306,8 +240,8 @@ export default function AprobacionesPendientes() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={fetchAprobacionesPendientes}
             disabled={loading}
@@ -483,8 +417,8 @@ export default function AprobacionesPendientes() {
             </thead>
             <tbody>
               {documentosFiltrados.map((doc) => (
-                <tr 
-                  key={doc.id} 
+                <tr
+                  key={doc.id}
                   className="border-b transition-colors hover:bg-gray-50"
                 >
                   <td className="p-4 align-middle">
@@ -510,8 +444,8 @@ export default function AprobacionesPendientes() {
                     </span>
                   </td>
                   <td className="p-4 align-middle">
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={`${getPrioridadColor(doc.prioridad)} font-medium`}
                     >
                       {getPrioridadIcon(doc.prioridad)}
@@ -583,7 +517,7 @@ export default function AprobacionesPendientes() {
                 ¡No hay documentos pendientes!
               </h3>
               <p className="text-gray-600 mb-4">
-                {filtro !== "todos" 
+                {filtro !== "todos"
                   ? `No hay documentos con prioridad ${filtro}`
                   : "Todos los documentos han sido revisados y aprobados."
                 }
@@ -629,15 +563,35 @@ export default function AprobacionesPendientes() {
                       Versión: {dialogState.documento.version}
                     </p>
                   </div>
-                  {dialogState.type === 'aprobar' ? (
-                    <p>
-                      El documento será marcado como <strong className="text-green-600">aprobado</strong> y 
-                      estará disponible para su uso en el sistema.
-                    </p>
+
+                  {dialogState.type === 'rechazar' ? (
+                    <>
+                      <div className="space-y-2">
+                        <label htmlFor="comentarios" className="text-sm font-medium text-gray-900 block">
+                          Motivo del rechazo <span className="text-red-600">*</span>
+                        </label>
+                        <Textarea
+                          id="comentarios"
+                          placeholder="Explica por qué se rechaza este documento (mínimo 10 caracteres)..."
+                          value={comentarios}
+                          onChange={(e) => setComentarios(e.target.value)}
+                          className="min-h-[100px]"
+                          disabled={actionLoading !== null}
+                        />
+                        <p className={`text-xs ${comentarios.length < 10 ? 'text-red-600' : 'text-gray-500'
+                          }`}>
+                          {comentarios.length}/10 caracteres mínimo
+                        </p>
+                      </div>
+                      <p className="text-sm">
+                        El documento será devuelto a estado <strong className="text-orange-600">borrador</strong> y
+                        el solicitante deberá realizar las correcciones necesarias.
+                      </p>
+                    </>
                   ) : (
                     <p>
-                      El documento será devuelto a estado <strong className="text-orange-600">borrador</strong> y 
-                      el solicitante deberá realizar las correcciones necesarias.
+                      El documento será marcado como <strong className="text-green-600">aprobado</strong> y
+                      estará disponible para su uso en el sistema.
                     </p>
                   )}
                 </>
@@ -651,8 +605,8 @@ export default function AprobacionesPendientes() {
             <AlertDialogAction
               onClick={dialogState.type === 'aprobar' ? handleAprobar : handleRechazar}
               disabled={actionLoading !== null}
-              className={dialogState.type === 'aprobar' 
-                ? 'bg-green-600 hover:bg-green-700' 
+              className={dialogState.type === 'aprobar'
+                ? 'bg-green-600 hover:bg-green-700'
                 : 'bg-red-600 hover:bg-red-700'
               }
             >

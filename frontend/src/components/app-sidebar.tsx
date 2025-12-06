@@ -14,6 +14,8 @@ import {
   TrendingUp,
   FileCheck,
   BookOpen,
+  CheckSquare,
+  FileX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
@@ -153,10 +155,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Aprobaciones Pendientes",
             url: "/Aprobaciones_Pendientes",
             badge: pendingCount > 0 ? pendingCount.toString() : undefined,
+            icon: FileCheck,
+          },
+          {
+            title: "Mis Aprobaciones",
+            url: "/mis-aprobaciones",
+            icon: CheckSquare,
           },
           {
             title: "Documentos Obsoletos",
             url: "/Documentos_Obsoletos",
+            icon: FileX,
           },
         ],
       },
