@@ -115,6 +115,18 @@ export const createDocumento = async (req: Request, res: Response) => {
     return res.status(201).json(doc);
   } catch (error: any) {
     console.error("Error al crear documento:", error);
+
+    // Manejar error de código duplicado
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      if (error.parent?.constraint === 'documentos_codigo_key') {
+        return res.status(400).json({
+          message: "Ya existe un documento con ese código",
+          error: `El código '${req.body.codigo}' ya está en uso. Por favor, utiliza un código diferente.`,
+          field: 'codigo'
+        });
+      }
+    }
+
     return res
       .status(500)
       .json({ message: "Error al crear documento", error: error.message });
