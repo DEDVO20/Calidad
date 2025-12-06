@@ -7,6 +7,12 @@ import {
   updateDocumento,
   deleteDocumento,
 } from "../controllers/documento.controller";
+import {
+  getDocumentosPendientes,
+  aprobarDocumento,
+  rechazarDocumento,
+  getMisAprobaciones,
+} from "../controllers/aprobaciones.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -311,5 +317,11 @@ router.put("/:id", authMiddleware, upload.single("archivo"), updateDocumento);
  *         description: Documento no encontrado
  */
 router.delete("/:id", authMiddleware, deleteDocumento);
+
+// Rutas específicas para aprobaciones
+router.get("/pendientes/lista", authMiddleware, getDocumentosPendientes);
+router.get("/mis-aprobaciones/resumen", authMiddleware, getMisAprobaciones);
+router.post("/:id/aprobar", authMiddleware, aprobarDocumento);
+router.post("/:id/rechazar", authMiddleware, rechazarDocumento);
 
 export default router;

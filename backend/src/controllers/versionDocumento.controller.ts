@@ -61,12 +61,13 @@ export const getVersionesByDocumento = async (req: Request, res: Response) => {
       order: [["numeroVersion", "DESC"]],
     });
     res.status(200).json(versiones);
-  } catch (error) {
+  } catch (error: any) {
+    console.error("❌ Error en getVersionesByDocumento:", error);
     res
       .status(500)
       .json({
         message: "Error al obtener las versiones del documento",
-        error,
+        error: error.message,
       });
   }
 };

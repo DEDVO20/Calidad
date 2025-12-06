@@ -208,52 +208,91 @@ export const updateDocumento = async (req: Request, res: Response) => {
     } = req.body;
 
     const archivo = req.file;
+    const VersionDocumento = require("../models/versionDocumento.model").default;
+
+    // Helper: Detectar si hay cambios significativos en metadata
+    const hayCambiosSignificativos = () => {
+      const camposCriticos = [
+        { campo: 'contenidoHtml', valorActual: doc.contenidoHtml, valorNuevo: contenidoHtml },
+        { campo: 'estado', valorActual: doc.estado, valorNuevo: estado },
+        { campo: 'nombreArchivo', valorActual: doc.nombreArchivo, valorNuevo: nombreArchivo },
+        { campo: 'tipoDocumento', valorActual: doc.tipoDocumento, valorNuevo: tipoDocumento },
+      ];
+
+      return camposCriticos.some(({ valorActual, valorNuevo }) =>
+        valorNuevo !== undefined && valorNuevo !== null && valorActual !== valorNuevo
+      );
+    };
+
+    // Helper: Obtener siguiente número de versión
+    const obtenerSiguienteNumeroVersion = async () => {
+      const ultimaVersion = await VersionDocumento.findOne({
+        where: { documentoId: doc.id },
+        order: [["numeroVersion", "DESC"]],
+      });
+      return ultimaVersion ? ultimaVersion.numeroVersion + 1 : 1;
+    };
+
+    // Helper: Calcular nueva versión string
+    const calcularNuevaVersion = (esArchivoNuevo: boolean) => {
+      const versionActualArray = (doc.versionActual || "1.0").split(".");
+      const major = parseInt(versionActualArray[0] || "1");
+      const minor = parseInt(versionActualArray[1] || "0");
+      const patch = parseInt(versionActualArray[2] || "0");
+
+      if (esArchivoNuevo) {
+        // Archivo nuevo: incrementa MINOR (1.0 -> 1.1)
+        return `${major}.${minor + 1}.0`;
+      } else {
+        // Solo metadata: incrementa PATCH (1.0.0 -> 1.0.1)
+        return `${major}.${minor}.${patch + 1}`;
+      }
+    };
+
+    // Helper: Crear snapshot de la versión actual
+    const crearSnapshotVersion = async (esArchivoNuevo: boolean, descripcionCambios: string) => {
+      const nuevoNumeroVersion = await obtenerSiguienteNumeroVersion();
+
+      await VersionDocumento.create({
+        documentoId: doc.id,
+        version: doc.versionActual || doc.version || "1.0",
+        numeroVersion: nuevoNumeroVersion,
+        versionString: doc.versionActual || "1.0",
+        subidoPor: subidoPor || doc.subidoPor,
+        cambios: descripcionCambios,
+        // Datos del archivo (si existe)
+        rutaArchivo: doc.rutaArchivo,
+        archivoUrl: doc.rutaAlmacenamiento,
+        nombreArchivo: doc.nombreArchivo,
+        tamañoBytes: doc.tamañoBytes,
+        tieneArchivo: !!doc.rutaAlmacenamiento,
+        // Snapshot de metadata
+        contenidoHtml: doc.contenidoHtml,
+        estadoDocumento: doc.estado,
+        tipoDocumento: doc.tipoDocumento,
+        codigoDocumento: doc.codigoDocumento,
+        estado: "historica",
+        metadataSnapshot: {
+          visibilidad: doc.visibilidad,
+          proximaRevision: doc.proximaRevision,
+          creadoPor: doc.creadoPor,
+          revisadoPor: doc.revisadoPor,
+        },
+      });
+
+      console.log(`📸 Versión ${doc.versionActual} guardada en historial`);
+    };
 
     // Si hay archivo nuevo, crear versión del documento actual y subir el nuevo
     if (archivo) {
       // 1. Crear versión del estado actual del documento (antes de actualizar)
       if (doc.rutaAlmacenamiento) {
-        const VersionDocumento = require("../models/versionDocumento.model").default;
-
-        // Obtener el último número de versión
-        const ultimaVersion = await VersionDocumento.findOne({
-          where: { documentoId: doc.id },
-          order: [["numeroVersion", "DESC"]],
-        });
-
-        const nuevoNumeroVersion = ultimaVersion ? ultimaVersion.numeroVersion + 1 : 1;
-
-        // Calcular versión string (formato semántico)
-        const versionActualArray = (doc.versionActual || "1.0").split(".");
-        const major = parseInt(versionActualArray[0] || "1");
-        const minor = parseInt(versionActualArray[1] || "0");
-
-        // Incrementar versión (por ahora solo incrementamos el minor)
-        const nuevaVersionString = `${major}.${minor + 1}`;
-
-        // Crear registro de la versión anterior
-        await VersionDocumento.create({
-          documentoId: doc.id,
-          numeroVersion: nuevoNumeroVersion,
-          versionString: doc.versionActual || "1.0",
-          subidoPor: subidoPor || doc.subidoPor,
-          cambios: cambios || "Actualización de documento",
-          rutaArchivo: doc.rutaArchivo,
-          archivoUrl: doc.rutaAlmacenamiento,
-          estado: "historica",
-          nombreArchivo: doc.nombreArchivo,
-          tamañoBytes: doc.tamañoBytes,
-        });
-
-        console.log(`✅ Versión ${doc.versionActual} guardada en historial`);
+        await crearSnapshotVersion(true, cambios || "Actualización con archivo nuevo");
       }
 
       // 2. Subir nuevo archivo a Supabase con path versionado
       const extension = archivo.originalname.split(".").pop();
-      const versionActualArray = (doc.versionActual || "1.0").split(".");
-      const major = parseInt(versionActualArray[0] || "1");
-      const minor = parseInt(versionActualArray[1] || "0");
-      const nuevaVersionString = `${major}.${minor + 1}`;
+      const nuevaVersionString = calcularNuevaVersion(true);
 
       // Path: documentos/{documentoId}/v{version}_{filename}
       const filename = `${doc.id}/v${nuevaVersionString}_${UUIDV4()}.${extension}`;
@@ -287,24 +326,57 @@ export const updateDocumento = async (req: Request, res: Response) => {
         actualizadoEn: new Date(),
       });
 
-      console.log(`✅ Documento actualizado a versión ${nuevaVersionString}`);
+      console.log(`✅ Documento actualizado a versión ${nuevaVersionString} con archivo nuevo`);
     } else {
-      // Si no hay archivo, solo actualizar metadata
-      await doc.update({
-        nombreArchivo,
-        tipoDocumento,
-        codigoDocumento,
-        version,
-        visibilidad,
-        estado,
-        proximaRevision,
-        creadoPor,
-        revisadoPor,
-        aprobadoPor,
-        fechaAprobacion,
-        contenidoHtml,
-        actualizadoEn: new Date(),
-      });
+      // Si no hay archivo nuevo, verificar si hay cambios significativos
+      const cambiosSignificativos = hayCambiosSignificativos();
+
+      if (cambiosSignificativos) {
+        // Crear snapshot de la versión actual antes de actualizar
+        await crearSnapshotVersion(false, cambios || "Actualización de metadata");
+
+        // Calcular nueva versión (patch)
+        const nuevaVersionString = calcularNuevaVersion(false);
+
+        // Actualizar documento con metadata y nueva versión
+        await doc.update({
+          nombreArchivo,
+          tipoDocumento,
+          codigoDocumento,
+          version: nuevaVersionString,
+          versionActual: nuevaVersionString,
+          visibilidad,
+          estado,
+          proximaRevision,
+          creadoPor,
+          revisadoPor,
+          aprobadoPor,
+          fechaAprobacion,
+          contenidoHtml,
+          actualizadoEn: new Date(),
+        });
+
+        console.log(`✅ Documento actualizado a versión ${nuevaVersionString} (cambios en metadata)`);
+      } else {
+        // Solo actualizar metadata sin crear versión
+        await doc.update({
+          nombreArchivo,
+          tipoDocumento,
+          codigoDocumento,
+          version,
+          visibilidad,
+          estado,
+          proximaRevision,
+          creadoPor,
+          revisadoPor,
+          aprobadoPor,
+          fechaAprobacion,
+          contenidoHtml,
+          actualizadoEn: new Date(),
+        });
+
+        console.log(`✅ Documento actualizado sin cambios significativos (no se creó versión)`);
+      }
     }
     return res.json(doc);
   } catch (error: any) {

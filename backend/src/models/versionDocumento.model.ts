@@ -3,6 +3,7 @@ import { DataTypes, Optional, Model, Sequelize } from "sequelize";
 interface VersionDocumentoAttributes {
   id: string;
   documentoId: string;
+  version?: string; // Columna version en la BD
   numeroVersion: number;
   versionString: string; // Versión en formato "1.0", "1.1", etc.
   subidoEn?: Date;
@@ -13,12 +14,19 @@ interface VersionDocumentoAttributes {
   estado?: string; // 'activa' o 'historica'
   nombreArchivo?: string; // Nombre original del archivo
   tamañoBytes?: number; // Tamaño del archivo
+  // Campos para snapshot de metadata
+  contenidoHtml?: string; // Snapshot del contenido HTML
+  estadoDocumento?: string; // Snapshot del estado del documento
+  tipoDocumento?: string; // Snapshot del tipo de documento
+  codigoDocumento?: string; // Snapshot del código del documento
+  metadataSnapshot?: any; // Metadata adicional en JSON
+  tieneArchivo?: boolean; // Indica si esta versión tiene archivo asociado
 }
 
 interface VersionDocumentoCreationAttributes
   extends Optional<
     VersionDocumentoAttributes,
-    "id" | "subidoEn" | "subidoPor" | "cambios" | "rutaArchivo" | "archivoUrl" | "estado" | "nombreArchivo" | "tamañoBytes"
+    "id" | "version" | "subidoEn" | "subidoPor" | "cambios" | "rutaArchivo" | "archivoUrl" | "estado" | "nombreArchivo" | "tamañoBytes" | "contenidoHtml" | "estadoDocumento" | "tipoDocumento" | "codigoDocumento" | "metadataSnapshot" | "tieneArchivo"
   > { }
 
 class VersionDocumento
@@ -26,6 +34,7 @@ class VersionDocumento
   implements VersionDocumentoAttributes {
   public id!: string;
   public documentoId!: string;
+  public version?: string;
   public numeroVersion!: number;
   public versionString!: string;
   public subidoEn?: Date;
@@ -36,6 +45,13 @@ class VersionDocumento
   public estado?: string;
   public nombreArchivo?: string;
   public tamañoBytes?: number;
+  // Campos para snapshot de metadata
+  public contenidoHtml?: string;
+  public estadoDocumento?: string;
+  public tipoDocumento?: string;
+  public codigoDocumento?: string;
+  public metadataSnapshot?: any;
+  public tieneArchivo?: boolean;
 
   static initModel(sequelize: Sequelize): typeof VersionDocumento {
     return VersionDocumento.init(
@@ -50,6 +66,11 @@ class VersionDocumento
           allowNull: false,
           field: "documento_id",
         },
+        version: {
+          type: DataTypes.STRING(50),
+          allowNull: true,
+          field: "version",
+        },
         numeroVersion: {
           type: DataTypes.INTEGER,
           allowNull: false,
@@ -63,16 +84,17 @@ class VersionDocumento
         subidoEn: {
           type: DataTypes.DATE,
           defaultValue: DataTypes.NOW,
-          field: "subido_en",
+          field: "creado_en",
         },
         subidoPor: {
           type: DataTypes.UUID,
-          allowNull: false,
-          field: "subido_por",
+          allowNull: true,
+          field: "creado_por",
         },
         cambios: {
           type: DataTypes.TEXT,
           allowNull: true,
+          field: "descripcion_cambios",
         },
         rutaArchivo: {
           type: DataTypes.TEXT,
@@ -98,6 +120,37 @@ class VersionDocumento
           type: DataTypes.BIGINT,
           allowNull: true,
           field: "tamaño_bytes",
+        },
+        contenidoHtml: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "contenido_html",
+        },
+        estadoDocumento: {
+          type: DataTypes.STRING(50),
+          allowNull: true,
+          field: "estado_documento",
+        },
+        tipoDocumento: {
+          type: DataTypes.STRING(100),
+          allowNull: true,
+          field: "tipo_documento",
+        },
+        codigoDocumento: {
+          type: DataTypes.STRING(100),
+          allowNull: true,
+          field: "codigo_documento",
+        },
+        metadataSnapshot: {
+          type: DataTypes.JSONB,
+          allowNull: true,
+          field: "metadata_snapshot",
+        },
+        tieneArchivo: {
+          type: DataTypes.BOOLEAN,
+          allowNull: false,
+          defaultValue: true,
+          field: "tiene_archivo",
         },
       },
       {
