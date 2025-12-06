@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Documento from "../models/documento.model";
 import Usuario from "../models/usuario.model";
+import NotificacionesService from "../services/notificaciones.service";
 
 /** Obtener documentos pendientes de aprobación */
 export const getDocumentosPendientes = async (req: Request, res: Response) => {
@@ -43,6 +44,20 @@ export const aprobarDocumento = async (req: Request, res: Response) => {
             // Opcional: guardar comentarios de aprobación si se desea
         });
 
+        // Notificar al creador del documento
+        if (doc.creadoPor && doc.creadoPor !== userId) {
+            try {
+                await NotificacionesService.notificarDocumentoAprobado(
+                    doc.creadoPor,
+                    doc.id,
+                    doc.nombre
+                );
+                console.log(`📧 Notificación de aprobación enviada al creador: ${doc.creadoPor}`);
+            } catch (notifError) {
+                console.error("Error al enviar notificación de aprobación:", notifError);
+            }
+        }
+
         return res.json({
             message: "Documento aprobado exitosamente",
             documento: doc,
@@ -83,6 +98,21 @@ export const rechazarDocumento = async (req: Request, res: Response) => {
             comentariosRechazo: comentarios,
         });
 
+        // Notificar al creador del documento
+        if (doc.creadoPor && doc.creadoPor !== userId) {
+            try {
+                await NotificacionesService.notificarDocumentoRechazado(
+                    doc.creadoPor,
+                    doc.id,
+                    doc.nombre,
+                    comentarios
+                );
+                console.log(`📧 Notificación de rechazo enviada al creador: ${doc.creadoPor}`);
+            } catch (notifError) {
+                console.error("Error al enviar notificación de rechazo:", notifError);
+            }
+        }
+
         return res.json({
             message: "Documento rechazado. Devuelto a borrador.",
             documento: doc,
@@ -101,9 +131,21 @@ export const getMisAprobaciones = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user?.id;
 
-        // Documentos pendientes
+        if (!userId) {
+            return res.status(401).json({ message: "Usuario no autenticado" });
+        }
+
+        // Documentos pendientes de revisión/aprobación ASIGNADOS A MÍ
+        // Estado "en_revision" y estoy asignado como revisor o aprobador
         const pendientes = await Documento.findAll({
-            where: { estado: "pendiente_aprobacion" },
+            where: {
+                estado: "en_revision",
+                [require("sequelize").Op.or]: [
+                    { revisadoPor: userId },
+                    { aprobadoPor: userId },
+                ],
+            },
+            order: [["creadoEn", "ASC"]],
         });
 
         // Documentos aprobados por mí

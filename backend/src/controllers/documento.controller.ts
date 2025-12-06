@@ -5,6 +5,7 @@ import {
   uploadFileToSupabase,
   deleteFileFromSupabase,
 } from "../utils/supabase";
+import NotificacionesService from "../services/notificaciones.service";
 
 /** Crear documento */
 export const createDocumento = async (req: Request, res: Response) => {
@@ -34,6 +35,13 @@ export const createDocumento = async (req: Request, res: Response) => {
       rutaArchivo,
     } = req.body;
 
+    // Obtener el ID del usuario autenticado
+    const usuarioId = (req as any).user?.id;
+
+    if (!usuarioId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
     // Validar campos obligatorios
     if (!codigo) {
       return res
@@ -59,15 +67,15 @@ export const createDocumento = async (req: Request, res: Response) => {
       rutaAlmacenamiento,
       tipoMime,
       tamañoBytes,
-      subidoPor: subidoPor || creadoPor,
-      creadoPor,
+      subidoPor: usuarioId, // Usuario logueado que sube el archivo
+      creadoPor: usuarioId, // Usuario logueado que crea el documento
       revisadoPor: revisadoPor || null,
       visibilidad: visibilidad || "privado",
       tipoDocumento,
       codigoDocumento: codigoDocumento || codigo,
       version,
       versionActual: versionActual || "1.0",
-      estado: estado || "borrador",
+      estado: estado || " ",
       aprobadoPor,
       fechaAprobacion,
       fechaVigencia,
@@ -77,6 +85,32 @@ export const createDocumento = async (req: Request, res: Response) => {
       creadoEn: new Date(),
       actualizadoEn: new Date(),
     });
+
+    // Notificar al revisor si fue asignado (y es diferente al creador)
+    if (revisadoPor && revisadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionRevision(
+          revisadoPor,
+          doc.id,
+          doc.nombre
+        );
+      } catch (notifError) {
+        console.error("Error al enviar notificación de revisión:", notifError);
+      }
+    }
+
+    // Notificar al aprobador si fue asignado (y es diferente al creador)
+    if (aprobadoPor && aprobadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionAprobacion(
+          aprobadoPor,
+          doc.id,
+          doc.nombre
+        );
+      } catch (notifError) {
+        console.error("Error al enviar notificación de aprobación:", notifError);
+      }
+    }
 
     return res.status(201).json(doc);
   } catch (error: any) {
@@ -207,6 +241,13 @@ export const updateDocumento = async (req: Request, res: Response) => {
       cambios, // Descripción de cambios para la versión
     } = req.body;
 
+    // Obtener el ID del usuario autenticado
+    const usuarioId = (req as any).user?.id;
+
+    if (!usuarioId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
     const archivo = req.file;
     const VersionDocumento = require("../models/versionDocumento.model").default;
 
@@ -258,7 +299,7 @@ export const updateDocumento = async (req: Request, res: Response) => {
         version: doc.versionActual || doc.version || "1.0",
         numeroVersion: nuevoNumeroVersion,
         versionString: doc.versionActual || "1.0",
-        subidoPor: subidoPor || doc.subidoPor,
+        subidoPor: usuarioId, // Usuario logueado que hace el cambio
         cambios: descripcionCambios,
         // Datos del archivo (si existe)
         rutaArchivo: doc.rutaArchivo,
@@ -378,6 +419,37 @@ export const updateDocumento = async (req: Request, res: Response) => {
         console.log(`✅ Documento actualizado sin cambios significativos (no se creó versión)`);
       }
     }
+
+    // Notificar asignación de revisor (si cambió y es diferente al usuario actual)
+    if (revisadoPor && revisadoPor !== doc.revisadoPor && revisadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionRevision(
+          revisadoPor,
+          doc.id,
+          doc.nombre
+        );
+        console.log(`📧 Notificación enviada al revisor: ${revisadoPor}`);
+      } catch (notifError) {
+        console.error("Error al enviar notificación de revisión:", notifError);
+        // No falla la operación si falla la notificación
+      }
+    }
+
+    // Notificar asignación de aprobador (si cambió y es diferente al usuario actual)
+    if (aprobadoPor && aprobadoPor !== doc.aprobadoPor && aprobadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionAprobacion(
+          aprobadoPor,
+          doc.id,
+          doc.nombre
+        );
+        console.log(`📧 Notificación enviada al aprobador: ${aprobadoPor}`);
+      } catch (notifError) {
+        console.error("Error al enviar notificación de aprobación:", notifError);
+        // No falla la operación si falla la notificación
+      }
+    }
+
     return res.json(doc);
   } catch (error: any) {
     console.error("❌ Error al actualizar documento:", error);
