@@ -24,6 +24,7 @@ import AreasResponsables from "./pages/areas/Asignar_Responsables";
 
 import ListaDeUsuarios from "./pages/usuarios/ListaDeUsuarios";
 import NuevosUsuarios from "./pages/usuarios/NuevoUsuario";
+import EditarUsuario from "./pages/usuarios/EditarUsuario";
 import BulkImportUsuarios from "./pages/usuarios/BulkImportUsuarios";
 import RolesYPermisos from "./pages/usuarios/Roles_Permisos";
 
@@ -98,13 +99,11 @@ function App() {
               path="/Asignar_Responsables"
               element={<AreasResponsables />}
             />
-            <Route path="/reportes" element={<ReportesView />} />
-            <Route path="/Asignar_Responsables" element={<AreasResponsables />} />
-
             {/* Usuarios */}
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
             <Route path="/usuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
+            <Route path="/usuarios/:id/editar" element={<EditarUsuario />} />
             <Route path="/usuarios/importar" element={<BulkImportUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
 
