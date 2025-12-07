@@ -19,3 +19,5 @@ router.put('/:id', actualizarAuditoria);
 
 router.delete('/:id', eliminarAuditoria);
 
+
+export default router;

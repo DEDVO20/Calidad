@@ -20,3 +20,5 @@ router.get("/:id", getSeguimientoObjetivoById);
 // PUT /api/:id
 router.put("/:id", updateSeguimientoObjetivo);
 
+
+export default router;

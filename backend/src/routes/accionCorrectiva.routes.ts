@@ -28,3 +28,5 @@ router.patch("/:id/estado", cambiarEstadoAccionCorrectiva);
 // PATCH /api/:id/verificar
 router.patch("/:id/verificar", verificarAccionCorrectiva);
 
+
+export default router;

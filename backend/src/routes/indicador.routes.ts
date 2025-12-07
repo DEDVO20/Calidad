@@ -20,3 +20,5 @@ router.get("/:id", getIndicadorById);
 // PUT /api/:id
 router.put("/:id", updateIndicador);
 
+
+export default router;

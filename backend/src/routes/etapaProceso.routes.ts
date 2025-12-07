@@ -20,3 +20,5 @@ router.get("/:id", getEtapaProcesoById);
 // PUT /api/:id
 router.put("/:id", updateEtapaProceso);
 
+
+export default router;

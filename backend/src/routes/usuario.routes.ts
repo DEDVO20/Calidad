@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+import multer from "multer";
 import {
   createUsuario,
   getUsuarios,
@@ -15,11 +16,17 @@ import {
 
 const router = Router();
 
-// Middleware condicional para multer
+// Configuración de multer para importación masiva (memoria, máx 5MB)
+const uploadBulk = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+// Middleware condicional para multer (manejo de foto de perfil)
 const conditionalMulter = (req: Request, res: Response, next: NextFunction) => {
   const contentType = req.headers["content-type"] || "";
   if (contentType.includes("multipart/form-data")) {
-    // Si es multipart, usar multer
+    // Si es multipart, usar multer para foto de perfil
     return uploadProfile.single("foto")(req, res, next);
   }
   // Si es JSON, pasar directo
@@ -29,25 +36,25 @@ const conditionalMulter = (req: Request, res: Response, next: NextFunction) => {
 // Aplicar middleware de autenticación a todas las rutas
 router.use(authMiddleware);
 
-// GET /api/usuarios - Obtener todos los usuarios
+// GET /api/usuarios - Obtener todos los usuarios (con paginación y filtros)
 router.get("/", getUsuarios);
 
-// GET /api/:id
+// GET /api/usuarios/:id - Obtener un usuario por su ID
 router.get("/:id", getUsuarioById);
 
-// POST /api/
+// POST /api/usuarios - Crear un nuevo usuario
 router.post("/", createUsuario);
 
-// PUT /api/:id
+// PUT /api/usuarios/:id - Actualizar información completa de un usuario
 router.put("/:id", conditionalMulter, handleMulterError, updateUsuario);
 
-// PATCH /api/:id
+// PATCH /api/usuarios/:id - Actualizar información parcial de un usuario (incluyendo foto)
 router.patch("/:id", conditionalMulter, handleMulterError, updateUsuario);
 
-// DELETE /api/:id
+// DELETE /api/usuarios/:id - Eliminar un usuario (soft delete si aplica, o físico)
 router.delete("/:id", deleteUsuario);
 
-// POST /api/bulk-import
+// POST /api/usuarios/bulk-import - Importación masiva de usuarios desde archivo Excel/CSV
 router.post("/bulk-import", uploadBulk.single('file'), bulkImportUsuarios);
 
 export default router;

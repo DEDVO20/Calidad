@@ -28,3 +28,5 @@ router.put("/:id", updateRiesgo);
 // DELETE /api/:id
 router.delete("/:id", deleteRiesgo);
 
+
+export default router;

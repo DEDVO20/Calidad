@@ -20,3 +20,5 @@ router.get("/:id", getInstanciaProcesoById);
 // PUT /api/:id
 router.put("/:id", updateInstanciaProceso);
 
+
+export default router;

@@ -20,3 +20,5 @@ router.get("/:id", getCampoFormularioById);
 // PUT /api/:id
 router.put("/:id", updateCampoFormulario);
 
+
+export default router;

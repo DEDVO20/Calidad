@@ -20,3 +20,5 @@ router.get("/:id", getDocumentoProcesoById);
 // PUT /api/:id
 router.put("/:id", updateDocumentoProceso);
 
+
+export default router;

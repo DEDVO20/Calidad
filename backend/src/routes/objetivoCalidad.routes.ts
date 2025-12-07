@@ -20,3 +20,5 @@ router.get("/:id", getObjetivoCalidadById);
 // PUT /api/:id
 router.put("/:id", updateObjetivoCalidad);
 
+
+export default router;
