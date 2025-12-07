@@ -267,21 +267,23 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
 
           <div className="flex gap-1 border-r border-border pr-2">
             <button
+              type="button"
               onClick={insertTable}
               className="p-2 hover:bg-accent rounded"
+              title="Insertar tabla"
             >
               <TableIcon className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex gap-1 border-r border-border pr-2">
-            <button onClick={addImage} className="p-2 hover:bg-accent rounded">
+            <button type="button" onClick={addImage} className="p-2 hover:bg-accent rounded" title="Agregar imagen">
               <ImageIcon className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex gap-1">
-            <button onClick={setLink} className="p-2 hover:bg-accent rounded">
+            <button type="button" onClick={setLink} className="p-2 hover:bg-accent rounded" title="Agregar enlace">
               <LinkIcon className="w-4 h-4" />
             </button>
           </div>
