@@ -12,13 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Users,
   Search,
-  Eye,
+  X,
   Edit,
   Trash2,
+  Eye,
+  Users,
   RefreshCw,
-  Filter,
+  Plus,
+  FileSpreadsheet,
   UserCheck,
   UserX,
   Building2,
@@ -258,14 +260,28 @@ export default function ListaUsuarios() {
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-7 w-7 text-blue-600" />
             </div>
-            Lista De Usuarios
+            Gestión de Usuarios
           </h1>
           <p className="text-gray-600 mt-2">
-            {total} usuario{total !== 1 ? "s" : ""} registrado
-            {total !== 1 ? "s" : ""} en el sistema
+            Administra usuarios, roles y permisos del sistema
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => navigate("/usuarios/importar")}
+            variant="outline"
+            className="hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
+          >
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Importar Usuarios
+          </Button>
+          <Button
+            onClick={() => navigate("/NuevoUsuario")}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Usuario
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -383,7 +399,6 @@ export default function ListaUsuarios() {
                 size="sm"
                 onClick={() => setFiltroEstado("todos")}
               >
-                <Filter className="w-4 h-4 mr-1" />
                 Todos
               </Button>
               <Button

@@ -5,6 +5,7 @@ import {
   getUsuarioById,
   updateUsuario,
   deleteUsuario,
+  bulkImportUsuarios,
 } from "../controllers/usuario.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import {
@@ -373,4 +374,63 @@ router.patch("/:id", conditionalMulter, handleMulterError, updateUsuario);
  */
 router.delete("/:id", deleteUsuario);
 
+/**
+ * @swagger
+ * /api/usuarios/bulk-import:
+ *   post:
+ *     summary: Importación masiva de usuarios
+ *     tags: [Usuarios]
+ *     description: Importa múltiples usuarios desde un archivo Excel (.xlsx) o CSV (.csv)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo Excel (.xlsx) o CSV (.csv) con datos de usuarios
+ *     responses:
+ *       200:
+ *         description: Importación completada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     success:
+ *                       type: integer
+ *                     failed:
+ *                       type: integer
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       400:
+ *         description: Archivo inválido o vacío
+ *       401:
+ *         description: No autorizado
+ */
+const multer = require('multer');
+const uploadBulk = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
+});
+
+router.post("/bulk-import", uploadBulk.single('file'), bulkImportUsuarios);
+
 export default router;
+
