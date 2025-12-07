@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {
   UserPlus,
   ArrowLeft,
@@ -26,6 +19,7 @@ import {
   FileText,
   Users,
   Shield,
+  Sparkles,
 } from "lucide-react";
 
 interface Area {
@@ -61,6 +55,7 @@ interface FormErrors {
 }
 
 export default function NuevosUsuarios() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     documento: "",
     nombre: "",
@@ -80,11 +75,6 @@ export default function NuevosUsuarios() {
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
-  const [dialogState, setDialogState] = useState<{
-    open: boolean;
-    type: "success" | "error";
-    message: string;
-  }>({ open: false, type: "success", message: "" });
 
   useEffect(() => {
     fetchAreas();
@@ -143,7 +133,7 @@ export default function NuevosUsuarios() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
@@ -250,11 +240,7 @@ export default function NuevosUsuarios() {
       const result = await response.json();
 
       if (response.ok) {
-        setDialogState({
-          open: true,
-          type: "success",
-          message: `Usuario "${formData.nombreUsuario}" creado exitosamente`,
-        });
+        toast.success(`Usuario "${formData.nombreUsuario}" creado exitosamente`);
 
         // Limpiar formulario
         setFormData({
@@ -271,16 +257,15 @@ export default function NuevosUsuarios() {
           activo: true,
         });
         setSelectedRoleIds([]);
+
+        // Redirigir a lista de usuarios después de 2 segundos
+        setTimeout(() => navigate("/usuarios"), 2000);
       } else {
         throw new Error(result.message || "Error al crear el usuario");
       }
     } catch (error: any) {
       console.error("Error:", error);
-      setDialogState({
-        open: true,
-        type: "error",
-        message: error.message || "Error al crear el usuario. Por favor intente nuevamente.",
-      });
+      toast.error(error.message || "Error al crear el usuario. Por favor intente nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -306,18 +291,46 @@ export default function NuevosUsuarios() {
     }
   };
 
-  const closeDialog = () => {
-    setDialogState({ open: false, type: "success", message: "" });
-  };
 
-  const removeRole = (id: string) => {
-    setSelectedRoleIds(prev => prev.filter(r => r !== id));
+
+  const toggleRole = (id: string) => {
+    setSelectedRoleIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(r => r !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
     if (errors.roles) {
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors.roles;
         return newErrors;
       });
+    }
+  };
+
+  const generarNombreUsuario = () => {
+    const nombre = formData.nombre.toLowerCase().trim();
+    const apellido = formData.primerApellido.toLowerCase().trim();
+
+    if (nombre && apellido) {
+      // Generar username en formato: primera letra del nombre + apellido
+      const username = `${nombre.charAt(0)}${apellido}`.replace(/[^a-z0-9]/g, '');
+      setFormData(prev => ({ ...prev, nombreUsuario: username }));
+
+      // Limpiar error si existe
+      if (errors.nombreUsuario) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.nombreUsuario;
+          return newErrors;
+        });
+      }
+
+      toast.success(`Nombre de usuario generado: ${username}`);
+    } else {
+      toast.error("Ingresa nombre y apellido primero");
     }
   };
 
@@ -361,7 +374,7 @@ export default function NuevosUsuarios() {
                 <FileText className="w-5 h-5 text-blue-600" />
                 Datos Personales
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Documento */}
                 <div className="space-y-2">
@@ -471,9 +484,8 @@ export default function NuevosUsuarios() {
                       name="areaId"
                       value={formData.areaId}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.areaId ? "border-red-500" : "border-gray-300"
-                      }`}
+                      className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.areaId ? "border-red-500" : "border-gray-300"
+                        }`}
                     >
                       <option value="">Seleccione un área</option>
                       {areas.map((area) => (
@@ -500,34 +512,50 @@ export default function NuevosUsuarios() {
                 Asignación de Roles
               </h3>
 
-              <div className="space-y-2">
-                <label htmlFor="roles" className="text-sm font-medium text-gray-700">
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700">
                   Roles <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-3 text-gray-400 w-4 h-4 z-10" />
-                  <select
-                    id="roles"
-                    multiple
-                    value={selectedRoleIds}
-                    onChange={(e) => {
-                      const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setSelectedRoleIds(selected);
-                    }}
-                    className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 ${
-                      errors.roles ? "border-red-500" : "border-gray-300"
-                    }`}
-                  >
-                    {roles.map((rol) => (
-                      <option key={rol.id} value={rol.id}>
-                        {rol.nombre} ({rol.clave})
-                      </option>
-                    ))}
-                  </select>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {roles.map((rol) => (
+                    <Card
+                      key={rol.id}
+                      className={`cursor-pointer transition-all hover:shadow-md ${selectedRoleIds.includes(rol.id)
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+                        : 'hover:border-gray-400'
+                        }`}
+                      onClick={() => toggleRole(rol.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedRoleIds.includes(rol.id)}
+                            onChange={() => toggleRole(rol.id)}
+                            className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900">{rol.nombre}</div>
+                            <div className="text-xs text-gray-600 mt-0.5">
+                              {rol.clave}
+                            </div>
+                            {rol.descripcion && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                {rol.descripcion}
+                              </div>
+                            )}
+                          </div>
+                          {selectedRoleIds.includes(rol.id) && (
+                            <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                <p className="text-xs text-gray-500">
-                  Mantén presionada la tecla <kbd className="px-1 bg-gray-200 rounded">Ctrl</kbd> (o <kbd className="px-1 bg-gray-200 rounded">Cmd</kbd>) para seleccionar múltiples roles
-                </p>
+
                 {errors.roles && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
                     <AlertCircle className="w-3 h-3" />
@@ -537,22 +565,20 @@ export default function NuevosUsuarios() {
 
                 {/* Mostrar roles seleccionados como badges */}
                 {selectedRoleIds.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {selectedRoleIds.map((id) => {
-                      const rol = roles.find(r => r.id === id);
-                      return rol ? (
-                        <Badge key={id} variant="secondary" className="flex items-center gap-1">
-                          {rol.nombre}
-                          <button
-                            type="button"
-                            onClick={() => removeRole(id)}
-                            className="ml-1 text-xs hover:text-red-600"
-                          >
-                            ×
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
+                  <div className="mt-3">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Roles seleccionados: ({selectedRoleIds.length})
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRoleIds.map((id) => {
+                        const rol = roles.find(r => r.id === id);
+                        return rol ? (
+                          <Badge key={id} className="bg-blue-100 text-blue-800 border-blue-200">
+                            {rol.nombre}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
@@ -596,17 +622,29 @@ export default function NuevosUsuarios() {
                   <label htmlFor="nombreUsuario" className="text-sm font-medium text-gray-700">
                     Nombre de Usuario <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="nombreUsuario"
-                      name="nombreUsuario"
-                      type="text"
-                      placeholder="Ej: jperez"
-                      value={formData.nombreUsuario}
-                      onChange={handleInputChange}
-                      className={`pl-10 ${errors.nombreUsuario ? "border-red-500" : ""}`}
-                    />
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        id="nombreUsuario"
+                        name="nombreUsuario"
+                        type="text"
+                        placeholder="Ej: jperez"
+                        value={formData.nombreUsuario}
+                        onChange={handleInputChange}
+                        className={`pl-10 ${errors.nombreUsuario ? "border-red-500" : ""}`}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={generarNombreUsuario}
+                      className="flex items-center gap-2"
+                      title="Generar nombre de usuario automáticamente"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Generar
+                    </Button>
                   </div>
                   {errors.nombreUsuario && (
                     <p className="text-sm text-red-500 flex items-center gap-1">
@@ -614,6 +652,9 @@ export default function NuevosUsuarios() {
                       {errors.nombreUsuario}
                     </p>
                   )}
+                  <p className="text-xs text-gray-500">
+                    💡 Usa el botón "Generar" para crear un nombre de usuario automáticamente
+                  </p>
                 </div>
 
                 {/* Contraseña */}
@@ -714,35 +755,6 @@ export default function NuevosUsuarios() {
           </CardContent>
         </Card>
       </form>
-
-      {/* Dialog de Resultado */}
-      <AlertDialog open={dialogState.open} onOpenChange={closeDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              {dialogState.type === "success" ? (
-                <>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  Usuario Creado
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                  Error
-                </>
-              )}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
-              {dialogState.message}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={closeDialog}>
-              Aceptar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

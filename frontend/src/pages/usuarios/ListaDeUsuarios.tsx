@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -59,6 +61,7 @@ interface Usuario {
 }
 
 export default function ListaUsuarios() {
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,12 +216,12 @@ export default function ListaUsuarios() {
         throw new Error("Error al eliminar usuario");
       }
 
-      alert(`✓ Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
+      toast.success(`Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
       await fetchUsuarios();
       closeDialog();
     } catch (error) {
       console.error("Error:", error);
-      alert("✗ Error al eliminar el usuario. Por favor intente nuevamente.");
+      toast.error("Error al eliminar el usuario. Por favor intente nuevamente.");
     }
   };
 
@@ -531,6 +534,7 @@ export default function ListaUsuarios() {
                         size="sm"
                         variant="outline"
                         className="h-8 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
+                        onClick={() => navigate(`/usuarios/${usuario.id}/editar`)}
                       >
                         <Edit className="w-3 h-3 mr-1" />
                         Editar
