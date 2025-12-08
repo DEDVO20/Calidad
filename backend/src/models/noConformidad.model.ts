@@ -5,15 +5,15 @@ interface NoConformidadAttributes {
   codigo: string;
   tipo?: string;
   descripcion?: string;
-  origen?: string;
+  fuente?: string;
   procesoId?: string;
   areaId?: string;
   detectadoPor?: string;
   responsableId?: string;
   estado?: string;
-  gravedad?: string;
   fechaDeteccion?: Date;
-  fechaLimite?: Date;
+  analisisCausa?: string;
+  planAccion?: string;
   fechaCierre?: Date;
   creadoEn?: Date;
   actualizadoEn?: Date;
@@ -25,37 +25,36 @@ interface NoConformidadCreationAttributes
     | "id"
     | "tipo"
     | "descripcion"
-    | "origen"
+    | "fuente"
     | "procesoId"
     | "areaId"
     | "detectadoPor"
     | "responsableId"
     | "estado"
-    | "gravedad"
     | "fechaDeteccion"
-    | "fechaLimite"
+    | "analisisCausa"
+    | "planAccion"
     | "fechaCierre"
     | "creadoEn"
     | "actualizadoEn"
-  > {}
+  > { }
 
 class NoConformidad
   extends Model<NoConformidadAttributes, NoConformidadCreationAttributes>
-  implements NoConformidadAttributes
-{
+  implements NoConformidadAttributes {
   public id!: string;
   public codigo!: string;
   public tipo?: string;
   public descripcion?: string;
-  public origen?: string;
+  public fuente?: string;
   public procesoId?: string;
   public areaId?: string;
   public detectadoPor?: string;
   public responsableId?: string;
   public estado?: string;
-  public gravedad?: string;
   public fechaDeteccion?: Date;
-  public fechaLimite?: Date;
+  public analisisCausa?: string;
+  public planAccion?: string;
   public fechaCierre?: Date;
   public creadoEn?: Date;
   public actualizadoEn?: Date;
@@ -75,13 +74,13 @@ class NoConformidad
         },
         tipo: {
           type: DataTypes.STRING(50),
-          allowNull: true,
+          allowNull: false,
         },
         descripcion: {
           type: DataTypes.TEXT,
           allowNull: true,
         },
-        origen: {
+        fuente: {
           type: DataTypes.TEXT,
           allowNull: true,
         },
@@ -96,7 +95,7 @@ class NoConformidad
           field: "area_id",
         },
         detectadoPor: {
-          type: DataTypes.STRING,
+          type: DataTypes.UUID,
           allowNull: true,
           field: "detectado_por",
         },
@@ -109,19 +108,20 @@ class NoConformidad
           type: DataTypes.STRING(50),
           allowNull: true,
         },
-        gravedad: {
-          type: DataTypes.STRING(50),
-          allowNull: true,
-        },
         fechaDeteccion: {
           type: DataTypes.DATEONLY,
           allowNull: true,
           field: "fecha_deteccion",
         },
-        fechaLimite: {
-          type: DataTypes.DATEONLY,
+        analisisCausa: {
+          type: DataTypes.TEXT,
           allowNull: true,
-          field: "fecha_limite",
+          field: "analisis_causa",
+        },
+        planAccion: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "plan_accion",
         },
         fechaCierre: {
           type: DataTypes.DATEONLY,
@@ -130,11 +130,13 @@ class NoConformidad
         },
         creadoEn: {
           type: DataTypes.DATE,
-          allowNull: true,
+          allowNull: false,
+          defaultValue: DataTypes.NOW,
           field: "creado_en",
         },
         actualizadoEn: {
           type: DataTypes.DATEONLY,
+          allowNull: false,
           defaultValue: DataTypes.NOW,
           field: "actualizado_en",
         },

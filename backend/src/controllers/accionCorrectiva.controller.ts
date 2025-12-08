@@ -68,6 +68,7 @@ export const getAccionesCorrectivas = async (_req: Request, res: Response) => {
     });
     return res.json(accionesCorrectivas);
   } catch (error: any) {
+    console.error("Error en getAccionesCorrectivas:", error);
     return res.status(500).json({
       message: "Error al obtener acciones correctivas",
       error: error.message,
@@ -161,7 +162,7 @@ export const updateAccionCorrectiva = async (req: Request, res: Response) => {
 export const cambiarEstadoAccionCorrectiva = async (req: Request, res: Response) => {
   try {
     const { estado } = req.body;
-    
+
     if (!estado) {
       return res.status(400).json({
         message: "El campo 'estado' es obligatorio.",

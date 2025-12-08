@@ -3,6 +3,7 @@ import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -167,10 +168,12 @@ export default function NoConformidadesAbiertas() {
             {total !== 1 ? "s" : ""} de iniciar tratamiento
           </p>
         </div>
-        <Button>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Nueva No Conformidad
-        </Button>
+        <Link to="/Nueva_NoConformidad">
+          <Button>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Nueva No Conformidad
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
