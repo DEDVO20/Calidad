@@ -36,7 +36,7 @@ export default function MisAprobaciones() {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-4 md:p-6 pt-6 max-w-7xl mx-auto">
+        <div className="flex-1 space-y-6 p-4 md:p-6 pt-6 w-full">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     <FileCheck className="h-7 w-7 text-blue-600" />
@@ -115,15 +115,15 @@ export default function MisAprobaciones() {
                                     <p className="text-gray-600">No tienes documentos pendientes de aprobar</p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     {data?.pendientes?.items.map((doc: any) => (
-                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">{doc.nombreArchivo}</p>
-                                                    <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
-                                                </div>
+                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50 flex flex-col justify-between h-full bg-white shadow-sm transition-all hover:shadow-md">
+                                            <div className="flex justify-between items-start mb-2">
                                                 <Badge>Pendiente</Badge>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-lg leading-tight mb-1">{doc.nombreArchivo}</p>
+                                                <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -142,18 +142,18 @@ export default function MisAprobaciones() {
                                     <p className="text-gray-600">No has aprobado ningún documento aún</p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     {data?.aprobados?.items.map((doc: any) => (
-                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">{doc.nombreArchivo}</p>
-                                                    <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Aprobado: {new Date(doc.fechaAprobacion).toLocaleDateString()}
-                                                    </p>
-                                                </div>
+                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50 flex flex-col justify-between h-full bg-white shadow-sm transition-all hover:shadow-md">
+                                            <div className="flex justify-between items-start mb-2">
                                                 <Badge className="bg-green-100 text-green-700">Aprobado</Badge>
+                                                <p className="text-xs text-gray-500">
+                                                    {new Date(doc.fechaAprobacion).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-lg leading-tight mb-1">{doc.nombreArchivo}</p>
+                                                <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -172,25 +172,25 @@ export default function MisAprobaciones() {
                                     <p className="text-gray-600">No has rechazado ningún documento aún</p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                     {data?.rechazados?.items.map((doc: any) => (
-                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <p className="font-medium">{doc.nombreArchivo}</p>
-                                                    <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
-                                                    {doc.comentariosRechazo && (
-                                                        <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded">
-                                                            <p className="text-xs font-medium text-red-900">Motivo del rechazo:</p>
-                                                            <p className="text-sm text-red-800">{doc.comentariosRechazo}</p>
-                                                        </div>
-                                                    )}
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        Rechazado: {new Date(doc.fechaRechazo).toLocaleDateString()}
-                                                    </p>
-                                                </div>
+                                        <div key={doc.id} className="p-4 border rounded-lg hover:bg-gray-50 flex flex-col justify-between h-full bg-white shadow-sm transition-all hover:shadow-md">
+                                            <div className="flex justify-between items-start mb-2">
                                                 <Badge className="bg-red-100 text-red-700">Rechazado</Badge>
+                                                <p className="text-xs text-gray-500">
+                                                    {new Date(doc.fechaRechazo).toLocaleDateString()}
+                                                </p>
                                             </div>
+                                            <div className="mb-3">
+                                                <p className="font-medium text-lg leading-tight mb-1">{doc.nombreArchivo}</p>
+                                                <p className="text-sm text-gray-600">Código: {doc.codigoDocumento || doc.codigo}</p>
+                                            </div>
+                                            {doc.comentariosRechazo && (
+                                                <div className="mt-auto p-2 bg-red-50 border border-red-100 rounded text-xs">
+                                                    <p className="font-medium text-red-900 mb-1">Motivo:</p>
+                                                    <p className="text-red-800 line-clamp-2" title={doc.comentariosRechazo}>{doc.comentariosRechazo}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
