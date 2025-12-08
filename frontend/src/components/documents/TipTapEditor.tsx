@@ -168,9 +168,8 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 1 }).run()
               }
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("heading", { level: 1 }) ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("heading", { level: 1 }) ? "bg-accent" : ""
+                }`}
             >
               <Heading1 className="w-4 h-4" />
             </button>
@@ -178,9 +177,8 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 2 }).run()
               }
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("heading", { level: 2 }) ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("heading", { level: 2 }) ? "bg-accent" : ""
+                }`}
             >
               <Heading2 className="w-4 h-4" />
             </button>
@@ -188,9 +186,8 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 3 }).run()
               }
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("heading", { level: 3 }) ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("heading", { level: 3 }) ? "bg-accent" : ""
+                }`}
             >
               <Heading3 className="w-4 h-4" />
             </button>
@@ -199,25 +196,22 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
           <div className="flex gap-1 border-r border-border pr-2">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("bold") ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("bold") ? "bg-accent" : ""
+                }`}
             >
               <Bold className="w-4 h-4" />
             </button>
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("italic") ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("italic") ? "bg-accent" : ""
+                }`}
             >
               <Italic className="w-4 h-4" />
             </button>
             <button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("underline") ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("underline") ? "bg-accent" : ""
+                }`}
             >
               <UnderlineIcon className="w-4 h-4" />
             </button>
@@ -226,17 +220,15 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
           <div className="flex gap-1 border-r border-border pr-2">
             <button
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("bulletList") ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("bulletList") ? "bg-accent" : ""
+                }`}
             >
               <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-2 hover:bg-accent rounded ${
-                editor.isActive("orderedList") ? "bg-accent" : ""
-              }`}
+              className={`p-2 hover:bg-accent rounded ${editor.isActive("orderedList") ? "bg-accent" : ""
+                }`}
             >
               <ListOrdered className="w-4 h-4" />
             </button>
@@ -275,21 +267,23 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
 
           <div className="flex gap-1 border-r border-border pr-2">
             <button
+              type="button"
               onClick={insertTable}
               className="p-2 hover:bg-accent rounded"
+              title="Insertar tabla"
             >
               <TableIcon className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex gap-1 border-r border-border pr-2">
-            <button onClick={addImage} className="p-2 hover:bg-accent rounded">
+            <button type="button" onClick={addImage} className="p-2 hover:bg-accent rounded" title="Agregar imagen">
               <ImageIcon className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex gap-1">
-            <button onClick={setLink} className="p-2 hover:bg-accent rounded">
+            <button type="button" onClick={setLink} className="p-2 hover:bg-accent rounded" title="Agregar enlace">
               <LinkIcon className="w-4 h-4" />
             </button>
           </div>

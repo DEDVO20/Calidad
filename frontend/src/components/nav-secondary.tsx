@@ -29,16 +29,20 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild={!item.onClick} onClick={item.onClick}>
+              <SidebarMenuButton
+                asChild={!item.onClick}
+                onClick={item.onClick}
+                className="group-data-[collapsible=icon]:justify-center"
+              >
                 {item.onClick ? (
                   <>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span className="overflow-hidden">{item.title}</span>
                   </>
                 ) : (
                   <Link to={item.url}>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span className="overflow-hidden">{item.title}</span>
                   </Link>
                 )}
               </SidebarMenuButton>

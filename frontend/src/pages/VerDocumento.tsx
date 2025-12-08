@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { documentoService } from "@/services/documento.service";
 import { DocumentWorkflow } from "@/components/documents/DocumentWorkflow";
+import { DocumentVersionHistory } from "@/components/documents/DocumentVersionHistory";
 import { toast } from "sonner";
 import {
   FileText,
@@ -613,6 +614,17 @@ export default function VerDocumento() {
             })}
           </p>
         </div>
+      </div>
+
+      {/* Historial de Versiones */}
+      <div className="mb-6">
+        <DocumentVersionHistory
+          documentoId={id!}
+          onVersionRestored={() => {
+            // Recargar el documento cuando se restaura una versión
+            fetchDocumento();
+          }}
+        />
       </div>
 
       {/* Contenido del Documento */}

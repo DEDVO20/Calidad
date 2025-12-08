@@ -17,12 +17,15 @@ import EnProcesoAccionesCorrectivas from "./pages/Acciones_correctivas/enproceso
 
 import AprobacionesPendientes from "./pages/documentos/Aprobaciones_Pendientes";
 import DocumentosObsoletos from "./pages/documentos/Documentos_Obsoletos";
+import MisAprobaciones from "./pages/MisAprobaciones";
 
 import GestionarAreas from "./pages/areas/Gestionar_Areas";
 import AreasResponsables from "./pages/areas/Asignar_Responsables";
 
 import ListaDeUsuarios from "./pages/usuarios/ListaDeUsuarios";
 import NuevosUsuarios from "./pages/usuarios/NuevoUsuario";
+import EditarUsuario from "./pages/usuarios/EditarUsuario";
+import BulkImportUsuarios from "./pages/usuarios/BulkImportUsuarios";
 import RolesYPermisos from "./pages/usuarios/Roles_Permisos";
 
 import AuditoriasPlanificacion from "./pages/auditorias/AuditoriasPlanificacion";
@@ -87,6 +90,7 @@ function App() {
             <Route path="/documentos/:id/aprobaciones" element={<AprobacionesPendientes />} />
 
             <Route path="/Aprobaciones_Pendientes" element={<AprobacionesPendientes />} />
+            <Route path="/mis-aprobaciones" element={<MisAprobaciones />} />
             <Route path="/Documentos_Obsoletos" element={<DocumentosObsoletos />} />
 
             {/* Áreas */}
@@ -95,12 +99,12 @@ function App() {
               path="/Asignar_Responsables"
               element={<AreasResponsables />}
             />
-            <Route path="/reportes" element={<ReportesView />} />
-            <Route path="/Asignar_Responsables" element={<AreasResponsables />} />
-
             {/* Usuarios */}
             <Route path="/ListaDeUsuarios" element={<ListaDeUsuarios />} />
+            <Route path="/usuarios" element={<ListaDeUsuarios />} />
             <Route path="/NuevoUsuario" element={<NuevosUsuarios />} />
+            <Route path="/usuarios/:id/editar" element={<EditarUsuario />} />
+            <Route path="/usuarios/importar" element={<BulkImportUsuarios />} />
             <Route path="/Roles_y_Permisos" element={<RolesYPermisos />} />
 
             {/* Auditorías */}

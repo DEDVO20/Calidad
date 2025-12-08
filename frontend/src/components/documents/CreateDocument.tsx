@@ -25,13 +25,29 @@ export default function CreateDocument() {
 
         // Upload file to Supabase Storage
         const timestamp = Date.now();
-        const filename = `documentos/${timestamp}-${file.name}`;
+        // Sanitize filename: remove accents, special chars, replace spaces with _
+        const sanitizedName = file.name
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // Remove accents
+          .replace(/[^a-zA-Z0-9.-]/g, "_"); // Replace special chars/spaces with _
 
-        const { url } = await uploadFileToSupabase(file, filename, "documentos");
+        const filename = `${timestamp}-${sanitizedName}`;
 
-        // Remove file from FormData and add URL instead
+        console.log("🚀 Debug Upload:", {
+          originalName: file.name,
+          generatedFilename: filename,
+          bucket: "documentos"
+        });
+
+        const { url, path } = await uploadFileToSupabase(file, filename, "documentos");
+
+        // Remove file from FormData and add Supabase metadata
         formData.delete("archivo");
-        formData.append("url", url);
+        // Use set instead of append to avoid arrays if the key already exists
+        formData.set("nombreArchivo", file.name);
+        formData.set("rutaAlmacenamiento", url);
+        formData.set("tipoMime", file.type);
+        formData.set("tamañoBytes", file.size.toString());
 
         toast.success("Archivo subido correctamente");
         setUploading(false);

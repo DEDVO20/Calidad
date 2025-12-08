@@ -9,7 +9,7 @@ import { swaggerSpec } from "./config/swagger";
 // Importar todas las rutas
 import authRoutes from "./routes/auth.routes";
 import areaRoutes from "./routes/area.routes";
-import notificacionRoutes from "./routes/notificacion.routes";
+import notificacionRoutes from "./routes/notificaciones.routes";
 import configuracionRoutes from "./routes/configuracion.routes";
 import documentoRoutes from "./routes/documento.routes";
 import rolRoutes from "./routes/rol.routes";

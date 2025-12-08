@@ -26,6 +26,9 @@ interface DocumentoAttributes {
   version?: string;
   proximaRevision?: Date;
   contenidoHtml?: string;
+  comentariosRechazo?: string;
+  rechazadoPor?: string;
+  fechaRechazo?: Date;
 }
 
 interface DocumentoCreationAttributes
@@ -52,36 +55,42 @@ interface DocumentoCreationAttributes
     | "version"
     | "proximaRevision"
     | "contenidoHtml"
+    | "comentariosRechazo"
+    | "rechazadoPor"
+    | "fechaRechazo"
   > { }
 
 class Documento
   extends Model<DocumentoAttributes, DocumentoCreationAttributes>
   implements DocumentoAttributes {
-  id!: string;
-  codigo!: string;
-  nombre!: string;
-  descripcion?: string;
-  tipoDocumento!: string;
-  rutaArchivo?: string;
-  versionActual!: string;
-  estado!: string;
-  fechaAprobacion?: Date;
-  fechaVigencia?: Date;
-  creadoPor?: string;
-  aprobadoPor?: string;
-  creadoEn!: Date;
-  actualizadoEn!: Date;
-  nombreArchivo!: string;
-  rutaAlmacenamiento?: string;
-  tipoMime?: string;
-  tamañoBytes?: number;
-  subidoPor?: string;
-  revisadoPor?: string;
-  visibilidad?: string;
-  codigoDocumento?: string;
-  version?: string;
-  proximaRevision?: Date;
-  contenidoHtml?: string;
+  public id!: string;
+  public codigo!: string;
+  public nombre!: string;
+  public descripcion?: string;
+  public tipoDocumento!: string;
+  public rutaArchivo?: string;
+  public versionActual!: string;
+  public estado!: string;
+  public fechaAprobacion?: Date;
+  public fechaVigencia?: Date;
+  public creadoPor?: string;
+  public aprobadoPor?: string;
+  public creadoEn!: Date;
+  public actualizadoEn!: Date;
+  public nombreArchivo!: string;
+  public rutaAlmacenamiento?: string;
+  public tipoMime?: string;
+  public tamañoBytes?: number;
+  public subidoPor?: string;
+  public revisadoPor?: string;
+  public visibilidad?: string;
+  public codigoDocumento?: string;
+  public version?: string;
+  public proximaRevision?: Date;
+  public contenidoHtml?: string;
+  public comentariosRechazo?: string;
+  public rechazadoPor?: string;
+  public fechaRechazo?: Date;
 
   public static initModel(sequelize: Sequelize): typeof Documento {
     return Documento.init(
@@ -225,6 +234,21 @@ class Documento
           type: DataTypes.TEXT,
           allowNull: true,
           field: "contenido_html",
+        },
+        comentariosRechazo: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "comentarios_rechazo",
+        },
+        rechazadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "rechazado_por",
+        },
+        fechaRechazo: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_rechazo",
         },
       },
       {

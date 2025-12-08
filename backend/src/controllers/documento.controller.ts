@@ -5,6 +5,7 @@ import {
   uploadFileToSupabase,
   deleteFileFromSupabase,
 } from "../utils/supabase";
+import NotificacionesService from "../services/notificaciones.service";
 
 /** Crear documento */
 export const createDocumento = async (req: Request, res: Response) => {
@@ -34,6 +35,13 @@ export const createDocumento = async (req: Request, res: Response) => {
       rutaArchivo,
     } = req.body;
 
+    // Obtener el ID del usuario autenticado
+    const usuarioId = (req as any).user?.id;
+
+    if (!usuarioId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
     // Validar campos obligatorios
     if (!codigo) {
       return res
@@ -59,15 +67,15 @@ export const createDocumento = async (req: Request, res: Response) => {
       rutaAlmacenamiento,
       tipoMime,
       tamañoBytes,
-      subidoPor: subidoPor || creadoPor,
-      creadoPor,
+      subidoPor: usuarioId, // Usuario logueado que sube el archivo
+      creadoPor: usuarioId, // Usuario logueado que crea el documento
       revisadoPor: revisadoPor || null,
       visibilidad: visibilidad || "privado",
       tipoDocumento,
       codigoDocumento: codigoDocumento || codigo,
       version,
       versionActual: versionActual || "1.0",
-      estado: estado || "borrador",
+      estado: estado || " ",
       aprobadoPor,
       fechaAprobacion,
       fechaVigencia,
@@ -78,9 +86,47 @@ export const createDocumento = async (req: Request, res: Response) => {
       actualizadoEn: new Date(),
     });
 
+    // Notificar al revisor si fue asignado (y es diferente al creador)
+    if (revisadoPor && revisadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionRevision(
+          revisadoPor,
+          doc.id,
+          doc.nombre
+        );
+      } catch (notifError) {
+        console.error("Error al enviar notificación de revisión:", notifError);
+      }
+    }
+
+    // Notificar al aprobador si fue asignado (y es diferente al creador)
+    if (aprobadoPor && aprobadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionAprobacion(
+          aprobadoPor,
+          doc.id,
+          doc.nombre
+        );
+      } catch (notifError) {
+        console.error("Error al enviar notificación de aprobación:", notifError);
+      }
+    }
+
     return res.status(201).json(doc);
   } catch (error: any) {
     console.error("Error al crear documento:", error);
+
+    // Manejar error de código duplicado
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      if (error.parent?.constraint === 'documentos_codigo_key') {
+        return res.status(400).json({
+          message: "Ya existe un documento con ese código",
+          error: `El código '${req.body.codigo}' ya está en uso. Por favor, utiliza un código diferente.`,
+          field: 'codigo'
+        });
+      }
+    }
+
     return res
       .status(500)
       .json({ message: "Error al crear documento", error: error.message });
@@ -204,26 +250,105 @@ export const updateDocumento = async (req: Request, res: Response) => {
       fechaAprobacion,
       proximaRevision,
       contenidoHtml,
+      cambios, // Descripción de cambios para la versión
     } = req.body;
 
-    const archivo = req.file;
+    // Obtener el ID del usuario autenticado
+    const usuarioId = (req as any).user?.id;
 
-    //si ahy archivo nuevo, eliminar anterior y subir el nuevo
+    if (!usuarioId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
+    const archivo = req.file;
+    const VersionDocumento = require("../models/versionDocumento.model").default;
+
+    // Helper: Detectar si hay cambios significativos en metadata
+    const hayCambiosSignificativos = () => {
+      const camposCriticos = [
+        { campo: 'contenidoHtml', valorActual: doc.contenidoHtml, valorNuevo: contenidoHtml },
+        { campo: 'estado', valorActual: doc.estado, valorNuevo: estado },
+        { campo: 'nombreArchivo', valorActual: doc.nombreArchivo, valorNuevo: nombreArchivo },
+        { campo: 'tipoDocumento', valorActual: doc.tipoDocumento, valorNuevo: tipoDocumento },
+      ];
+
+      return camposCriticos.some(({ valorActual, valorNuevo }) =>
+        valorNuevo !== undefined && valorNuevo !== null && valorActual !== valorNuevo
+      );
+    };
+
+    // Helper: Obtener siguiente número de versión
+    const obtenerSiguienteNumeroVersion = async () => {
+      const ultimaVersion = await VersionDocumento.findOne({
+        where: { documentoId: doc.id },
+        order: [["numeroVersion", "DESC"]],
+      });
+      return ultimaVersion ? ultimaVersion.numeroVersion + 1 : 1;
+    };
+
+    // Helper: Calcular nueva versión string
+    const calcularNuevaVersion = (esArchivoNuevo: boolean) => {
+      const versionActualArray = (doc.versionActual || "1.0").split(".");
+      const major = parseInt(versionActualArray[0] || "1");
+      const minor = parseInt(versionActualArray[1] || "0");
+      const patch = parseInt(versionActualArray[2] || "0");
+
+      if (esArchivoNuevo) {
+        // Archivo nuevo: incrementa MINOR (1.0 -> 1.1)
+        return `${major}.${minor + 1}.0`;
+      } else {
+        // Solo metadata: incrementa PATCH (1.0.0 -> 1.0.1)
+        return `${major}.${minor}.${patch + 1}`;
+      }
+    };
+
+    // Helper: Crear snapshot de la versión actual
+    const crearSnapshotVersion = async (esArchivoNuevo: boolean, descripcionCambios: string) => {
+      const nuevoNumeroVersion = await obtenerSiguienteNumeroVersion();
+
+      await VersionDocumento.create({
+        documentoId: doc.id,
+        version: doc.versionActual || doc.version || "1.0",
+        numeroVersion: nuevoNumeroVersion,
+        versionString: doc.versionActual || "1.0",
+        subidoPor: usuarioId, // Usuario logueado que hace el cambio
+        cambios: descripcionCambios,
+        // Datos del archivo (si existe)
+        rutaArchivo: doc.rutaArchivo,
+        archivoUrl: doc.rutaAlmacenamiento,
+        nombreArchivo: doc.nombreArchivo,
+        tamañoBytes: doc.tamañoBytes,
+        tieneArchivo: !!doc.rutaAlmacenamiento,
+        // Snapshot de metadata
+        contenidoHtml: doc.contenidoHtml,
+        estadoDocumento: doc.estado,
+        tipoDocumento: doc.tipoDocumento,
+        codigoDocumento: doc.codigoDocumento,
+        estado: "historica",
+        metadataSnapshot: {
+          visibilidad: doc.visibilidad,
+          proximaRevision: doc.proximaRevision,
+          creadoPor: doc.creadoPor,
+          revisadoPor: doc.revisadoPor,
+        },
+      });
+
+      console.log(`📸 Versión ${doc.versionActual} guardada en historial`);
+    };
+
+    // Si hay archivo nuevo, crear versión del documento actual y subir el nuevo
     if (archivo) {
+      // 1. Crear versión del estado actual del documento (antes de actualizar)
       if (doc.rutaAlmacenamiento) {
-        try {
-          const oldPath = doc.rutaAlmacenamiento.split("/").pop();
-          if (oldPath) {
-            // await deleteFileFromSupabase(oldPath);
-          }
-        } catch (error) {
-          console.error("Error al eliminar archivo anterior:", error);
-        }
+        await crearSnapshotVersion(true, cambios || "Actualización con archivo nuevo");
       }
 
-      //Subir nuevo archivo
+      // 2. Subir nuevo archivo a Supabase con path versionado
       const extension = archivo.originalname.split(".").pop();
-      const filename = `${UUIDV4()}.${extension}`;
+      const nuevaVersionString = calcularNuevaVersion(true);
+
+      // Path: documentos/{documentoId}/v{version}_{filename}
+      const filename = `${doc.id}/v${nuevaVersionString}_${UUIDV4()}.${extension}`;
 
       const { url } = await uploadFileToSupabase(
         filename,
@@ -231,16 +356,19 @@ export const updateDocumento = async (req: Request, res: Response) => {
         "documentos",
       );
 
+      // 3. Actualizar documento con nueva información
       await doc.update({
-        nombreArchivo,
+        nombreArchivo: nombreArchivo || archivo.originalname,
         rutaAlmacenamiento: url,
+        rutaArchivo: filename,
         tipoMime: archivo.mimetype,
         tamañoBytes: archivo.size,
+        versionActual: nuevaVersionString,
         subidoPor,
         visibilidad,
         tipoDocumento,
         codigoDocumento,
-        version,
+        version: nuevaVersionString,
         estado,
         aprobadoPor,
         fechaAprobacion,
@@ -248,25 +376,95 @@ export const updateDocumento = async (req: Request, res: Response) => {
         creadoPor,
         revisadoPor,
         contenidoHtml,
+        actualizadoEn: new Date(),
       });
+
+      console.log(`✅ Documento actualizado a versión ${nuevaVersionString} con archivo nuevo`);
     } else {
-      await doc.update({
-        nombreArchivo,
-        tipoDocumento,
-        codigoDocumento,
-        version,
-        visibilidad,
-        estado,
-        proximaRevision,
-        creadoPor,
-        revisadoPor,
-        aprobadoPor,
-        fechaAprobacion,
-        contenidoHtml,
-      });
+      // Si no hay archivo nuevo, verificar si hay cambios significativos
+      const cambiosSignificativos = hayCambiosSignificativos();
+
+      if (cambiosSignificativos) {
+        // Crear snapshot de la versión actual antes de actualizar
+        await crearSnapshotVersion(false, cambios || "Actualización de metadata");
+
+        // Calcular nueva versión (patch)
+        const nuevaVersionString = calcularNuevaVersion(false);
+
+        // Actualizar documento con metadata y nueva versión
+        await doc.update({
+          nombreArchivo,
+          tipoDocumento,
+          codigoDocumento,
+          version: nuevaVersionString,
+          versionActual: nuevaVersionString,
+          visibilidad,
+          estado,
+          proximaRevision,
+          creadoPor,
+          revisadoPor,
+          aprobadoPor,
+          fechaAprobacion,
+          contenidoHtml,
+          actualizadoEn: new Date(),
+        });
+
+        console.log(`✅ Documento actualizado a versión ${nuevaVersionString} (cambios en metadata)`);
+      } else {
+        // Solo actualizar metadata sin crear versión
+        await doc.update({
+          nombreArchivo,
+          tipoDocumento,
+          codigoDocumento,
+          version,
+          visibilidad,
+          estado,
+          proximaRevision,
+          creadoPor,
+          revisadoPor,
+          aprobadoPor,
+          fechaAprobacion,
+          contenidoHtml,
+          actualizadoEn: new Date(),
+        });
+
+        console.log(`✅ Documento actualizado sin cambios significativos (no se creó versión)`);
+      }
     }
+
+    // Notificar asignación de revisor (si cambió y es diferente al usuario actual)
+    if (revisadoPor && revisadoPor !== doc.revisadoPor && revisadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionRevision(
+          revisadoPor,
+          doc.id,
+          doc.nombre
+        );
+        console.log(`📧 Notificación enviada al revisor: ${revisadoPor}`);
+      } catch (notifError) {
+        console.error("Error al enviar notificación de revisión:", notifError);
+        // No falla la operación si falla la notificación
+      }
+    }
+
+    // Notificar asignación de aprobador (si cambió y es diferente al usuario actual)
+    if (aprobadoPor && aprobadoPor !== doc.aprobadoPor && aprobadoPor !== usuarioId) {
+      try {
+        await NotificacionesService.notificarAsignacionAprobacion(
+          aprobadoPor,
+          doc.id,
+          doc.nombre
+        );
+        console.log(`📧 Notificación enviada al aprobador: ${aprobadoPor}`);
+      } catch (notifError) {
+        console.error("Error al enviar notificación de aprobación:", notifError);
+        // No falla la operación si falla la notificación
+      }
+    }
+
     return res.json(doc);
   } catch (error: any) {
+    console.error("❌ Error al actualizar documento:", error);
     return res
       .status(500)
       .json({ message: "Error al actualizar documento", error: error.message });

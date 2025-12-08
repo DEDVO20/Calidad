@@ -14,6 +14,8 @@ import {
   TrendingUp,
   FileCheck,
   BookOpen,
+  CheckSquare,
+  FileX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
@@ -153,10 +155,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Aprobaciones Pendientes",
             url: "/Aprobaciones_Pendientes",
             badge: pendingCount > 0 ? pendingCount.toString() : undefined,
+            icon: FileCheck,
+          },
+          {
+            title: "Mis Aprobaciones",
+            url: "/mis-aprobaciones",
+            icon: CheckSquare,
           },
           {
             title: "Documentos Obsoletos",
             url: "/Documentos_Obsoletos",
+            icon: FileX,
           },
         ],
       },
@@ -372,14 +381,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="px-2 py-4">
-        <div className="mb-3 px-3">
+        <div className="mb-3 px-3 group-data-[collapsible=icon]:hidden">
           <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Gestión</p>
         </div>
         <NavMain items={data.navMain} />
 
         <div className="my-4 mx-3 border-t border-sidebar-border/50" />
 
-        <div className="mb-3 px-3">
+        <div className="mb-3 px-3 group-data-[collapsible=icon]:hidden">
           <p className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">Calidad</p>
         </div>
         <NavMain items={data.navQuality} />

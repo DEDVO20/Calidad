@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function NavMain({
@@ -35,6 +36,7 @@ export function NavMain({
   title?: string;
 }) {
   const location = useLocation();
+  const { state, setOpen } = useSidebar();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   // Determinar qué menús deben estar abiertos basándose en la ruta actual
@@ -58,6 +60,16 @@ export function NavMain({
       [title]: !prev[title],
     }));
   };
+
+  const handleMenuClick = (item: typeof items[0], e: React.MouseEvent) => {
+    // Si el sidebar está colapsado y hay subitems, expandir el sidebar
+    if (state === "collapsed" && item.items && item.items.length > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(true);
+    }
+  };
+
   return (
     <SidebarGroup>
       {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
@@ -73,10 +85,14 @@ export function NavMain({
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    onClick={(e) => handleMenuClick(item, e)}
+                    className="group-data-[collapsible=icon]:justify-center"
+                  >
                     {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    <span className="overflow-hidden">{item.title}</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -85,7 +101,7 @@ export function NavMain({
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
                           <Link to={subItem.url}>
-                            <span>{subItem.title}</span>
+                            <span className="overflow-hidden">{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -96,10 +112,14 @@ export function NavMain({
             </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} asChild>
+              <SidebarMenuButton
+                tooltip={item.title}
+                asChild
+                className="group-data-[collapsible=icon]:justify-center"
+              >
                 <Link to={item.url}>
                   {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  <span className="overflow-hidden">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

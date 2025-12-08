@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,13 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Users,
   Search,
-  Eye,
+  X,
   Edit,
   Trash2,
+  Eye,
+  Users,
   RefreshCw,
-  Filter,
+  Plus,
+  FileSpreadsheet,
   UserCheck,
   UserX,
   Building2,
@@ -35,6 +39,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Usuario {
   id: string;
@@ -59,6 +70,7 @@ interface Usuario {
 }
 
 export default function ListaUsuarios() {
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,12 +225,43 @@ export default function ListaUsuarios() {
         throw new Error("Error al eliminar usuario");
       }
 
-      alert(`✓ Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
+      toast.success(`Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
       await fetchUsuarios();
       closeDialog();
     } catch (error) {
       console.error("Error:", error);
-      alert("✗ Error al eliminar el usuario. Por favor intente nuevamente.");
+      toast.error("Error al eliminar el usuario. Por favor intente nuevamente.");
+    }
+  };
+
+  const handleToggleEstado = async (id: string, nuevoEstado: boolean) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Actualización optimista en la UI
+      setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: nuevoEstado } : u));
+
+      const response = await fetch(`/api/usuarios/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ activo: nuevoEstado }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar estado");
+      }
+
+      const action = nuevoEstado ? "activado" : "desactivado";
+      toast.success(`Usuario ${action} correctamente`);
+
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Error al cambiar el estado. Revertiendo...");
+      // Revertir cambio en UI si falla
+      setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: !nuevoEstado } : u));
     }
   };
 
@@ -255,14 +298,28 @@ export default function ListaUsuarios() {
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-7 w-7 text-blue-600" />
             </div>
-            Lista De Usuarios
+            Gestión de Usuarios
           </h1>
           <p className="text-gray-600 mt-2">
-            {total} usuario{total !== 1 ? "s" : ""} registrado
-            {total !== 1 ? "s" : ""} en el sistema
+            Administra usuarios, roles y permisos del sistema
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => navigate("/usuarios/importar")}
+            variant="outline"
+            className="hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
+          >
+            <FileSpreadsheet className="w-4 h-4 mr-2" />
+            Importar Usuarios
+          </Button>
+          <Button
+            onClick={() => navigate("/NuevoUsuario")}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Usuario
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -380,7 +437,6 @@ export default function ListaUsuarios() {
                 size="sm"
                 onClick={() => setFiltroEstado("todos")}
               >
-                <Filter className="w-4 h-4 mr-1" />
                 Todos
               </Button>
               <Button
@@ -498,52 +554,72 @@ export default function ListaUsuarios() {
                     </div>
                   </td>
                   <td className="p-4 align-middle">
-                    {usuario.activo ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-green-50 text-green-700 border-green-200"
-                      >
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Activo
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-red-50 text-red-700 border-red-200"
-                      >
-                        <XCircle className="w-3 h-3 mr-1" />
-                        Inactivo
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={usuario.activo}
+                        onCheckedChange={(checked) => handleToggleEstado(usuario.id, checked)}
+                        className={usuario.activo ? "data-[state=checked]:bg-green-600" : "data-[state=checked]:bg-gray-200"}
+                      />
+                      <span className={`text-sm ${usuario.activo ? "text-green-700 font-medium" : "text-gray-500"}`}>
+                        {usuario.activo ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
                   </td>
                   <td className="p-4 align-middle">
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                        onClick={() => openDialog("ver", usuario)}
-                      >
-                        <Eye className="w-3 h-3 mr-1" />
-                        Ver
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                        onClick={() => openDialog("eliminar", usuario)}
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Eliminar
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+                              onClick={() => openDialog("ver", usuario)}
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Ver detalles</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
+                              onClick={() => navigate(`/usuarios/${usuario.id}/editar`)}
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Editar usuario</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                              onClick={() => openDialog("eliminar", usuario)}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Eliminar usuario</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </td>
                 </tr>
