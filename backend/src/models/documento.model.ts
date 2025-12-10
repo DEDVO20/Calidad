@@ -2,69 +2,95 @@ import { DataTypes, Model, Sequelize, Optional } from "sequelize";
 
 interface DocumentoAttributes {
   id: string;
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  tipoDocumento: string;
+  rutaArchivo?: string;
+  versionActual: string;
+  estado: string;
+  fechaAprobacion?: Date;
+  fechaVigencia?: Date;
+  creadoPor?: string;
+  aprobadoPor?: string;
+  creadoEn: Date;
+  actualizadoEn: Date;
   nombreArchivo: string;
   rutaAlmacenamiento?: string;
   tipoMime?: string;
   tamañoBytes?: number;
   subidoPor?: string;
-  creadoEn?: Date;
+  revisadoPor?: string;
   visibilidad?: string;
-  tipoDocumento?: string;
   codigoDocumento?: string;
   version?: string;
-  estado?: string;
-  aprobadoPor?: string;
-  fechaAprobacion?: Date;
   proximaRevision?: Date;
-  creadoPor?: string;
-  revisadoPor?: string;
   contenidoHtml?: string;
+  comentariosRechazo?: string;
+  rechazadoPor?: string;
+  fechaRechazo?: Date;
 }
 
 interface DocumentoCreationAttributes
   extends Optional<
     DocumentoAttributes,
     | "id"
+    | "descripcion"
+    | "rutaArchivo"
+    | "versionActual"
+    | "estado"
+    | "fechaAprobacion"
+    | "fechaVigencia"
+    | "creadoPor"
+    | "aprobadoPor"
+    | "creadoEn"
+    | "actualizadoEn"
     | "rutaAlmacenamiento"
     | "tipoMime"
     | "tamañoBytes"
     | "subidoPor"
-    | "creadoEn"
+    | "revisadoPor"
     | "visibilidad"
-    | "tipoDocumento"
     | "codigoDocumento"
     | "version"
-    | "estado"
-    | "aprobadoPor"
-    | "fechaAprobacion"
     | "proximaRevision"
-    | "creadoPor"
-    | "revisadoPor"
     | "contenidoHtml"
-  > {}
+    | "comentariosRechazo"
+    | "rechazadoPor"
+    | "fechaRechazo"
+  > { }
 
 class Documento
   extends Model<DocumentoAttributes, DocumentoCreationAttributes>
-  implements DocumentoAttributes
-{
-  id!: string;
-  nombreArchivo!: string;
-  rutaAlmacenamiento?: string;
-  tipoMime?: string;
-  tamañoBytes?: number;
-  subidoPor?: string;
-  creadoEn?: Date;
-  visibilidad?: string;
-  tipoDocumento?: string;
-  codigoDocumento?: string;
-  version?: string;
-  estado?: string;
-  aprobadoPor?: string;
-  fechaAprobacion?: Date;
-  proximaRevision?: Date;
-  creadoPor?: string;
-  revisadoPor?: string;
-  contenidoHtml?: string;
+  implements DocumentoAttributes {
+  public id!: string;
+  public codigo!: string;
+  public nombre!: string;
+  public descripcion?: string;
+  public tipoDocumento!: string;
+  public rutaArchivo?: string;
+  public versionActual!: string;
+  public estado!: string;
+  public fechaAprobacion?: Date;
+  public fechaVigencia?: Date;
+  public creadoPor?: string;
+  public aprobadoPor?: string;
+  public creadoEn!: Date;
+  public actualizadoEn!: Date;
+  public nombreArchivo!: string;
+  public rutaAlmacenamiento?: string;
+  public tipoMime?: string;
+  public tamañoBytes?: number;
+  public subidoPor?: string;
+  public revisadoPor?: string;
+  public visibilidad?: string;
+  public codigoDocumento?: string;
+  public version?: string;
+  public proximaRevision?: Date;
+  public contenidoHtml?: string;
+  public comentariosRechazo?: string;
+  public rechazadoPor?: string;
+  public fechaRechazo?: Date;
 
   public static initModel(sequelize: Sequelize): typeof Documento {
     return Documento.init(
@@ -74,9 +100,82 @@ class Documento
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
+        codigo: {
+          type: DataTypes.STRING(100),
+          allowNull: false,
+          unique: true,
+        },
+        nombre: {
+          type: DataTypes.STRING(300),
+          allowNull: false,
+        },
+        descripcion: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        tipoDocumento: {
+          type: DataTypes.STRING(100),
+          allowNull: false,
+          field: "tipo_documento",
+        },
+        rutaArchivo: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "ruta_archivo",
+        },
+        versionActual: {
+          type: DataTypes.STRING(20),
+          allowNull: false,
+          defaultValue: "1.0",
+          field: "version_actual",
+        },
+        estado: {
+          type: DataTypes.STRING(50),
+          allowNull: false,
+          defaultValue: "borrador",
+        },
+        fechaAprobacion: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_aprobacion",
+        },
+        fechaVigencia: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_vigencia",
+        },
+        creadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "creado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
+        },
+        aprobadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "aprobado_por",
+          references: {
+            model: "usuarios",
+            key: "id",
+          },
+        },
+        creadoEn: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          field: "creado_en",
+        },
+        actualizadoEn: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          field: "actualizado_en",
+        },
         nombreArchivo: {
           type: DataTypes.STRING(500),
           allowNull: false,
+          defaultValue: "documento",
           field: "nombre_archivo",
         },
         rutaAlmacenamiento: {
@@ -98,19 +197,12 @@ class Documento
           type: DataTypes.UUID,
           allowNull: true,
           field: "subido_por",
-        },
-        creadoPor: {
-          // ← Nuevo
-          type: DataTypes.UUID,
-          allowNull: false,
-          field: "creado_por",
           references: {
             model: "usuarios",
             key: "id",
           },
         },
         revisadoPor: {
-          // ← Nuevo
           type: DataTypes.UUID,
           allowNull: true,
           field: "revisado_por",
@@ -119,19 +211,10 @@ class Documento
             key: "id",
           },
         },
-        creadoEn: {
-          type: DataTypes.DATE,
-          allowNull: true,
-          field: "creado_en",
-        },
         visibilidad: {
           type: DataTypes.STRING(50),
-          defaultValue: "privado",
-        },
-        tipoDocumento: {
-          type: DataTypes.STRING(50),
           allowNull: true,
-          field: "tipo_documento",
+          defaultValue: "privado",
         },
         codigoDocumento: {
           type: DataTypes.STRING(100),
@@ -141,19 +224,6 @@ class Documento
         version: {
           type: DataTypes.STRING(20),
           allowNull: true,
-        },
-        estado: {
-          type: DataTypes.STRING(50),
-          allowNull: true,
-        },
-        aprobadoPor: {
-          type: DataTypes.UUID,
-          allowNull: true,
-        },
-        fechaAprobacion: {
-          type: DataTypes.DATEONLY,
-          allowNull: true,
-          field: "fecha_aprobacion",
         },
         proximaRevision: {
           type: DataTypes.DATEONLY,
@@ -165,13 +235,27 @@ class Documento
           allowNull: true,
           field: "contenido_html",
         },
+        comentariosRechazo: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+          field: "comentarios_rechazo",
+        },
+        rechazadoPor: {
+          type: DataTypes.UUID,
+          allowNull: true,
+          field: "rechazado_por",
+        },
+        fechaRechazo: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          field: "fecha_rechazo",
+        },
       },
       {
         sequelize,
         tableName: "documentos",
         modelName: "Documento",
         timestamps: false,
-        underscored: true,
       },
     );
   }
@@ -179,7 +263,15 @@ class Documento
   public static associate(models: any) {
     Documento.belongsTo(models.Usuario, {
       foreignKey: "subidoPor",
+      as: "subidor",
+    });
+    Documento.belongsTo(models.Usuario, {
+      foreignKey: "creadoPor",
       as: "autor",
+    });
+    Documento.belongsTo(models.Usuario, {
+      foreignKey: "revisadoPor",
+      as: "revisor",
     });
     Documento.belongsTo(models.Usuario, {
       foreignKey: "aprobadoPor",

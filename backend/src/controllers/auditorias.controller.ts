@@ -66,33 +66,34 @@ export const getAuditorias = async (req: Request, res: Response) => {
     const { tipo, estado } = req.query;
 
     // Construir filtros opcionales
-    const where: any = {};
-    if (tipo) where.tipo = tipo;
-    if (estado) where.estado = estado;
+    const whereClause: Record<string, any> = {};
+    if (tipo && typeof tipo === 'string') {
+      whereClause.tipo = tipo;
+    }
+    if (estado && typeof estado === 'string') {
+      whereClause.estado = estado;
+    }
 
-    const auditorias = await Auditorias.findAll({
-      where,
+    const options: any = {
       order: [["creadoEn", "DESC"]],
       include: [
         {
           association: "auditorLider",
-          attributes: ["id", "nombre", "email"],
-          required: false,
-        },
-        {
-          association: "creadoPorUsuario",
-          attributes: ["id", "nombre", "email"],
-          required: false,
+          attributes: ["id", "nombre", "primerApellido", "segundoApellido"],
         },
       ],
-    });
+    };
 
-    return res.json({
-      total: auditorias.length,
-      auditorias,
-    });
+    // Solo agregar where si hay filtros
+    if (Object.keys(whereClause).length > 0) {
+      options.where = whereClause;
+    }
+
+    const auditorias = await Auditorias.findAll(options);
+
+    return res.json(auditorias);
   } catch (error: any) {
-    console.error(error);
+    console.error("Error en getAuditorias:", error);
     return res
       .status(500)
       .json({ message: "Error al obtener auditorías", error: error.message });
@@ -102,7 +103,14 @@ export const getAuditorias = async (req: Request, res: Response) => {
 /** Obtener Auditoría por ID */
 export const getAuditoriaById = async (req: Request, res: Response) => {
   try {
-    const auditoria = await Auditorias.findByPk(req.params.id);
+    const auditoria = await Auditorias.findByPk(req.params.id, {
+      include: [
+        {
+          association: "auditorLider",
+          attributes: ["id", "nombre", "primerApellido", "segundoApellido"],
+        },
+      ],
+    });
     if (!auditoria)
       return res.status(404).json({ message: "Auditoría no encontrada" });
     return res.json(auditoria);

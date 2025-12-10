@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { TipTapEditor } from "./TipTapEditor";
+import { FileUpload } from "./FileUpload";
 import { usuarioService, Usuario } from "@/services/usuario.service";
 import { toast } from "sonner";
-import { Save, Eye, Download, FileText } from "lucide-react";
+import { Save, Eye, Download, FileText, Upload as UploadIcon, Edit } from "lucide-react";
 
 interface InitialData {
   nombreArchivo?: string;
@@ -38,6 +39,10 @@ export const DocumentFormWithTipTap = ({
   const [preview, setPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Document creation mode: 'editor' or 'upload'
+  const [documentMode, setDocumentMode] = useState<'editor' | 'upload'>('editor');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
   const [formData, setFormData] = useState({
     nombreArchivo: initialData?.nombreArchivo || "",
     tipoDocumento: initialData?.tipoDocumento || "formato",
@@ -60,7 +65,7 @@ export const DocumentFormWithTipTap = ({
         const usuarios = await usuarioService.getAllActive();
         setUsuarios(usuarios);
       } catch (error) {
-        console.error("Error al cargar usuarios:", error);
+        console.error("❌ Error al cargar usuarios:", error);
         toast.error("Error al cargar la lista de usuarios");
       }
     };
@@ -93,8 +98,16 @@ export const DocumentFormWithTipTap = ({
     if (!formData.subidoPor) {
       newErrors.subidoPor = "Debe seleccionar quien creó el documento";
     }
-    if (!content.trim() || content === "<p></p>") {
-      newErrors.content = "El contenido del documento es requerido";
+
+    // Validate content based on mode
+    if (documentMode === 'editor') {
+      if (!content.trim() || content === "<p></p>") {
+        newErrors.content = "El contenido del documento es requerido";
+      }
+    } else if (documentMode === 'upload') {
+      if (!uploadedFile) {
+        newErrors.file = "Debe seleccionar un archivo para subir";
+      }
     }
 
     setErrors(newErrors);
@@ -113,6 +126,11 @@ export const DocumentFormWithTipTap = ({
     try {
       // Crear FormData para enviar al backend
       const data = new FormData();
+      // Mapear campos requeridos por el backend
+      data.append("codigo", formData.codigoDocumento);
+      data.append("nombre", formData.nombreArchivo);
+      data.append("descripcion", `Documento ${formData.nombreArchivo}`); // Descripción por defecto
+
       data.append("nombreArchivo", formData.nombreArchivo);
       data.append("tipoDocumento", formData.tipoDocumento);
       data.append("codigoDocumento", formData.codigoDocumento);
@@ -120,7 +138,13 @@ export const DocumentFormWithTipTap = ({
       data.append("visibilidad", formData.visibilidad);
       data.append("estado", formData.estado);
       data.append("subidoPor", formData.subidoPor);
-      data.append("contenidoHtml", content);
+
+      // Add content based on mode
+      if (documentMode === 'editor') {
+        data.append("contenidoHtml", content);
+      } else if (documentMode === 'upload' && uploadedFile) {
+        data.append("archivo", uploadedFile);
+      }
 
       if (formData.proximaRevision) {
         data.append("proximaRevision", formData.proximaRevision);
@@ -275,9 +299,8 @@ export const DocumentFormWithTipTap = ({
               name="nombreArchivo"
               value={formData.nombreArchivo}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md bg-background ${
-                errors.nombreArchivo ? "border-destructive" : "border-input"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md bg-background ${errors.nombreArchivo ? "border-destructive" : "border-input"
+                }`}
               placeholder="Ej: Formato de Solicitud de Equipos"
             />
             {errors.nombreArchivo && (
@@ -297,9 +320,8 @@ export const DocumentFormWithTipTap = ({
               name="codigoDocumento"
               value={formData.codigoDocumento}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md bg-background ${
-                errors.codigoDocumento ? "border-destructive" : "border-input"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md bg-background ${errors.codigoDocumento ? "border-destructive" : "border-input"
+                }`}
               placeholder="Ej: FO-GC-001"
             />
             {errors.codigoDocumento && (
@@ -317,9 +339,8 @@ export const DocumentFormWithTipTap = ({
               name="version"
               value={formData.version}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md bg-background ${
-                errors.version ? "border-destructive" : "border-input"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md bg-background ${errors.version ? "border-destructive" : "border-input"
+                }`}
               placeholder="Ej: 1.0"
             />
             {errors.version && (
@@ -428,12 +449,11 @@ export const DocumentFormWithTipTap = ({
               name="subidoPor"
               value={formData.subidoPor}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md bg-background ${
-                errors.subidoPor ? "border-destructive" : "border-input"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md bg-background ${errors.subidoPor ? "border-destructive" : "border-input"
+                }`}
             >
               <option value="">Seleccionar usuario</option>
-              {usuarios.map((usuario) => (
+              {usuarios?.map((usuario) => (
                 <option key={usuario.id} value={usuario.id}>
                   {usuario.nombre} {usuario.primerApellido}
                 </option>
@@ -466,7 +486,7 @@ export const DocumentFormWithTipTap = ({
               className="w-full px-3 py-2 border border-input rounded-md bg-background"
             >
               <option value="">Seleccionar (opcional)</option>
-              {usuarios.map((usuario) => (
+              {usuarios?.map((usuario) => (
                 <option key={usuario.id} value={usuario.id}>
                   {usuario.nombre} {usuario.primerApellido}
                 </option>
@@ -494,7 +514,7 @@ export const DocumentFormWithTipTap = ({
               className="w-full px-3 py-2 border border-input rounded-md bg-background"
             >
               <option value="">Seleccionar (opcional)</option>
-              {usuarios.map((usuario) => (
+              {usuarios?.map((usuario) => (
                 <option key={usuario.id} value={usuario.id}>
                   {usuario.nombre} {usuario.primerApellido}
                 </option>
@@ -542,37 +562,92 @@ export const DocumentFormWithTipTap = ({
         </div>
       </div>
 
-      {/* Editor TipTap */}
+      {/* Content Section - Editor or Upload */}
       <div className="bg-card p-6 rounded-lg border border-border">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Contenido del Documento</h3>
-          <div className="flex gap-2">
+        {/* Mode Selection Tabs */}
+        <div className="mb-6">
+          <div className="flex gap-2 border-b border-border">
             <button
               type="button"
-              onClick={() => setPreview(!preview)}
-              className="flex items-center gap-2 px-3 py-2 border border-border rounded-md hover:bg-accent transition-colors"
+              onClick={() => setDocumentMode('editor')}
+              className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${documentMode === 'editor'
+                ? 'border-primary text-primary font-medium'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
-              <Eye className="w-4 h-4" />
-              {preview ? "Editar" : "Vista Previa"}
+              <Edit className="w-4 h-4" />
+              Crear con Editor
             </button>
             <button
               type="button"
-              onClick={handleExportPDF}
-              className="flex items-center gap-2 px-3 py-2 border border-border rounded-md hover:bg-accent transition-colors"
+              onClick={() => setDocumentMode('upload')}
+              className={`flex items-center gap-2 px-4 py-2 border-b-2 transition-colors ${documentMode === 'upload'
+                ? 'border-primary text-primary font-medium'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
             >
-              <Download className="w-4 h-4" />
-              Exportar PDF
+              <UploadIcon className="w-4 h-4" />
+              Subir Archivo
             </button>
           </div>
         </div>
 
-        <TipTapEditor
-          content={content}
-          onChange={setContent}
-          editable={!preview}
-        />
-        {errors.content && (
-          <p className="text-destructive text-sm mt-2">{errors.content}</p>
+        {/* Editor Mode */}
+        {documentMode === 'editor' && (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Contenido del Documento</h3>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPreview(!preview)}
+                  className="flex items-center gap-2 px-3 py-2 border border-border rounded-md hover:bg-accent transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  {preview ? "Editar" : "Vista Previa"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-3 py-2 border border-border rounded-md hover:bg-accent transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar PDF
+                </button>
+              </div>
+            </div>
+
+            <TipTapEditor
+              content={content}
+              onChange={setContent}
+              editable={!preview}
+            />
+            {errors.content && (
+              <p className="text-destructive text-sm mt-2">{errors.content}</p>
+            )}
+          </>
+        )}
+
+        {/* Upload Mode */}
+        {documentMode === 'upload' && (
+          <>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">Subir Archivo Existente</h3>
+              <p className="text-sm text-muted-foreground">
+                Sube un documento existente (PDF, Word, Excel, etc.) a Supabase Storage
+              </p>
+            </div>
+
+            <FileUpload
+              onFileSelect={setUploadedFile}
+              selectedFile={uploadedFile}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+              maxSize={10}
+            />
+            {errors.file && (
+              <p className="text-destructive text-sm mt-2">{errors.file}</p>
+            )}
+          </>
         )}
       </div>
 

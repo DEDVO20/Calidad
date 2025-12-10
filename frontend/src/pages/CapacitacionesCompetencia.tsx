@@ -1,12 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 import { Award, Brain, Users, TrendingUp } from "lucide-react";
+import { capacitacionService, Capacitacion } from "@/services/capacitacion.service";
 
 const CapacitacionesCompetencias: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
+
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, []);
+
+  const cargarCapacitaciones = async () => {
+    try {
+      setLoading(true);
+      const data = await capacitacionService.getAll();
+      setCapacitaciones(data);
+    } catch (err) {
+      console.error("Error al cargar capacitaciones:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [open, setOpen] = useState(false);
   const [selectedCompetencia, setSelectedCompetencia] = useState<any>(null);
 

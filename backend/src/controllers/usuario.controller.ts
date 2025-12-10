@@ -246,3 +246,65 @@ export const deleteUsuario = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Bulk import users from Excel or CSV file
+ */
+export const bulkImportUsuarios = async (req: Request, res: Response) => {
+  const { BulkImportService } = await import('../services/bulkImport.service');
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No se proporcionó archivo' });
+    }
+
+    // Validar tipo de archivo
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv',
+      'text/comma-separated-values'
+    ];
+
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        message: 'Formato de archivo no válido. Use Excel (.xlsx) o CSV (.csv)'
+      });
+    }
+
+    // Validar tamaño (5MB máx)
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        message: 'El archivo excede el tamaño máximo de 5MB'
+      });
+    }
+
+    // Parse archivo
+    const rows = await BulkImportService.parseFile(
+      req.file.buffer,
+      req.file.mimetype
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: 'El archivo está vacío' });
+    }
+
+    if (rows.length > 1000) {
+      return res.status(400).json({
+        message: 'El archivo excede el límite de 1000 usuarios por importación'
+      });
+    }
+
+    // Importar usuarios
+    const result = await BulkImportService.importUsers(rows);
+
+    return res.status(200).json(result);
+
+  } catch (error: any) {
+    console.error('Error en importación masiva:', error);
+    return res.status(500).json({
+      message: 'Error al procesar el archivo',
+      error: error.message
+    });
+  }
+};

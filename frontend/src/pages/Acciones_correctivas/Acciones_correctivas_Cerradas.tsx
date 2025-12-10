@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import NuevasAccionesCorrectivas from "./nuevas";
+import { accionCorrectivaService } from "@/services/accionCorrectiva.service";
 
 interface AccionCorrectiva {
   id: number;
@@ -55,24 +56,7 @@ export default function AccionesCorrectivasCerradas() {
 
   const fetchAccionesCorrectivasCerradas = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/acciones-correctivas", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al obtener acciones correctivas");
-      }
-
-      const data = await response.json();
-
-      // Filtrar solo las cerradas
-      const cerradas = Array.isArray(data) ? data : [];
-      const accionesCerradas = cerradas.filter(
-        (ac: AccionCorrectivaAPI) => 
-          ac.estado?.toLowerCase() === "cerrada" || 
-          ac.estado?.toLowerCase() === "cerrado"
-      );
+      const accionesCerradas = await accionCorrectivaService.getCerradas();
 
       // Transformar los datos para el DataTable
       const transformedData = accionesCerradas.map((ac: AccionCorrectivaAPI, index: number) => {

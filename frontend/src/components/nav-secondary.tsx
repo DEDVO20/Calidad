@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import {
   SidebarGroup,
@@ -28,17 +29,21 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild={!item.onClick} onClick={item.onClick}>
+              <SidebarMenuButton
+                asChild={!item.onClick}
+                onClick={item.onClick}
+                className="group-data-[collapsible=icon]:justify-center"
+              >
                 {item.onClick ? (
                   <>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span className="overflow-hidden">{item.title}</span>
                   </>
                 ) : (
-                  <a href={item.url}>
+                  <Link to={item.url}>
                     <item.icon />
-                    <span>{item.title}</span>
-                  </a>
+                    <span className="overflow-hidden">{item.title}</span>
+                  </Link>
                 )}
               </SidebarMenuButton>
             </SidebarMenuItem>

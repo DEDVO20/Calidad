@@ -68,6 +68,7 @@ export const getAccionesCorrectivas = async (_req: Request, res: Response) => {
     });
     return res.json(accionesCorrectivas);
   } catch (error: any) {
+    console.error("Error en getAccionesCorrectivas:", error);
     return res.status(500).json({
       message: "Error al obtener acciones correctivas",
       error: error.message,
@@ -152,6 +153,62 @@ export const updateAccionCorrectiva = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Error al actualizar la acción correctiva",
+      error: error.message,
+    });
+  }
+};
+
+/** Cambiar estado de acción correctiva */
+export const cambiarEstadoAccionCorrectiva = async (req: Request, res: Response) => {
+  try {
+    const { estado } = req.body;
+
+    if (!estado) {
+      return res.status(400).json({
+        message: "El campo 'estado' es obligatorio.",
+      });
+    }
+
+    const accionCorrectiva = await AccionCorrectiva.findByPk(req.params.id);
+    if (!accionCorrectiva) {
+      return res.status(404).json({
+        message: "Acción correctiva no encontrada",
+      });
+    }
+
+    await accionCorrectiva.update({ estado });
+    return res.json(accionCorrectiva);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al cambiar estado de la acción correctiva",
+      error: error.message,
+    });
+  }
+};
+
+/** Verificar acción correctiva */
+export const verificarAccionCorrectiva = async (req: Request, res: Response) => {
+  try {
+    const { observaciones } = req.body;
+
+    const accionCorrectiva = await AccionCorrectiva.findByPk(req.params.id);
+    if (!accionCorrectiva) {
+      return res.status(404).json({
+        message: "Acción correctiva no encontrada",
+      });
+    }
+
+    await accionCorrectiva.update({
+      estado: "verificada",
+      eficaciaVerificada: true,
+      fechaVerificacion: new Date(),
+      observacion: observaciones || accionCorrectiva.observacion,
+    });
+
+    return res.json(accionCorrectiva);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al verificar la acción correctiva",
       error: error.message,
     });
   }

@@ -64,7 +64,7 @@ if (USE_CLOUD || NODE_ENV === "production") {
     host: DB_HOST,
     port: DB_PORT,
     dialect: "postgres",
-    logging: NODE_ENV === "development" ? console.log : false,
+    logging: console.log,
     pool: {
       max: 5,
       min: 0,

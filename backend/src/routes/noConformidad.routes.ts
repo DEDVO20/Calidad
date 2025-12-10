@@ -4,188 +4,56 @@ import {
   getNoConformidades,
   getNoConformidadById,
   updateNoConformidad,
-  deleteNoConformidad
+  deleteNoConformidad,
+  iniciarTratamientoNoConformidad,
+  cerrarNoConformidad
 } from "../controllers/noConformidad.controller";
 
 const router = Router();
 
-/**
- * @swagger
- * /api/noconformidades:
- *   post:
- *     summary: Crear no conformidad
- *     tags: [No Conformidades]
- *     description: Registra una nueva no conformidad detectada
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - descripcion
- *               - tipo
- *             properties:
- *               codigo:
- *                 type: string
- *                 example: NC-2024-001
- *               descripcion:
- *                 type: string
- *                 example: Documentos sin firmar en el proceso de producción
- *               tipo:
- *                 type: string
- *                 enum: [producto, proceso, sistema]
- *                 example: proceso
- *               gravedad:
- *                 type: string
- *                 enum: [menor, mayor, critica]
- *                 example: mayor
- *               origenId:
- *                 type: string
- *                 format: uuid
- *                 description: ID del origen (auditoría, reclamo, inspección)
- *               fechaDeteccion:
- *                 type: string
- *                 format: date
- *                 example: 2024-10-26
- *               estado:
- *                 type: string
- *                 enum: [abierta, en_analisis, en_tratamiento, cerrada]
- *                 default: abierta
- *     responses:
- *       201:
- *         description: No conformidad creada
- *       400:
- *         description: Datos inválidos
- *       401:
- *         description: No autorizado
- */
+// POST /api/
 router.post("/", createNoConformidad);
 
-/**
- * @swagger
- * /api/noconformidades:
- *   get:
- *     summary: Listar no conformidades
- *     tags: [No Conformidades]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: tipo
- *         schema:
- *           type: string
- *           enum: [producto, proceso, sistema]
- *       - in: query
- *         name: gravedad
- *         schema:
- *           type: string
- *           enum: [menor, mayor, critica]
- *       - in: query
- *         name: estado
- *         schema:
- *           type: string
- *           enum: [abierta, en_analisis, en_tratamiento, cerrada]
- *     responses:
- *       200:
- *         description: Lista de no conformidades
- *       401:
- *         description: No autorizado
- */
+// GET /api/
 router.get("/", getNoConformidades);
 
-/**
- * @swagger
- * /api/noconformidades/{id}:
- *   get:
- *     summary: Obtener no conformidad por ID
- *     tags: [No Conformidades]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Detalles de la no conformidad
- *       404:
- *         description: No conformidad no encontrada
- *       401:
- *         description: No autorizado
- */
+// GET /api/abiertas
+router.get("/abiertas", (req, res) => {
+  req.query.estado = 'abierta';
+  return getNoConformidades(req, res);
+});
+
+// GET /api/en-tratamiento
+router.get("/en-tratamiento", (req, res) => {
+  req.query.estado = 'en_tratamiento';
+  return getNoConformidades(req, res);
+});
+
+// GET /api/en-analisis
+router.get("/en-analisis", (req, res) => {
+  req.query.estado = 'en_analisis';
+  return getNoConformidades(req, res);
+});
+
+// GET /api/cerradas
+router.get("/cerradas", (req, res) => {
+  req.query.estado = 'cerrada';
+  return getNoConformidades(req, res);
+});
+
+// GET /api/:id
 router.get("/:id", getNoConformidadById);
 
-/**
- * @swagger
- * /api/noconformidades/{id}:
- *   put:
- *     summary: Actualizar no conformidad
- *     tags: [No Conformidades]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               descripcion:
- *                 type: string
- *               estado:
- *                 type: string
- *                 enum: [abierta, en_analisis, en_tratamiento, cerrada]
- *               accionCorrectiva:
- *                 type: string
- *               fechaCierre:
- *                 type: string
- *                 format: date
- *     responses:
- *       200:
- *         description: No conformidad actualizada
- *       404:
- *         description: No encontrada
- *       401:
- *         description: No autorizado
- */
+// PUT /api/:id
 router.put("/:id", updateNoConformidad);
 
-/**
- * @swagger
- * /api/noconformidades/{id}:
- *   delete:
- *     summary: Eliminar no conformidad
- *     tags: [No Conformidades]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: No conformidad eliminada
- *       404:
- *         description: No encontrada
- *       401:
- *         description: No autorizado
- */
+// DELETE /api/:id
 router.delete("/:id", deleteNoConformidad);
+
+// PATCH /api/:id/iniciar-tratamiento
+router.patch("/:id/iniciar-tratamiento", iniciarTratamientoNoConformidad);
+
+// PATCH /api/:id/cerrar
+router.patch("/:id/cerrar", cerrarNoConformidad);
 
 export default router;

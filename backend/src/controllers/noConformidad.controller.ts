@@ -4,33 +4,38 @@ import NoConformidad from "../models/noConformidad.model";
 /** Crear No Conformidad */
 export const createNoConformidad = async (req: Request, res: Response) => {
   try {
-    const { codigo, descripcion, responsableId, estado } = req.body;
+    const data = req.body;
 
     // Validación de campos obligatorios
-    if (!codigo || !descripcion) {
+    if (!data.codigo || !data.descripcion || !data.tipo) {
       return res.status(400).json({
-        message: "Los campos 'codigo' y 'descripcion' son obligatorios.",
+        message: "Los campos 'codigo', 'tipo' y 'descripcion' son obligatorios.",
       });
     }
 
     // Verificar si ya existe una no conformidad con el mismo código
-    const existe = await NoConformidad.findOne({ where: { codigo } });
+    const existe = await NoConformidad.findOne({ where: { codigo: data.codigo } });
     if (existe) {
       return res
         .status(409)
         .json({ message: "Ya existe una no conformidad con ese código." });
     }
 
+    // Convertir strings vacíos a null para claves foráneas
+    const cleanData = {
+      ...data,
+      responsableId: data.responsableId || null,
+      detectadoPor: data.detectadoPor || null,
+      areaId: data.areaId || null,
+      procesoId: data.procesoId || null,
+    };
+
     // Crear registro
-    const nueva = await NoConformidad.create({
-      codigo,
-      descripcion,
-      responsableId,
-      estado,
-    });
+    const nueva = await NoConformidad.create(cleanData);
 
     return res.status(201).json(nueva);
   } catch (error: any) {
+    console.error("Error en createNoConformidad:", error);
     return res.status(500).json({
       message: "Error al crear la no conformidad",
       error: error.message,
@@ -41,11 +46,25 @@ export const createNoConformidad = async (req: Request, res: Response) => {
 /** Listar todas las No Conformidades */
 export const getNoConformidades = async (req: Request, res: Response) => {
   try {
+    const { estado } = req.query;
+
+    const where: any = {};
+    if (estado) {
+      where.estado = estado;
+    }
+
     const lista = await NoConformidad.findAll({
-      order: [["createdAt", "DESC"]],
+      where,
+      order: [["creadoEn", "DESC"]],
+      include: [
+        { association: "detectadoPorUsuario" },
+        { association: "responsable" },
+        { association: "area" },
+      ],
     });
     return res.json(lista);
   } catch (error: any) {
+    console.error("Error en getNoConformidades:", error);
     return res.status(500).json({
       message: "Error al obtener las no conformidades",
       error: error.message,
@@ -105,6 +124,49 @@ export const deleteNoConformidad = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Error al eliminar la no conformidad",
+      error: error.message,
+    });
+  }
+};
+
+/** Iniciar tratamiento de no conformidad */
+export const iniciarTratamientoNoConformidad = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const nc = await NoConformidad.findByPk(id);
+
+    if (!nc)
+      return res.status(404).json({ message: "No conformidad no encontrada." });
+
+    await nc.update({ estado: "en_tratamiento" });
+    return res.json(nc);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al iniciar tratamiento",
+      error: error.message,
+    });
+  }
+};
+
+/** Cerrar no conformidad */
+export const cerrarNoConformidad = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { observaciones } = req.body;
+    const nc = await NoConformidad.findByPk(id);
+
+    if (!nc)
+      return res.status(404).json({ message: "No conformidad no encontrada." });
+
+    await nc.update({
+      estado: "cerrada",
+      fechaCierre: new Date(),
+    });
+
+    return res.json(nc);
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Error al cerrar la no conformidad",
       error: error.message,
     });
   }

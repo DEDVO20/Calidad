@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { documentoService } from "@/services/documento.service";
 import { DocumentWorkflow } from "@/components/documents/DocumentWorkflow";
+import { DocumentVersionHistory } from "@/components/documents/DocumentVersionHistory";
 import { toast } from "sonner";
 import {
   FileText,
@@ -29,8 +30,8 @@ interface Documento {
   visibilidad: string;
   contenidoHtml?: string;
   proximaRevision?: string;
-  createdAt: string;
-  updatedAt: string;
+  creadoEn: string;
+  actualizadoEn: string;
   subidoPor?: {
     id: string;
     nombre: string;
@@ -462,9 +463,8 @@ export default function VerDocumento() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col items-center flex-1">
               <div
-                className={`w-12 h-12 rounded-full ${
-                  documento.subidoPor ? "bg-blue-500" : "bg-gray-300"
-                } text-white flex items-center justify-center font-bold mb-2`}
+                className={`w-12 h-12 rounded-full ${documento.subidoPor ? "bg-blue-500" : "bg-gray-300"
+                  } text-white flex items-center justify-center font-bold mb-2`}
               >
                 {documento.subidoPor ? "✓" : "1"}
               </div>
@@ -474,15 +474,13 @@ export default function VerDocumento() {
               </p>
             </div>
             <div
-              className={`flex-1 h-1 ${
-                documento.revisadoPor ? "bg-orange-500" : "bg-border"
-              } mx-2`}
+              className={`flex-1 h-1 ${documento.revisadoPor ? "bg-orange-500" : "bg-border"
+                } mx-2`}
             ></div>
             <div className="flex flex-col items-center flex-1">
               <div
-                className={`w-12 h-12 rounded-full ${
-                  documento.revisadoPor ? "bg-orange-500" : "bg-gray-300"
-                } text-white flex items-center justify-center font-bold mb-2`}
+                className={`w-12 h-12 rounded-full ${documento.revisadoPor ? "bg-orange-500" : "bg-gray-300"
+                  } text-white flex items-center justify-center font-bold mb-2`}
               >
                 {documento.revisadoPor ? "✓" : "2"}
               </div>
@@ -492,15 +490,13 @@ export default function VerDocumento() {
               </p>
             </div>
             <div
-              className={`flex-1 h-1 ${
-                documento.aprobadoPor ? "bg-green-500" : "bg-border"
-              } mx-2`}
+              className={`flex-1 h-1 ${documento.aprobadoPor ? "bg-green-500" : "bg-border"
+                } mx-2`}
             ></div>
             <div className="flex flex-col items-center flex-1">
               <div
-                className={`w-12 h-12 rounded-full ${
-                  documento.aprobadoPor ? "bg-green-500" : "bg-gray-300"
-                } text-white flex items-center justify-center font-bold mb-2`}
+                className={`w-12 h-12 rounded-full ${documento.aprobadoPor ? "bg-green-500" : "bg-gray-300"
+                  } text-white flex items-center justify-center font-bold mb-2`}
               >
                 {documento.aprobadoPor ? "✓" : "3"}
               </div>
@@ -593,7 +589,7 @@ export default function VerDocumento() {
             <span className="text-sm font-medium">Fecha de Creación</span>
           </div>
           <p className="text-lg">
-            {new Date(documento.createdAt).toLocaleDateString("es-ES", {
+            {new Date(documento.creadoEn).toLocaleDateString("es-ES", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -609,7 +605,7 @@ export default function VerDocumento() {
             <span className="text-sm font-medium">Última Actualización</span>
           </div>
           <p className="text-lg">
-            {new Date(documento.updatedAt).toLocaleDateString("es-ES", {
+            {new Date(documento.actualizadoEn).toLocaleDateString("es-ES", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -618,6 +614,17 @@ export default function VerDocumento() {
             })}
           </p>
         </div>
+      </div>
+
+      {/* Historial de Versiones */}
+      <div className="mb-6">
+        <DocumentVersionHistory
+          documentoId={id!}
+          onVersionRestored={() => {
+            // Recargar el documento cuando se restaura una versión
+            fetchDocumento();
+          }}
+        />
       </div>
 
       {/* Contenido del Documento */}

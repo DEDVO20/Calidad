@@ -4,11 +4,13 @@ interface ControlRiesgoAttributes {
 	id: string;
 	riesgoId: string;
 	descripcion?: string;
-	tipo?: string;
-	responsableId?: string;
+	tipoControl?: string;
 	frecuencia?: string;
+	responsableId?: string;
 	efectividad?: string;
+	activo?: boolean;
 	creadoEn: Date;
+	actualizadoEn: Date;
 }
 
 interface ControlRiesgoCreationAttributes
@@ -16,25 +18,28 @@ interface ControlRiesgoCreationAttributes
 		ControlRiesgoAttributes,
 		| "id"
 		| "descripcion"
-		| "tipo"
-		| "responsableId"
+		| "tipoControl"
 		| "frecuencia"
+		| "responsableId"
 		| "efectividad"
+		| "activo"
 		| "creadoEn"
-	> {}
+		| "actualizadoEn"
+	> { }
 
 class ControlRiesgo
 	extends Model<ControlRiesgoAttributes, ControlRiesgoCreationAttributes>
-	implements ControlRiesgoAttributes
-{
+	implements ControlRiesgoAttributes {
 	public id!: string;
 	public riesgoId!: string;
 	public descripcion?: string;
-	public tipo?: string;
-	public responsableId?: string;
+	public tipoControl?: string;
 	public frecuencia?: string;
+	public responsableId?: string;
 	public efectividad?: string;
+	public activo?: boolean;
 	public readonly creadoEn!: Date;
+	public readonly actualizadoEn!: Date;
 
 	public static initModel(sequelize: Sequelize): typeof ControlRiesgo {
 		return ControlRiesgo.init(
@@ -53,7 +58,12 @@ class ControlRiesgo
 					type: DataTypes.TEXT,
 					allowNull: true,
 				},
-				tipo: {
+				tipoControl: {
+					type: DataTypes.STRING(50),
+					allowNull: true,
+					field: "tipo_control",
+				},
+				frecuencia: {
 					type: DataTypes.STRING(50),
 					allowNull: true,
 				},
@@ -62,13 +72,14 @@ class ControlRiesgo
 					allowNull: true,
 					field: "responsable_id",
 				},
-				frecuencia: {
-					type: DataTypes.STRING(50),
-					allowNull: true,
-				},
 				efectividad: {
 					type: DataTypes.STRING(50),
 					allowNull: true,
+				},
+				activo: {
+					type: DataTypes.BOOLEAN,
+					allowNull: true,
+					defaultValue: true,
 				},
 				creadoEn: {
 					type: DataTypes.DATE,
@@ -76,10 +87,16 @@ class ControlRiesgo
 					defaultValue: DataTypes.NOW,
 					field: "creado_en",
 				},
+				actualizadoEn: {
+					type: DataTypes.DATE,
+					allowNull: false,
+					defaultValue: DataTypes.NOW,
+					field: "actualizado_en",
+				},
 			},
 			{
 				sequelize,
-				tableName: "controles_riesgo",
+				tableName: "control_riesgos",
 				modelName: "controlRiesgo",
 				timestamps: false,
 				underscored: true,

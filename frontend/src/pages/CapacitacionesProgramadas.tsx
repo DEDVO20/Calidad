@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle,
   Laptop,
@@ -9,52 +9,42 @@ import {
   Link as LinkIcon,
   Tag,
 } from "lucide-react";
-
-interface Capacitacion {
-  id: number;
-  titulo: string;
-  modalidad: "Virtual" | "Presencial";
-  encargado: string;
-  categoria: string;
-  fecha: string;
-  hora: string;
-  ubicacion?: string;
-  enlace?: string;
-  estado: "Pendiente" | "Completada";
-}
+import { capacitacionService, Capacitacion } from "@/services/capacitacion.service";
 
 const CapacitacionesProgramadas = () => {
-  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([
-    {
-      id: 1,
-      titulo: "Capacitación en Seguridad Laboral",
-      modalidad: "Presencial",
-      encargado: "Carlos Castro",
-      categoria: "Seguridad",
-      fecha: "2025-11-20",
-      hora: "09:00 AM",
-      ubicacion: "Sede 2 - salon 302",
-      estado: "Pendiente",
-    },
-    {
-      id: 2,
-      titulo: "Uso de Herramientas Digitales",
-      modalidad: "Virtual",
-      encargado: "María López",
-      categoria: "Tecnología",
-      fecha: "2025-11-25",
-      hora: "02:00 PM",
-      enlace: "https://meet.google.com/abc-123",
-      estado: "Pendiente",
-    },
-  ]);
+  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const marcarCompletada = (id: number) => {
-    setCapacitaciones((prev) =>
-      prev.map((cap) =>
-        cap.id === id ? { ...cap, estado: "Completada" } : cap
-      )
-    );
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, []);
+
+  const cargarCapacitaciones = async () => {
+    try {
+      setLoading(true);
+      const data = await capacitacionService.getProgramadas();
+      setCapacitaciones(data);
+    } catch (err: any) {
+      console.error("Error al cargar capacitaciones:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const marcarCompletada = async (id: string) => {
+    try {
+      await capacitacionService.marcarCompletada(id);
+      setCapacitaciones((prev) =>
+        prev.map((cap) =>
+          cap.id === id ? { ...cap, estado: "completada" } : cap
+        )
+      );
+    } catch (err: any) {
+      console.error("Error al marcar como completada:", err);
+      alert("Error al marcar la capacitación como completada");
+    }
   };
 
   const total = capacitaciones.length;
@@ -64,6 +54,24 @@ const CapacitacionesProgramadas = () => {
   const presenciales = capacitaciones.filter(
     (c) => c.modalidad === "Presencial"
   ).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Cargando capacitaciones...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -94,12 +102,12 @@ const CapacitacionesProgramadas = () => {
           >
             <div className="flex-1 w-full">
               <h2 className="text-lg font-semibold text-gray-800">
-                {cap.titulo}
+                {cap.nombre}
               </h2>
               <div className="mt-2 text-sm text-gray-600 space-y-1">
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-indigo-500" />
-                  <span>{cap.categoria}</span>
+                  <span>{cap.tipoCapacitacion}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {cap.modalidad === "Virtual" ? (
@@ -109,51 +117,44 @@ const CapacitacionesProgramadas = () => {
                   )}
                   <span>{cap.modalidad}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{new Date(cap.fecha).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span>{cap.hora}</span>
-                </div>
-                {cap.modalidad === "Presencial" ? (
+                {cap.fechaProgramada && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span>{cap.ubicacion}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4 text-gray-500" />
-                    <a
-                      href={cap.enlace}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Acceder a la reunión
-                    </a>
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span>{new Date(cap.fechaProgramada).toLocaleDateString()}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  <span>Encargado: {cap.encargado}</span>
-                </div>
+                {cap.duracionHoras && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span>{cap.duracionHoras} horas</span>
+                  </div>
+                )}
+                {cap.lugar && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span>{cap.lugar}</span>
+                  </div>
+                )}
+                {cap.instructor && (
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <span>Instructor: {cap.instructor}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="mt-4 md:mt-0 flex flex-col items-center">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold mb-2 ${
-                  cap.estado === "Pendiente"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-green-100 text-green-700"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold mb-2 ${cap.estado === "programada"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+                  }`}
               >
-                {cap.estado}
+                {cap.estado === "programada" ? "Pendiente" : cap.estado === "completada" ? "Completada" : cap.estado}
               </span>
 
-              {cap.estado === "Pendiente" ? (
+              {cap.estado === "programada" ? (
                 <button
                   onClick={() => marcarCompletada(cap.id)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
