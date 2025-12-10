@@ -9,6 +9,7 @@ import LoginPage from "./pages/Login";
 import NoConformidadesAbiertas from "@/pages/No_conformidades_Abiertas";
 import NoConformidadesEnTratamiento from "@/pages/No_conformidades_EnTratamiento";
 import NoConformidadesCerradas from "./pages/No_conformidades_Cerradas";
+import NuevaNoConformidad from "./pages/Nueva_NoConformidad";
 
 import AccionesCorrectivasCerradas from "./pages/Acciones_correctivas/Acciones_correctivas_Cerradas";
 import AccionesCorrectivasVerificadas from "./pages/Acciones_correctivas/Acciones_correctivas_Verificadas";
@@ -121,6 +122,7 @@ function App() {
             <Route path="/No_conformidades_Abiertas" element={<NoConformidadesAbiertas />} />
             <Route path="/No_conformidades_EnTratamiento" element={<NoConformidadesEnTratamiento />} />
             <Route path="/No_conformidades_Cerradas" element={<NoConformidadesCerradas />} />
+            <Route path="/Nueva_NoConformidad" element={<NuevaNoConformidad />} />
 
             {/* Acciones Correctivas */}
             <Route path="/Acciones_correctivas_Cerradas" element={<AccionesCorrectivasCerradas />} />
