@@ -50,8 +50,8 @@ export default function NoConformidadesCerradas() {
       const data = await noConformidadService.getCerradas();
       const dataArray = Array.isArray(data) ? data : [];
 
-      const transformedData = dataArray.map((nc: NoConformidadAPI) => ({
-        id: nc.id,
+      const transformedData: NoConformidad[] = dataArray.map((nc) => ({
+        id: Number(nc.id),
         codigo: nc.codigo,
         tipo: nc.tipo || "No Conformidad",
         descripcion: nc.descripcion,

@@ -119,6 +119,13 @@ export default function ControlVersiones() {
     }
   };
 
+  const formatEstado = (estado?: string) => {
+    const s = estado ?? "";
+    if (!s) return "-";
+    const replaced = s.replace(/_/g, " ");
+    return replaced.charAt(0).toUpperCase() + replaced.slice(1).toLowerCase();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F5F7FA]">
@@ -262,7 +269,7 @@ export default function ControlVersiones() {
                     <TableCell>{doc.version || "1.0"}</TableCell>
                     <TableCell>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoColor(doc.estado)}`}>
-                        {doc.estado.replace("_", " ").charAt(0).toUpperCase() + doc.estado.replace("_", " ").slice(1).toLowerCase()}
+                        {formatEstado(doc.estado)}
                       </span>
                     </TableCell>
                     <TableCell className="text-[#6B7280]">
@@ -297,7 +304,7 @@ export default function ControlVersiones() {
                               <div>
                                 <p className="text-sm text-[#6B7280]">Estado</p>
                                 <p className={`font-semibold ${getEstadoColor(selectedDoc?.estado || "")}`}>
-                                  {selectedDoc?.estado.replace("_", " ").charAt(0).toUpperCase() + selectedDoc?.estado.replace("_", " ").slice(1).toLowerCase()}
+                                  {formatEstado(selectedDoc?.estado)}
                                 </p>
                               </div>
                               <div>

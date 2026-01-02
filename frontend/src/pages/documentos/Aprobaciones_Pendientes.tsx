@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -14,9 +13,6 @@ import {
   CheckCircle,
   X,
   Eye,
-  FileText,
-  Calendar,
-  User,
   RefreshCw,
   AlertCircle,
   Clock,
@@ -456,8 +452,7 @@ export default function AprobacionesPendientes() {
                     </div>
                   )}
 
-                  <div className={dialogState.type === 'aprobar' ? "bg-[#ECFDF5] border border-[#22C55E]" : "bg-[#FEF2F2] border border-[#EF4444]"} 
-                       className="rounded-xl p-4">
+                  <div className={`${dialogState.type === 'aprobar' ? 'bg-[#ECFDF5] border border-[#22C55E]' : 'bg-[#FEF2F2] border border-[#EF4444]'} rounded-xl p-4`}>
                     <p className="font-medium">
                       {dialogState.type === 'aprobar'
                         ? "El documento será marcado como APROBADO y estará disponible para todos los usuarios."
