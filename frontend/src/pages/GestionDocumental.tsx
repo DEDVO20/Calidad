@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Search } from "lucide-react";
+import { Eye, Search, FileText } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
 export default function Gestion_Documental() {
@@ -46,122 +46,177 @@ export default function Gestion_Documental() {
     { name: "Finalizado", cantidad: documentos.filter((d) => d.estado === "Finalizado").length },
   ];
 
-  // Colores por estado
-  const colorEstado = (estado: string) => {
-    if (estado === "Vigente") return "text-green-600 font-semibold";
-    if (estado === "En Revisión") return "text-orange-500 font-semibold";
-    if (estado === "Finalizado") return "text-red-500 font-semibold";
-  };
-
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-4 text-center">Gestión Documental</h1>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-2 w-full md:w-1/2">
-          <Input
-            placeholder="Buscar documento por nombre..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-          />
-          <Button variant="default">
-            <Search className="h-4 w-4 mr-1" /> Buscar
-          </Button>
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <FileText className="h-9 w-9 text-[#2563EB]" />
+                Gestión Documental
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Controla y administra todos los documentos del sistema de calidad ISO 9001
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Búsqueda y filtros */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-[#6B7280]" />
+            <Input
+              placeholder="Buscar documento por nombre..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full md:w-64">
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="Vigente">🟢 Vigente</SelectItem>
-              <SelectItem value="En Revisión">🟠 En Revisión</SelectItem>
-              <SelectItem value="Finalizado">🔴 Finalizado</SelectItem>
+              <SelectItem value="todos">Todos los documentos</SelectItem>
+              <SelectItem value="Vigente">Vigente</SelectItem>
+              <SelectItem value="En Revisión">En Revisión</SelectItem>
+              <SelectItem value="Finalizado">Finalizado</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      {/* Tabla de documentos */}
-      <div className="border rounded-lg shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Versión</TableHead>
-              <TableHead>Responsable</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredDocs.map((doc) => (
-              <TableRow key={doc.id}>
-                <TableCell>{doc.nombre}</TableCell>
-                <TableCell>{doc.version}</TableCell>
-                <TableCell>{doc.responsable}</TableCell>
-                <TableCell className={colorEstado(doc.estado)}>{doc.estado}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedDoc(doc);
-                      setOpen(true);
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-1" /> Ver
-                  </Button>
-                </TableCell>
+        {/* Tabla de documentos */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
+          <div className="bg-[#F1F5F9] px-6 py-4">
+            <h2 className="text-xl font-semibold text-[#1E3A8A]">Listado de Documentos</h2>
+          </div>
+          <Table>
+            <TableHeader className="bg-[#F1F5F9]">
+              <TableRow>
+                <TableHead className="text-[#1E3A8A]">Nombre</TableHead>
+                <TableHead className="text-[#1E3A8A]">Versión</TableHead>
+                <TableHead className="text-[#1E3A8A]">Responsable</TableHead>
+                <TableHead className="text-[#1E3A8A]">Estado</TableHead>
+                <TableHead className="text-[#1E3A8A] text-right">Acciones</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {filteredDocs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-12 text-[#6B7280]">
+                    No se encontraron documentos
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredDocs.map((doc) => (
+                  <TableRow key={doc.id} className="hover:bg-[#EFF6FF] transition-colors">
+                    <TableCell className="font-medium">{doc.nombre}</TableCell>
+                    <TableCell>{doc.version}</TableCell>
+                    <TableCell className="text-[#6B7280]">{doc.responsable}</TableCell>
+                    <TableCell>
+                      <span className={
+                        doc.estado === "Vigente" ? "text-[#22C55E] font-medium" :
+                        doc.estado === "En Revisión" ? "text-[#F59E0B] font-medium" :
+                        "text-[#EF4444] font-medium"
+                      }>
+                        {doc.estado}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedDoc(doc);
+                          setOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 text-[#2563EB]" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      {/* Gráfica de barras */}
-      <div className="mt-8 bg-white rounded-lg shadow-md p-4">
-        <h2 className="text-xl font-semibold mb-4 text-center">Resumen de Estados de Documentos</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="cantidad" fill="#0f1013ff" radius={[5, 5, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+        {/* Gráfica de barras */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
+          <h2 className="text-2xl font-semibold text-[#1E3A8A] mb-6">Resumen de Estados de Documentos</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="name" tick={{ fill: "#6B7280" }} />
+              <YAxis tick={{ fill: "#6B7280" }} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: "8px" }}
+                labelStyle={{ color: "#1E3A8A" }}
+              />
+              <Bar dataKey="cantidad" fill="#2563EB" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-      {/* Modal flotante para trazabilidad */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Trazabilidad del Documento</DialogTitle>
-          </DialogHeader>
-          {selectedDoc && (
-            <div className="space-y-3">
-              <p><strong>Nombre:</strong> {selectedDoc.nombre}</p>
-              <p><strong>Versión:</strong> {selectedDoc.version}</p>
-              <p><strong>Responsable:</strong> {selectedDoc.responsable}</p>
-              <p><strong>Estado actual:</strong> <span className={colorEstado(selectedDoc.estado)}>{selectedDoc.estado}</span></p>
+        {/* Modal de trazabilidad */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+                <FileText className="h-7 w-7 text-[#2563EB]" />
+                Trazabilidad del Documento
+              </DialogTitle>
+            </DialogHeader>
+            {selectedDoc && (
+              <div className="space-y-6 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Nombre</p>
+                    <p className="font-semibold text-gray-900">{selectedDoc.nombre}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Versión</p>
+                    <p className="font-semibold text-gray-900">{selectedDoc.version}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Responsable</p>
+                    <p className="font-semibold text-gray-900">{selectedDoc.responsable}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Estado actual</p>
+                    <p className={
+                      selectedDoc.estado === "Vigente" ? "text-[#22C55E] font-semibold" :
+                      selectedDoc.estado === "En Revisión" ? "text-[#F59E0B] font-semibold" :
+                      "text-[#EF4444] font-semibold"
+                    }>
+                      {selectedDoc.estado}
+                    </p>
+                  </div>
+                </div>
 
-              <div className="border-t pt-3">
-                <p className="font-semibold mb-2">📋 Historial de Cambios:</p>
-                <ul className="text-sm space-y-1">
-                  <li>✅ Documento creado</li>
-                  <li>🔄 En revisión por el área de calidad</li>
-                  <li>🟢 Aprobado y vigente</li>
-                </ul>
+                <div className="bg-[#F1F5F9] rounded-lg p-6">
+                  <p className="font-semibold text-[#1E3A8A] mb-3">Historial de Cambios</p>
+                  <ul className="space-y-2 text-[#6B7280]">
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#22C55E]">✓</span> Documento creado
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#F59E0B]">↻</span> En revisión por el área de calidad
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#22C55E]">✓</span> Aprobado y vigente
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
