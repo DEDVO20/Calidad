@@ -12,7 +12,7 @@ module.exports = {
       return results.length > 0;
     };
 
-    const tableName = 'version_documentos';
+    const tableName = 'versiones_documento';
 
     // Agregar campo para snapshot del contenido HTML
     if (!(await columnExists(tableName, 'contenido_html'))) {
@@ -71,7 +71,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    const tableName = 'version_documentos';
+    const tableName = 'versiones_documento';
 
     // Revertir los cambios en caso de rollback
     await queryInterface.removeColumn(tableName, 'contenido_html');
