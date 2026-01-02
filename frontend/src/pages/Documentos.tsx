@@ -6,7 +6,6 @@ import {
   FileText,
   Plus,
   Search,
-  Filter,
   Eye,
   Edit,
   Trash2,
@@ -15,6 +14,14 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface Documento {
   id: string;
@@ -54,61 +61,42 @@ export default function Documentos() {
   };
 
   const getEstadoBadge = (estado: string) => {
-    const estados: Record<
-      string,
-      { color: string; icon: React.ReactElement; label: string }
-    > = {
-      borrador: {
-        color: "bg-gray-100 text-gray-800 border-gray-300",
-        icon: <Clock className="w-3 h-3" />,
-        label: "Borrador",
-      },
-      en_revision: {
-        color: "bg-blue-100 text-blue-800 border-blue-300",
-        icon: <AlertCircle className="w-3 h-3" />,
-        label: "En Revisión",
-      },
-      pendiente_aprobacion: {
-        color: "bg-orange-100 text-orange-800 border-orange-300",
-        icon: <Clock className="w-3 h-3" />,
-        label: "Pendiente Aprobación",
-      },
-      aprobado: {
-        color: "bg-green-100 text-green-800 border-green-300",
-        icon: <CheckCircle className="w-3 h-3" />,
-        label: "Aprobado",
-      },
-      obsoleto: {
-        color: "bg-red-100 text-red-800 border-red-300",
-        icon: <XCircle className="w-3 h-3" />,
-        label: "Obsoleto",
-      },
+    const estados: Record<string, { bg: string; text: string; icon: React.ReactElement }> = {
+      borrador: { bg: "bg-gray-100", text: "text-gray-700", icon: <Clock className="h-3 w-3" /> },
+      en_revision: { bg: "bg-[#FFF7ED]", text: "text-[#F59E0B]", icon: <AlertCircle className="h-3 w-3" /> },
+      pendiente_aprobacion: { bg: "bg-[#FFF7ED]", text: "text-[#F59E0B]", icon: <Clock className="h-3 w-3" /> },
+      aprobado: { bg: "bg-[#ECFDF5]", text: "text-[#22C55E]", icon: <CheckCircle className="h-3 w-3" /> },
+      obsoleto: { bg: "bg-[#FEF2F2]", text: "text-[#EF4444]", icon: <XCircle className="h-3 w-3" /> },
     };
 
     const badge = estados[estado] || estados.borrador;
 
     return (
-      <span
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${badge.color}`}
-      >
+      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border border-[#E5E7EB] ${badge.bg} ${badge.text}`}>
         {badge.icon}
-        {badge.label}
+        {estado.replace("_", " ").charAt(0).toUpperCase() + estado.replace("_", " ").slice(1).toLowerCase()}
       </span>
     );
   };
 
-  const getTipoColor = (tipo: string) => {
-    const tipos: Record<string, string> = {
-      formato: "bg-purple-100 text-purple-800 border-purple-300",
-      procedimiento: "bg-blue-100 text-blue-800 border-blue-300",
-      instructivo: "bg-cyan-100 text-cyan-800 border-cyan-300",
-      manual: "bg-indigo-100 text-indigo-800 border-indigo-300",
-      politica: "bg-pink-100 text-pink-800 border-pink-300",
-      registro: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      plan: "bg-orange-100 text-orange-800 border-orange-300",
+  const getTipoBadge = (tipo: string) => {
+    const tipos: Record<string, { bg: string; text: string }> = {
+      formato: { bg: "bg-[#E0EDFF]", text: "text-[#2563EB]" },
+      procedimiento: { bg: "bg-[#DBEAFE]", text: "text-[#3B82F6]" },
+      instructivo: { bg: "bg-[#CFFAFE]", text: "text-[#0891B2]" },
+      manual: { bg: "bg-[#E0E7FF]", text: "text-[#6366F1]" },
+      politica: { bg: "bg-[#FCE7F3]", text: "text-[#EC4899]" },
+      registro: { bg: "bg-[#FEF3C7]", text: "text-[#D97706]" },
+      plan: { bg: "bg-[#FFEDD5]", text: "text-[#F97316]" },
     };
 
-    return tipos[tipo] || "bg-gray-100 text-gray-800 border-gray-300";
+    const badge = tipos[tipo] || { bg: "bg-gray-100", text: "text-gray-700" };
+
+    return (
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border border-[#E5E7EB] ${badge.bg} ${badge.text}`}>
+        {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+      </span>
+    );
   };
 
   const filteredDocumentos = documentos.filter((doc) => {
@@ -121,22 +109,15 @@ export default function Documentos() {
     return matchSearch && matchTipo && matchEstado;
   });
 
-  const handleView = (id: string) => {
-    navigate(`/documentos/${id}`);
-  };
-
-  const handleEdit = (id: string) => {
-    navigate(`/documentos/${id}/editar`);
-  };
+  const handleView = (id: string) => navigate(`/documentos/${id}`);
+  const handleEdit = (id: string) => navigate(`/documentos/${id}/editar`);
 
   const handleDelete = async (docId: string, nombreDocumento: string) => {
     toast.warning(
       <div>
         <p className="font-semibold">¿Eliminar documento?</p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Se eliminará "{nombreDocumento}"
-        </p>
-        <div className="flex gap-2 mt-3">
+        <p className="text-sm mt-1">Se eliminará permanentemente "{nombreDocumento}"</p>
+        <div className="flex gap-2 mt-4">
           <button
             onClick={async () => {
               try {
@@ -144,87 +125,79 @@ export default function Documentos() {
                 toast.success("Documento eliminado correctamente");
                 fetchDocumentos();
               } catch (error) {
-                console.error("Error al eliminar documento:", error);
-                toast.error(
-                  error instanceof Error
-                    ? error.message
-                    : "Error al eliminar documento",
-                );
+                toast.error("Error al eliminar documento");
               }
             }}
-            className="px-3 py-1 bg-destructive text-destructive-foreground rounded text-sm"
+            className="px-4 py-2 bg-[#EF4444] text-white rounded-md text-sm hover:bg-red-700"
           >
             Eliminar
           </button>
-          <button
-            onClick={() => toast.dismiss()}
-            className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm"
-          >
+          <button onClick={() => toast.dismiss()} className="px-4 py-2 bg-gray-200 rounded-md text-sm">
             Cancelar
           </button>
         </div>
       </div>,
-      {
-        duration: 10000,
-      },
+      { duration: 10000 }
     );
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FA]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando documentos...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-[#6B7280]">Cargando documentos...</p>
         </div>
       </div>
     );
   }
 
+  const totalAprobados = documentos.filter(d => d.estado === "aprobado").length;
+  const totalEnProceso = documentos.filter(d => ["en_revision", "pendiente_aprobacion"].includes(d.estado)).length;
+  const totalBorradores = documentos.filter(d => d.estado === "borrador").length;
+
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileText className="w-8 h-8 text-primary" />
-            Gestión Documental
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Administra todos los documentos del sistema de gestión de calidad
-          </p>
-        </div>
-        <button
-          onClick={() => navigate("/documentos/crear")}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo Documento
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Filters */}
-      <div className="bg-card p-4 rounded-lg border border-border mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o código..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-input rounded-md bg-background"
-            />
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <FileText className="h-9 w-9 text-[#2563EB]" />
+                Gestión Documental
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Administra todos los documentos del sistema de gestión de calidad ISO 9001
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate("/documentos/crear")}
+              className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Nuevo Documento
+            </Button>
           </div>
+        </div>
 
-          {/* Filter Tipo */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        {/* Filtros */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-5 w-5 text-[#6B7280]" />
+              <Input
+                placeholder="Buscar por nombre o código..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
             <select
               value={filterTipo}
               onChange={(e) => setFilterTipo(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-input rounded-md bg-background appearance-none"
+              className="px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             >
               <option value="">Todos los tipos</option>
               <option value="formato">Formato</option>
@@ -235,15 +208,10 @@ export default function Documentos() {
               <option value="registro">Registro</option>
               <option value="plan">Plan</option>
             </select>
-          </div>
-
-          {/* Filter Estado */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-input rounded-md bg-background appearance-none"
+              className="px-4 py-2 border border-[#E5E7EB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             >
               <option value="">Todos los estados</option>
               <option value="borrador">Borrador</option>
@@ -254,166 +222,106 @@ export default function Documentos() {
             </select>
           </div>
         </div>
+
+        {/* Métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1E3A8A]">Total Documentos</CardTitle>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{documentos.length}</div>
+            </CardHeader>
+          </Card>
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1E3A8A]">Aprobados</CardTitle>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{totalAprobados}</div>
+            </CardHeader>
+          </Card>
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1E3A8A]">En Proceso</CardTitle>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{totalEnProceso}</div>
+            </CardHeader>
+          </Card>
+          <Card className="bg-gray-100 border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1E3A8A]">Borradores</CardTitle>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{totalBorradores}</div>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Grid de Documentos */}
+        {filteredDocumentos.length === 0 ? (
+          <Card className="shadow-sm p-12 text-center">
+            <FileText className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+            <p className="text-lg font-medium text-[#6B7280]">
+              {searchTerm || filterTipo || filterEstado
+                ? "No se encontraron documentos con los filtros aplicados"
+                : "Aún no hay documentos registrados"}
+            </p>
+            {(searchTerm || filterTipo || filterEstado) && (
+              <Button variant="outline" onClick={() => { setSearchTerm(""); setFilterTipo(""); setFilterEstado(""); }} className="mt-4">
+                Limpiar filtros
+              </Button>
+            )}
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDocumentos.map((documento) => (
+              <Card key={documento.id} className="shadow-sm hover:shadow-md transition-shadow border-[#E5E7EB]">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
+                        {documento.nombreArchivo}
+                      </h3>
+                      <p className="text-sm font-mono text-[#6B7280] mt-1">{documento.codigoDocumento}</p>
+                    </div>
+                    <FileText className="h-8 w-8 text-[#2563EB] opacity-70" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {getTipoBadge(documento.tipoDocumento)}
+                    {getEstadoBadge(documento.estado)}
+                  </div>
+
+                  <div className="space-y-2 text-sm text-[#6B7280]">
+                    <div className="flex justify-between">
+                      <span>Versión</span>
+                      <span className="font-medium text-gray-900">{documento.version}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Visibilidad</span>
+                      <span className="font-medium text-gray-900 capitalize">{documento.visibilidad}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Actualizado</span>
+                      <span className="font-medium text-gray-900">
+                        {new Date(documento.actualizadoEn).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4 border-t border-[#E5E7EB]">
+                    <Button size="sm" variant="ghost" className="flex-1" onClick={() => handleView(documento.id)}>
+                      <Eye className="mr-2 h-4 w-4 text-[#2563EB]" />
+                      Ver
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleEdit(documento.id)}>
+                      <Edit className="h-4 w-4 text-[#4B5563]" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleDelete(documento.id, documento.nombreArchivo)}>
+                      <Trash2 className="h-4 w-4 text-[#EF4444]" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card p-4 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">{documentos.length}</p>
-            </div>
-            <FileText className="w-8 h-8 text-primary opacity-50" />
-          </div>
-        </div>
-        <div className="bg-card p-4 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Aprobados</p>
-              <p className="text-2xl font-bold text-green-600">
-                {documentos.filter((d) => d.estado === "aprobado").length}
-              </p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-500 opacity-50" />
-          </div>
-        </div>
-        <div className="bg-card p-4 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">En Proceso</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {
-                  documentos.filter(
-                    (d) =>
-                      d.estado === "en_revision" ||
-                      d.estado === "pendiente_aprobacion",
-                  ).length
-                }
-              </p>
-            </div>
-            <AlertCircle className="w-8 h-8 text-blue-500 opacity-50" />
-          </div>
-        </div>
-        <div className="bg-card p-4 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Borradores</p>
-              <p className="text-2xl font-bold text-gray-600">
-                {documentos.filter((d) => d.estado === "borrador").length}
-              </p>
-            </div>
-            <Clock className="w-8 h-8 text-gray-500 opacity-50" />
-          </div>
-        </div>
-      </div>
-
-      {/* Documents Grid */}
-      {filteredDocumentos.length === 0 ? (
-        <div className="bg-card p-12 rounded-lg border border-border text-center">
-          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-xl font-semibold mb-2">
-            No se encontraron documentos
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm || filterTipo || filterEstado
-              ? "Intenta ajustar los filtros de búsqueda"
-              : "Comienza creando tu primer documento"}
-          </p>
-          {!searchTerm && !filterTipo && !filterEstado && (
-            <button
-              onClick={() => navigate("/documentos/crear")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Crear Documento
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDocumentos.map((documento) => (
-            <div
-              key={documento.id}
-              className="bg-card p-5 rounded-lg border border-border hover:shadow-lg transition-shadow"
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg mb-1 line-clamp-2">
-                    {documento.nombreArchivo}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {documento.codigoDocumento}
-                  </p>
-                </div>
-                <FileText className="w-5 h-5 text-primary flex-shrink-0 ml-2" />
-              </div>
-
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium border ${getTipoColor(
-                    documento.tipoDocumento,
-                  )}`}
-                >
-                  {documento.tipoDocumento.charAt(0).toUpperCase() +
-                    documento.tipoDocumento.slice(1)}
-                </span>
-                {getEstadoBadge(documento.estado)}
-              </div>
-
-              {/* Meta Info */}
-              <div className="space-y-1 mb-4 text-sm text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>Versión:</span>
-                  <span className="font-medium">{documento.version}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Visibilidad:</span>
-                  <span className="font-medium capitalize">
-                    {documento.visibilidad}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Actualizado:</span>
-                  <span className="font-medium">
-                    {new Date(documento.actualizadoEn).toLocaleDateString("es-ES")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-3 border-t border-border">
-                <button
-                  onClick={() => handleView(documento.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors text-sm"
-                  title="Ver documento"
-                >
-                  <Eye className="w-4 h-4" />
-                  Ver
-                </button>
-                <button
-                  onClick={() => handleEdit(documento.id)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-600 rounded-md hover:bg-blue-500/20 transition-colors text-sm"
-                  title="Editar documento"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() =>
-                    handleDelete(documento.id, documento.nombreArchivo)
-                  }
-                  className="flex items-center justify-center gap-2 px-3 py-2 bg-destructive/10 text-destructive rounded-md hover:bg-destructive/20 transition-colors text-sm"
-                  title="Eliminar documento"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default function NuevasAccionesCorrectivas() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     noConformidadId: "",
     codigo: "",
@@ -60,24 +60,19 @@ export default function NuevasAccionesCorrectivas() {
     fetchData();
   }, []);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token");
-  };
+  const getAuthToken = () => localStorage.getItem("token");
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const token = getAuthToken();
-      
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
+      if (!token) throw new Error("No hay sesión activa");
 
       const noConformidadesData = await noConformidadService.getAll();
-      const noConformidadesFormatted = noConformidadesData.map(nc => ({
+      const noConformidadesFormatted = noConformidadesData.map((nc: any) => ({
         id: nc.id.toString(),
         codigo: nc.codigo,
-        descripcion: nc.descripcion
+        descripcion: nc.descripcion,
       }));
 
       const headers = {
@@ -100,23 +95,17 @@ export default function NuevasAccionesCorrectivas() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.noConformidadId || !formData.codigo || !formData.tipo) {
-      alert("Por favor completa los campos obligatorios");
+      alert("Por favor completa los campos obligatorios: No Conformidad, Código y Tipo");
       return;
     }
 
     try {
       setSaving(true);
-      const token = getAuthToken();
-
-      if (!token) {
-        throw new Error("No hay sesión activa");
-      }
-
       await accionCorrectivaService.create(formData);
       alert("Acción correctiva creada exitosamente");
-      
+
       // Limpiar formulario
       setFormData({
         noConformidadId: "",
@@ -139,7 +128,7 @@ export default function NuevasAccionesCorrectivas() {
     }
   };
 
-  const handleReset = () => {
+  const handleCancel = () => {
     if (confirm("¿Estás seguro de cancelar? Se perderán los datos ingresados.")) {
       setFormData({
         noConformidadId: "",
@@ -159,242 +148,273 @@ export default function NuevasAccionesCorrectivas() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent" />
-          <p className="mt-4 text-sm text-gray-500">Cargando...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-gray-700">
+            Cargando formulario...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <FileText className="h-6 w-6 text-sky-500" />
-            Nueva Acción Correctiva
-          </h1>
-          <p className="text-gray-500">
-            Registra una nueva acción correctiva asociada a una no conformidad
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
 
-      {error && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-amber-800">
-              <AlertCircle className="h-5 w-5" />
-              <div>
-                <p className="font-medium">Error de conexión</p>
-                <p className="text-sm">{error}</p>
-              </div>
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <FileText className="h-9 w-9 text-[#2563EB]" />
+                Registrar Nueva Acción Correctiva
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Define una acción correctiva, preventiva o de mejora asociada a una no conformidad
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Información de la Acción Correctiva</CardTitle>
-            <CardDescription>
-              Completa todos los campos marcados con * para registrar la acción correctiva
+        {/* Error Card */}
+        {error && (
+          <Card className="border-red-200 bg-red-50 shadow-sm">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 text-red-700">
+                <AlertCircle className="h-6 w-6" />
+                <div>
+                  <p className="font-semibold">Error de conexión</p>
+                  <p className="text-sm">{error}</p>
+                  <button
+                    onClick={fetchData}
+                    className="text-sm font-medium underline mt-1"
+                  >
+                    Reintentar carga de datos
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Formulario Principal */}
+        <Card className="shadow-sm overflow-hidden">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A]">
+              Detalles de la Acción Correctiva
+            </CardTitle>
+            <CardDescription className="text-[#6B7280]">
+              Los campos marcados con * son obligatorios
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* No Conformidad */}
-              <div className="grid gap-2">
-                <Label htmlFor="noConformidadId">No Conformidad Asociada *</Label>
-                <Select
-                  value={formData.noConformidadId}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, noConformidadId: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una no conformidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {noConformidades.map((nc) => (
-                      <SelectItem key={nc.id} value={nc.id}>
-                        [{nc.codigo}] {nc.descripcion}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <CardContent className="p-6 md:p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* No Conformidad Asociada */}
+                <div className="space-y-2">
+                  <Label htmlFor="noConformidadId" className="text-base font-medium">
+                    No Conformidad Asociada *
+                  </Label>
+                  <Select
+                    value={formData.noConformidadId}
+                    onValueChange={(value) => setFormData({ ...formData, noConformidadId: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una no conformidad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {noConformidades.map((nc) => (
+                        <SelectItem key={nc.id} value={nc.id}>
+                          [{nc.codigo}] {nc.descripcion.length > 60 ? nc.descripcion.substring(0, 60) + "..." : nc.descripcion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Código */}
+                <div className="space-y-2">
+                  <Label htmlFor="codigo" className="text-base font-medium">
+                    Código *
+                  </Label>
+                  <Input
+                    id="codigo"
+                    placeholder="Ej: AC-2024-001"
+                    value={formData.codigo}
+                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value.toUpperCase() })}
+                    required
+                  />
+                </div>
+
+                {/* Tipo */}
+                <div className="space-y-2">
+                  <Label htmlFor="tipo" className="text-base font-medium">
+                    Tipo de Acción *
+                  </Label>
+                  <Select
+                    value={formData.tipo}
+                    onValueChange={(value) => setFormData({ ...formData, tipo: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="correctiva">Correctiva</SelectItem>
+                      <SelectItem value="preventiva">Preventiva</SelectItem>
+                      <SelectItem value="mejora">Mejora</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Responsable */}
+                <div className="space-y-2">
+                  <Label htmlFor="responsableId" className="text-base font-medium">
+                    Responsable de Ejecución
+                  </Label>
+                  <Select
+                    value={formData.responsableId}
+                    onValueChange={(value) => setFormData({ ...formData, responsableId: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un responsable" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {usuarios.map((usuario) => (
+                        <SelectItem key={usuario.id} value={usuario.id}>
+                          {usuario.nombre} {usuario.primerApellido}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Fecha Compromiso */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaCompromiso" className="text-base font-medium">
+                    Fecha Compromiso
+                  </Label>
+                  <Input
+                    id="fechaCompromiso"
+                    type="date"
+                    value={formData.fechaCompromiso}
+                    onChange={(e) => setFormData({ ...formData, fechaCompromiso: e.target.value })}
+                  />
+                </div>
+
+                {/* Fecha Implementación */}
+                <div className="space-y-2">
+                  <Label htmlFor="fechaImplementacion" className="text-base font-medium">
+                    Fecha Prev. Implementación
+                  </Label>
+                  <Input
+                    id="fechaImplementacion"
+                    type="date"
+                    value={formData.fechaImplementacion}
+                    onChange={(e) => setFormData({ ...formData, fechaImplementacion: e.target.value })}
+                  />
+                </div>
               </div>
 
-              {/* Código */}
-              <div className="grid gap-2">
-                <Label htmlFor="codigo">Código *</Label>
-                <Input
-                  id="codigo"
-                  placeholder="Ej: AC-2024-001"
-                  value={formData.codigo}
-                  onChange={(e) =>
-                    setFormData({ ...formData, codigo: e.target.value })
-                  }
-                  required
+              {/* Descripción */}
+              <div className="space-y-2">
+                <Label htmlFor="descripcion" className="text-base font-medium">
+                  Descripción de la Acción
+                </Label>
+                <Textarea
+                  id="descripcion"
+                  placeholder="Describe claramente qué se va a hacer para corregir/prevenir/mejorar..."
+                  rows={4}
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  className="resize-none"
                 />
               </div>
 
-              {/* Tipo */}
-              <div className="grid gap-2">
-                <Label htmlFor="tipo">Tipo *</Label>
-                <Select
-                  value={formData.tipo}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, tipo: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="correctiva">Correctiva</SelectItem>
-                    <SelectItem value="preventiva">Preventiva</SelectItem>
-                    <SelectItem value="mejora">Mejora</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Responsable */}
-              <div className="grid gap-2">
-                <Label htmlFor="responsableId">Responsable</Label>
-                <Select
-                  value={formData.responsableId}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, responsableId: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un responsable" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {usuarios.map((usuario) => (
-                      <SelectItem key={usuario.id} value={usuario.id}>
-                        {usuario.nombre} {usuario.primerApellido}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Fecha Compromiso */}
-              <div className="grid gap-2">
-                <Label htmlFor="fechaCompromiso">Fecha Compromiso</Label>
-                <Input
-                  id="fechaCompromiso"
-                  type="date"
-                  value={formData.fechaCompromiso}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fechaCompromiso: e.target.value })
-                  }
+              {/* Análisis de Causa Raíz */}
+              <div className="space-y-2">
+                <Label htmlFor="analisisCausaRaiz" className="text-base font-medium">
+                  Análisis de Causa Raíz
+                </Label>
+                <Textarea
+                  id="analisisCausaRaiz"
+                  placeholder="Explica las causas raíz identificadas (5 Porqués, Ishikawa, etc.)..."
+                  rows={5}
+                  value={formData.analisisCausaRaiz}
+                  onChange={(e) => setFormData({ ...formData, analisisCausaRaiz: e.target.value })}
+                  className="resize-none"
                 />
               </div>
 
-              {/* Fecha Implementación */}
-              <div className="grid gap-2">
-                <Label htmlFor="fechaImplementacion">Fecha Implementación</Label>
-                <Input
-                  id="fechaImplementacion"
-                  type="date"
-                  value={formData.fechaImplementacion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fechaImplementacion: e.target.value })
-                  }
+              {/* Plan de Acción */}
+              <div className="space-y-2">
+                <Label htmlFor="planAccion" className="text-base font-medium">
+                  Plan de Acción Detallado
+                </Label>
+                <Textarea
+                  id="planAccion"
+                  placeholder="Detalla paso a paso las actividades, recursos necesarios y responsables..."
+                  rows={5}
+                  value={formData.planAccion}
+                  onChange={(e) => setFormData({ ...formData, planAccion: e.target.value })}
+                  className="resize-none"
                 />
               </div>
-            </div>
 
-            {/* Descripción */}
-            <div className="grid gap-2">
-              <Label htmlFor="descripcion">Descripción</Label>
-              <Textarea
-                id="descripcion"
-                placeholder="Describe la acción correctiva..."
-                rows={3}
-                value={formData.descripcion}
-                onChange={(e: { target: { value: any; }; }) =>
-                  setFormData({ ...formData, descripcion: e.target.value })
-                }
-              />
-            </div>
+              {/* Observaciones */}
+              <div className="space-y-2">
+                <Label htmlFor="observacion" className="text-base font-medium">
+                  Observaciones Adicionales
+                </Label>
+                <Textarea
+                  id="observacion"
+                  placeholder="Comentarios, riesgos identificados, dependencias, etc..."
+                  rows={4}
+                  value={formData.observacion}
+                  onChange={(e) => setFormData({ ...formData, observacion: e.target.value })}
+                  className="resize-none"
+                />
+              </div>
 
-            {/* Análisis de Causa Raíz */}
-            <div className="grid gap-2">
-              <Label htmlFor="analisisCausaRaiz">Análisis de Causa Raíz</Label>
-              <Textarea
-                id="analisisCausaRaiz"
-                placeholder="Describe el análisis de la causa raíz..."
-                rows={4}
-                value={formData.analisisCausaRaiz}
-                onChange={(e: { target: { value: any; }; }) =>
-                  setFormData({ ...formData, analisisCausaRaiz: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Plan de Acción */}
-            <div className="grid gap-2">
-              <Label htmlFor="planAccion">Plan de Acción</Label>
-              <Textarea
-                id="planAccion"
-                placeholder="Detalla el plan de acción..."
-                rows={4}
-                value={formData.planAccion}
-                onChange={(e: { target: { value: any; }; }) =>
-                  setFormData({ ...formData, planAccion: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Observaciones */}
-            <div className="grid gap-2">
-              <Label htmlFor="observacion">Observaciones</Label>
-              <Textarea
-                id="observacion"
-                placeholder="Observaciones adicionales..."
-                rows={3}
-                value={formData.observacion}
-                onChange={(e: { target: { value: any; }; }) =>
-                  setFormData({ ...formData, observacion: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Botones */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-                disabled={saving}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Crear Acción Correctiva
-                  </>
-                )}
-              </Button>
-            </div>
+              {/* Botones de Acción */}
+              <div className="flex justify-end gap-4 pt-6 border-t border-[#E5E7EB]">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={handleCancel}
+                  disabled={saving}
+                >
+                  <X className="mr-2 h-5 w-5" />
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={saving}
+                  className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium shadow-sm"
+                >
+                  {saving ? (
+                    <>
+                      <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-5 w-5" />
+                      Crear Acción Correctiva
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
-      </form>
+      </div>
     </div>
   );
 }
