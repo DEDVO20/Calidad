@@ -12,8 +12,8 @@ module.exports = {
             return results.length > 0;
         };
 
-        // IMPORTANTE: La tabla se llama "version_documentos" (no "versiones_documento")
-        const tableName = 'version_documentos';
+        // IMPORTANTE: La tabla creada en la migración inicial se llama "versiones_documento"
+        const tableName = 'versiones_documento';
 
         // Agregar columnas nuevas solo si no existen
         if (!(await columnExists(tableName, 'version_string'))) {
@@ -72,7 +72,7 @@ module.exports = {
     },
 
     async down(queryInterface, Sequelize) {
-        const tableName = 'version_documentos';
+        const tableName = 'versiones_documento';
 
         // Revertir los cambios en caso de rollback
         await queryInterface.removeColumn(tableName, 'version_string');
