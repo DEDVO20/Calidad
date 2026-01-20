@@ -29,7 +29,6 @@ import {
   Search,
   FileText,
   User,
-  Filter,
   RefreshCw,
   Eye,
   Trash2,
@@ -75,19 +74,16 @@ export default function DocumentosObsoletos() {
   const [total, setTotal] = useState(0);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Filtros
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [filtroFecha, setFiltroFecha] = useState<string>("todos");
 
-  // Dialog
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     type: 'eliminar' | 'restaurar' | null;
     documento: Documento | null;
   }>({ open: false, type: null, documento: null });
 
-  // CARGAR DOCUMENTOS OBSOLETOS DESDE API
   useEffect(() => {
     fetchDocumentosObsoletos();
   }, []);
@@ -133,7 +129,6 @@ export default function DocumentosObsoletos() {
     } catch (error) {
       console.error("Error:", error);
 
-      // Datos de ejemplo en caso de error
       const ejemploData: Documento[] = [
         {
           id: "1",
@@ -268,13 +263,13 @@ export default function DocumentosObsoletos() {
 
   const getTipoColor = (tipo: string) => {
     const colores: Record<string, string> = {
-      manual: "bg-purple-50 text-purple-700 border-purple-200",
-      procedimiento: "bg-blue-50 text-blue-700 border-blue-200",
-      instructivo: "bg-green-50 text-green-700 border-green-200",
-      formato: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      registro: "bg-orange-50 text-orange-700 border-orange-200",
+      manual: "bg-[#E0E7FF] text-[#6366F1]",
+      procedimiento: "bg-[#DBEAFE] text-[#3B82F6]",
+      instructivo: "bg-[#CFFAFE] text-[#0891B2]",
+      formato: "bg-[#FEF3C7] text-[#D97706]",
+      registro: "bg-[#FFEDD5] text-[#F97316]",
     };
-    return colores[tipo.toLowerCase()] || "bg-gray-50 text-gray-700 border-gray-200";
+    return colores[tipo.toLowerCase()] || "bg-[#F3F4F6] text-[#4B5563]";
   };
 
   const calcularTiempoObsoleto = (fechaAprobacion?: string): string => {
@@ -308,10 +303,10 @@ export default function DocumentosObsoletos() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto text-gray-500" />
-          <p className="text-gray-600">Cargando documentos obsoletos...</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FA]">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-[#6B7280]">Cargando documentos obsoletos...</p>
         </div>
       </div>
     );
@@ -319,359 +314,312 @@ export default function DocumentosObsoletos() {
 
   return (
     <TooltipProvider>
-      <div className="flex-1 space-y-6 p-4 md:p-6 pt-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <Archive className="h-7 w-7 text-gray-600" />
-              </div>
-              Documentos Obsoletos
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {total} documento{total !== 1 ? "s" : ""} obsoleto{total !== 1 ? "s" : ""} archivado{total !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchDocumentosObsoletos}
-              disabled={loading}
-            >
-              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Tarjetas de resumen */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className="hover:shadow-md transition-shadow border-gray-200">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2">
-                <Archive className="w-4 h-4" />
-                Total Obsoletos
-              </CardDescription>
-              <CardTitle className="text-4xl font-bold text-gray-700">{total}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-gray-600">Documentos fuera de vigencia</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow border-purple-100">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2 text-purple-600">
-                <FileText className="w-4 h-4" />
-                Manuales
-              </CardDescription>
-              <CardTitle className="text-4xl font-bold text-purple-600">
-                {documentos.filter(d => d.tipoDocumento.toLowerCase() === "manual").length}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                Archivados
-              </Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow border-blue-100">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2 text-blue-600">
-                <FileText className="w-4 h-4" />
-                Procedimientos
-              </CardDescription>
-              <CardTitle className="text-4xl font-bold text-blue-600">
-                {documentos.filter(d => d.tipoDocumento.toLowerCase() === "procedimiento").length}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                Archivados
-              </Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-md transition-shadow border-orange-100">
-            <CardHeader className="pb-3">
-              <CardDescription className="flex items-center gap-2 text-orange-600">
-                <History className="w-4 h-4" />
-                Antiguos
-              </CardDescription>
-              <CardTitle className="text-4xl font-bold text-orange-600">
-                {documentos.filter(d => {
-                  if (!d.fechaAprobacion) return false;
-                  const meses = (new Date().getTime() - new Date(d.fechaAprobacion).getTime()) / (1000 * 60 * 60 * 24 * 30);
-                  return meses > 12;
-                }).length}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                +1 año obsoletos
-              </Badge>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Información */}
-        <Card className="border-amber-200 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2 text-amber-900">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-              Gestión de Documentos Obsoletos
-            </CardTitle>
-            <CardDescription className="text-amber-800">
-              Estos documentos han sido marcados como obsoletos y ya no están en uso activo
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
-              <Archive className="w-5 h-5 text-blue-600 mt-0.5" />
+          {/* Header Profesional */}
+          <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
-                <span className="font-semibold text-gray-900">Consulta histórica:</span>
-                <p className="text-gray-700">Los documentos obsoletos se mantienen para referencia y auditoría</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
-              <History className="w-5 h-5 text-green-600 mt-0.5" />
-              <div>
-                <span className="font-semibold text-gray-900">Restaurar:</span>
-                <p className="text-gray-700">Puedes restaurar un documento si necesita volver a estar activo</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
-              <Trash2 className="w-5 h-5 text-red-600 mt-0.5" />
-              <div>
-                <span className="font-semibold text-gray-900">Eliminar permanentemente:</span>
-                <p className="text-gray-700">Una vez eliminado, el documento no podrá recuperarse</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Filtros */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              Filtros de búsqueda
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar por nombre o código..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Tipo de documento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los tipos</SelectItem>
-                  <SelectItem value="manual">Manual</SelectItem>
-                  <SelectItem value="procedimiento">Procedimiento</SelectItem>
-                  <SelectItem value="instructivo">Instructivo</SelectItem>
-                  <SelectItem value="formato">Formato</SelectItem>
-                  <SelectItem value="registro">Registro</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={filtroFecha} onValueChange={setFiltroFecha}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Antigüedad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todas las fechas</SelectItem>
-                  <SelectItem value="reciente">Últimos 6 meses</SelectItem>
-                  <SelectItem value="medio">6-12 meses</SelectItem>
-                  <SelectItem value="antiguo">Más de 1 año</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tabla */}
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b bg-gray-50">
-                <tr>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Código</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Nombre del Documento</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Tipo</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Versión</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Obsoleto desde</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Creado por</th>
-                  <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentosFiltrados.map((doc) => (
-                  <tr key={doc.id} className="border-b transition-colors hover:bg-gray-50">
-                    <td className="p-4 align-middle">
-                      <div className="font-mono text-sm font-medium">{doc.codigoDocumento}</div>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="max-w-[300px]">
-                        <div className="font-medium truncate">{doc.nombreArchivo}</div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                          <XCircle className="w-3 h-3 text-red-500" />
-                          Obsoleto
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <Badge variant="outline" className={getTipoColor(doc.tipoDocumento)}>
-                        {doc.tipoDocumento}
-                      </Badge>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">v{doc.version}</span>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="text-sm flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-gray-400" />
-                        {calcularTiempoObsoleto(doc.fechaAprobacion)}
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="text-sm flex items-center gap-1">
-                        <User className="w-3 h-3 text-gray-400" />
-                        {doc.creadoPor ? `${doc.creadoPor.nombre} ${doc.creadoPor.primerApellido}` : "Desconocido"}
-                      </div>
-                    </td>
-                    <td className="p-4 align-middle">
-                      <div className="flex gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" onClick={() => handleVer(doc)} disabled={actionLoading === doc.id}>
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Ver documento</p>
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="icon" variant="outline" onClick={() => handleDescargar(doc)} disabled={actionLoading === doc.id}>
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Descargar</p>
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="icon" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => openDialog('restaurar', doc)} disabled={actionLoading === doc.id}>
-                              {actionLoading === doc.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <History className="w-4 h-4" />}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Restaurar</p>
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="icon" variant="destructive" onClick={() => openDialog('eliminar', doc)} disabled={actionLoading === doc.id}>
-                              {actionLoading === doc.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Eliminar permanentemente</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {documentosFiltrados.length === 0 && (
-              <div className="text-center py-16">
-                <Archive className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold mb-2 text-gray-900">No hay documentos obsoletos</h3>
-                <p className="text-gray-600 mb-4">
-                  {searchTerm || filtroTipo !== "todos" || filtroFecha !== "todos"
-                    ? "No se encontraron documentos con los filtros aplicados"
-                    : "Actualmente no hay documentos marcados como obsoletos."
-                  }
+                <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                  <Archive className="h-9 w-9 text-[#2563EB]" />
+                  Documentos Obsoletos
+                </h1>
+                <p className="text-[#6B7280] mt-2 text-lg">
+                  {total} documento{total !== 1 ? "s" : ""} obsoleto{total !== 1 ? "s" : ""} archivados
                 </p>
-                {(searchTerm || filtroTipo !== "todos" || filtroFecha !== "todos") && (
-                  <Button variant="outline" onClick={() => {
-                    setSearchTerm("");
-                    setFiltroTipo("todos");
-                    setFiltroFecha("todos");
-                  }}>
-                    Limpiar filtros
-                  </Button>
-                )}
               </div>
-            )}
-          </div>
-        </Card>
-
-        {/* Dialog */}
-        <AlertDialog open={dialogState.open} onOpenChange={closeDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                {dialogState.type === 'restaurar' ? (
-                  <> <History className="w-5 h-5 text-blue-600" /> ¿Restaurar documento? </>
-                ) : (
-                  <> <Trash2 className="w-5 h-5 text-red-600" /> ¿Eliminar permanentemente? </>
-                )}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-3">
-                {dialogState.documento && (
-                  <>
-                    <div className="bg-gray-50 p-3 rounded-lg space-y-1">
-                      <p className="font-semibold text-gray-900">{dialogState.documento.nombreArchivo}</p>
-                      <p className="text-sm text-gray-600">Código: {dialogState.documento.codigoDocumento}</p>
-                      <p className="text-sm text-gray-600">Versión: {dialogState.documento.version}</p>
-                    </div>
-                    {dialogState.type === 'restaurar' ? (
-                      <p>El documento será restaurado a estado <strong className="text-blue-600">aprobado</strong>.</p>
-                    ) : (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-red-900 font-medium mb-2">Esta acción es irreversible</p>
-                        <p className="text-red-800 text-sm">El documento será eliminado permanentemente.</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={actionLoading !== null}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={dialogState.type === 'restaurar' ? handleRestaurar : handleEliminarPermanente}
-                disabled={actionLoading !== null}
-                className={dialogState.type === 'restaurar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'}
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={fetchDocumentosObsoletos}
+                disabled={loading}
               >
-                {actionLoading !== null ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : null}
-                {dialogState.type === 'restaurar' ? 'Restaurar' : 'Eliminar permanentemente'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <RefreshCw className={`mr-2 h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                Actualizar
+              </Button>
+            </div>
+          </div>
+
+          {/* Tarjetas de resumen */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-[#1E3A8A]">Total Obsoletos</CardTitle>
+                <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{total}</div>
+                <p className="text-[#6B7280] text-sm mt-1">Documentos fuera de vigencia</p>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-[#E0E7FF] border border-[#E5E7EB] shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-[#1E3A8A]">Manuales</CardTitle>
+                <div className="text-4xl font-bold text-[#1E3A8A] mt-4">
+                  {documentos.filter(d => d.tipoDocumento.toLowerCase() === "manual").length}
+                </div>
+                <p className="text-[#6B7280] text-sm mt-1">Archivados</p>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-[#DBEAFE] border border-[#E5E7EB] shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-[#1E3A8A]">Procedimientos</CardTitle>
+                <div className="text-4xl font-bold text-[#1E3A8A] mt-4">
+                  {documentos.filter(d => d.tipoDocumento.toLowerCase() === "procedimiento").length}
+                </div>
+                <p className="text-[#6B7280] text-sm mt-1">Archivados</p>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-[#1E3A8A]">Antiguos</CardTitle>
+                <div className="text-4xl font-bold text-[#1E3A8A] mt-4">
+                  {documentos.filter(d => {
+                    if (!d.fechaAprobacion) return false;
+                    const meses = (new Date().getTime() - new Date(d.fechaAprobacion).getTime()) / (1000 * 60 * 60 * 24 * 30);
+                    return meses > 12;
+                  }).length}
+                </div>
+                <p className="text-[#6B7280] text-sm mt-1">+1 año obsoletos</p>
+              </CardHeader>
+            </Card>
+          </div>
+
+          {/* Información */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-[#F1F5F9]">
+              <CardTitle className="text-xl text-[#1E3A8A] flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-[#F59E0B]" />
+                Gestión de Documentos Obsoletos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+              <div className="bg-[#EFF6FF] rounded-xl p-6 border border-[#E5E7EB]">
+                <FileText className="h-10 w-10 text-[#2563EB] mb-4" />
+                <h3 className="font-semibold text-[#1E3A8A] mb-2">Consulta histórica</h3>
+                <p className="text-[#6B7280]">Los documentos obsoletos se mantienen para referencia y auditoría</p>
+              </div>
+              <div className="bg-[#ECFDF5] rounded-xl p-6 border border-[#E5E7EB]">
+                <History className="h-10 w-10 text-[#22C55E] mb-4" />
+                <h3 className="font-semibold text-[#1E3A8A] mb-2">Restaurar</h3>
+                <p className="text-[#6B7280]">Puedes restaurar un documento si necesita volver a estar activo</p>
+              </div>
+              <div className="bg-[#FEF2F2] rounded-xl p-6 border border-[#E5E7EB]">
+                <Trash2 className="h-10 w-10 text-[#EF4444] mb-4" />
+                <h3 className="font-semibold text-[#1E3A8A] mb-2">Eliminar permanentemente</h3>
+                <p className="text-[#6B7280]">Una vez eliminado, el documento no podrá recuperarse</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Filtros */}
+          <Card className="shadow-sm">
+            <CardHeader className="bg-[#F1F5F9]">
+              <CardTitle className="text-xl text-[#1E3A8A]">Filtros de búsqueda</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-5 w-5 text-[#6B7280]" />
+                  <Input
+                    placeholder="Buscar por nombre o código..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+
+                <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tipo de documento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos los tipos</SelectItem>
+                    <SelectItem value="manual">Manual</SelectItem>
+                    <SelectItem value="procedimiento">Procedimiento</SelectItem>
+                    <SelectItem value="instructivo">Instructivo</SelectItem>
+                    <SelectItem value="formato">Formato</SelectItem>
+                    <SelectItem value="registro">Registro</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={filtroFecha} onValueChange={setFiltroFecha}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Antigüedad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todas las fechas</SelectItem>
+                    <SelectItem value="reciente">Últimos 6 meses</SelectItem>
+                    <SelectItem value="medio">6-12 meses</SelectItem>
+                    <SelectItem value="antiguo">Más de 1 año</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tabla */}
+          <Card className="shadow-sm overflow-hidden">
+            <CardHeader className="bg-[#F1F5F9]">
+              <CardTitle className="text-2xl text-[#1E3A8A]">Documentos Obsoletos</CardTitle>
+            </CardHeader>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#F1F5F9] border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Código</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Nombre del Documento</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Tipo</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Versión</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Obsoleto desde</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Creado por</th>
+                    <th className="text-right p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider pr-10">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-[#E5E7EB]">
+                  {documentosFiltrados.map((doc) => (
+                    <tr key={doc.id} className="hover:bg-[#EFF6FF] transition-colors">
+                      <td className="p-6">
+                        <div className="font-mono text-sm font-medium text-[#2563EB]">{doc.codigoDocumento}</div>
+                      </td>
+                      <td className="p-6">
+                        <div className="max-w-[300px]">
+                          <div className="font-medium truncate text-gray-900">{doc.nombreArchivo}</div>
+                          <div className="text-sm text-[#6B7280] flex items-center gap-1 mt-1">
+                            <XCircle className="w-3 h-3 text-[#EF4444]" />
+                            Obsoleto
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <Badge variant="outline" className={getTipoColor(doc.tipoDocumento)}>
+                          {doc.tipoDocumento}
+                        </Badge>
+                      </td>
+                      <td className="p-6">
+                        <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">v{doc.version}</span>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-sm flex items-center gap-1 text-[#6B7280]">
+                          <Clock className="w-3 h-3" />
+                          {calcularTiempoObsoleto(doc.fechaAprobacion)}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-sm flex items-center gap-1 text-[#6B7280]">
+                          <User className="w-3 h-3" />
+                          {doc.creadoPor ? `${doc.creadoPor.nombre} ${doc.creadoPor.primerApellido}` : "Desconocido"}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex gap-2 justify-end">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" onClick={() => handleVer(doc)} disabled={actionLoading === doc.id}>
+                                <Eye className="w-4 h-4 text-[#2563EB]" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Ver documento</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" onClick={() => handleDescargar(doc)} disabled={actionLoading === doc.id}>
+                                <Download className="w-4 h-4 text-[#4B5563]" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Descargar</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" className="text-[#2563EB]" onClick={() => openDialog('restaurar', doc)} disabled={actionLoading === doc.id}>
+                                {actionLoading === doc.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <History className="w-4 h-4" />}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Restaurar documento</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" className="text-[#EF4444]" onClick={() => openDialog('eliminar', doc)} disabled={actionLoading === doc.id}>
+                                {actionLoading === doc.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Eliminar permanentemente</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {documentosFiltrados.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="text-center py-16 text-[#6B7280]">
+                        <Archive className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                        <p className="text-lg font-medium">No hay documentos obsoletos</p>
+                        <p className="mt-2">
+                          {searchTerm || filtroTipo !== "todos" || filtroFecha !== "todos"
+                            ? "No se encontraron documentos con los filtros aplicados"
+                            : "Actualmente no hay documentos marcados como obsoletos"}
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          {/* Dialog */}
+          <AlertDialog open={dialogState.open} onOpenChange={closeDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-[#1E3A8A]">
+                  {dialogState.type === 'restaurar' ? "Restaurar Documento" : "Eliminar Permanentemente"}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="space-y-3">
+                  {dialogState.documento && (
+                    <>
+                      <div className="bg-[#F1F5F9] p-3 rounded-lg">
+                        <p className="font-semibold text-gray-900">{dialogState.documento.nombreArchivo}</p>
+                        <p className="text-sm text-[#6B7280]">Código: {dialogState.documento.codigoDocumento}</p>
+                        <p className="text-sm text-[#6B7280]">Versión: {dialogState.documento.version}</p>
+                      </div>
+                      {dialogState.type === 'restaurar' ? (
+                        <p>El documento será restaurado a estado <strong className="text-[#22C55E]">aprobado</strong>.</p>
+                      ) : (
+                        <div className="bg-[#FEF2F2] border border-[#EF4444] rounded-lg p-3">
+                          <p className="text-[#991B1B] font-medium mb-2">Esta acción es irreversible</p>
+                          <p className="text-[#DC2626] text-sm">El documento será eliminado permanentemente.</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={actionLoading !== null}>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={dialogState.type === 'restaurar' ? handleRestaurar : handleEliminarPermanente}
+                  disabled={actionLoading !== null}
+                  className={dialogState.type === 'restaurar' ? "bg-[#2563EB] hover:bg-[#1D4ED8]" : "bg-[#EF4444] hover:bg-red-700"}
+                >
+                  {actionLoading !== null ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  {dialogState.type === 'restaurar' ? 'Restaurar' : 'Eliminar permanentemente'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </TooltipProvider>
   );

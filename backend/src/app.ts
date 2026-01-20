@@ -103,6 +103,8 @@ app.use("/api/controles-riesgo", controlRiesgoRoutes);
 // Acciones correctivas y no conformidades
 app.use("/api/acciones-correctivas", accionCorrectivaRoutes);
 app.use("/api/noconformidades", noConformidadRoutes);
+// Alias con guion (compatibilidad con frontend u otros clientes)
+app.use("/api/no-conformidades", noConformidadRoutes);
 
 // Procesos
 app.use("/api/procesos", procesoRoutes);
