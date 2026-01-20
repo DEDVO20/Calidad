@@ -83,6 +83,7 @@ class NoConformidad
         fuente: {
           type: DataTypes.TEXT,
           allowNull: true,
+          field: "origen",
         },
         procesoId: {
           type: DataTypes.UUID,

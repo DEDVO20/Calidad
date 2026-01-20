@@ -167,45 +167,43 @@ export default function AreasResponsables() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-          <p className="mt-4 text-lg font-medium text-indigo-700">Cargando áreas...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-gray-700">Cargando áreas...</p>
         </div>
       </div>
     );
   }
 
   const total = areas.length;
-  const asignadas = 0;
+  const asignadas = 0; // Placeholder (puedes conectar lógica real)
   const sinAsignar = total;
   const conIncidencias = 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Header Premium */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/50 p-8">
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                <Building2 className="h-10 w-10 text-indigo-600" />
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <Building2 className="h-9 w-9 text-[#2563EB]" />
                 Gestión de Áreas Responsables
               </h1>
-              <p className="text-gray-600 mt-2 text-lg">
+              <p className="text-[#6B7280] mt-2 text-lg">
                 Administra todas las áreas de tu sistema de calidad ISO 9001
               </p>
-              <div className="flex items-center gap-2 mt-3">
-                <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 font-semibold">
-                  {total} {total === 1 ? "área activa" : "áreas activas"}
-                </Badge>
-              </div>
+              <Badge variant="secondary" className="mt-3 bg-white text-[#2563EB]">
+                {total} {total === 1 ? "área activa" : "áreas activas"}
+              </Badge>
             </div>
             <Button 
               size="lg" 
               onClick={handleCreate}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+              className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium shadow-sm"
             >
               <Plus className="mr-2 h-5 w-5" />
               Nueva Área
@@ -215,7 +213,7 @@ export default function AreasResponsables() {
 
         {/* Error Card */}
         {error && (
-          <Card className="border-red-200 bg-red-50/80 backdrop-blur">
+          <Card className="border-red-200 bg-red-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 text-red-700">
                 <AlertCircle className="h-6 w-6" />
@@ -231,87 +229,91 @@ export default function AreasResponsables() {
           </Card>
         )}
 
-        {/* Stats Cards con colores vivos */}
+        {/* Tarjetas de métricas - Fondos pastel suaves */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+          {/* Total Áreas */}
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white/90">Total Áreas</CardTitle>
-                <Users className="h-8 w-8 text-white/80" />
+                <CardTitle className="text-[#1E3A8A]">Total Áreas</CardTitle>
+                <Users className="h-8 w-8 text-[#2563EB]" />
               </div>
-              <div className="text-4xl font-bold mt-2">{total}</div>
-              <p className="text-blue-100 text-sm mt-1">Registradas en el sistema</p>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{total}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Registradas en el sistema</p>
             </CardHeader>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+          {/* Asignadas */}
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white/90">Asignadas</CardTitle>
-                <UserCheck className="h-8 w-8 text-white/80" />
+                <CardTitle className="text-[#1E3A8A]">Asignadas</CardTitle>
+                <UserCheck className="h-8 w-8 text-[#22C55E]" />
               </div>
-              <div className="text-4xl font-bold mt-2">{asignadas}</div>
-              <p className="text-green-100 text-sm mt-1">Con responsables</p>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{asignadas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Con responsables</p>
             </CardHeader>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+          {/* Sin Asignar */}
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white/90">Sin Asignar</CardTitle>
-                <UserX className="h-8 w-8 text-white/80" />
+                <CardTitle className="text-[#1E3A8A]">Sin Asignar</CardTitle>
+                <UserX className="h-8 w-8 text-[#F59E0B]" />
               </div>
-              <div className="text-4xl font-bold mt-2">{sinAsignar}</div>
-              <p className="text-amber-100 text-sm mt-1">Pendientes</p>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{sinAsignar}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Pendientes</p>
             </CardHeader>
           </Card>
 
-          <Card className="bg-gradient-to-br from-rose-500 to-pink-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+          {/* Incidencias */}
+          <Card className="bg-[#FEF2F2] border border-[#E5E7EB] shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white/90">Incidencias</CardTitle>
-                <AlertTriangle className="h-8 w-8 text-white/80" />
+                <CardTitle className="text-[#1E3A8A]">Incidencias</CardTitle>
+                <AlertTriangle className="h-8 w-8 text-[#EF4444]" />
               </div>
-              <div className="text-4xl font-bold mt-2">{conIncidencias}</div>
-              <p className="text-rose-100 text-sm mt-1">Requieren atención</p>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{conIncidencias}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Requieren atención</p>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Lista de Áreas */}
-        <Card className="shadow-2xl border-0 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-            <CardTitle className="text-2xl flex items-center gap-3">
+        {/* Tabla de Áreas */}
+        <Card className="shadow-sm overflow-hidden">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
               <Hash className="h-7 w-7" />
               Listado Completo de Áreas
             </CardTitle>
-            <CardDescription className="text-indigo-100">
-              Haz clic en los botones para ver, editar o eliminar
+            <CardDescription className="text-[#6B7280]">
+              Haz clic en los íconos para ver, editar o eliminar
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b-2 border-gray-200">
+                <thead className="bg-[#F1F5F9] border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="text-left p-6 text-sm font-bold text-gray-700 uppercase tracking-wider">Código</th>
-                    <th className="text-left p-6 text-sm font-bold text-gray-700 uppercase tracking-wider">Nombre del Área</th>
-                    <th className="text-left p-6 text-sm font-bold text-gray-700 uppercase tracking-wider">Descripción</th>
-                    <th className="text-left p-6 text-sm font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Código</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Nombre del Área</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Descripción</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">
                       <Calendar className="inline h-4 w-4 mr-1" />
                       Creado
                     </th>
-                    <th className="text-right p-6 text-sm font-bold text-gray-700 uppercase tracking-wider pr-10">Acciones</th>
+                    <th className="text-right p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider pr-10">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-100">
+                <tbody className="bg-white divide-y divide-[#E5E7EB]">
                   {areas.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-16 text-gray-400">
+                      <td colSpan={5} className="text-center py-16 text-[#6B7280]">
                         <div className="flex flex-col items-center">
                           <Building2 className="h-16 w-16 text-gray-300 mb-4" />
                           <p className="text-lg">No hay áreas registradas aún</p>
-                          <Button onClick={handleCreate} className="mt-4" variant="outline">
+                          <Button onClick={handleCreate} variant="outline" className="mt-4">
                             <Plus className="mr-2 h-4 w-4" /> Crear la primera área
                           </Button>
                         </div>
@@ -319,17 +321,17 @@ export default function AreasResponsables() {
                     </tr>
                   ) : (
                     areas.map((area) => (
-                      <tr key={area.id} className="hover:bg-indigo-50/50 transition-colors duration-200">
+                      <tr key={area.id} className="hover:bg-[#EFF6FF] transition-colors">
                         <td className="p-6">
-                          <Badge className="bg-indigo-100 text-indigo-700 font-bold text-lg">
+                          <Badge className="bg-[#E0EDFF] text-[#2563EB] font-bold">
                             {area.codigo}
                           </Badge>
                         </td>
-                        <td className="p-6 font-semibold text-gray-800 text-lg">{area.nombre}</td>
-                        <td className="p-6 text-gray-600 max-w-md">
+                        <td className="p-6 font-medium text-gray-900">{area.nombre}</td>
+                        <td className="p-6 text-[#6B7280] max-w-md">
                           {area.descripcion || <span className="italic text-gray-400">Sin descripción</span>}
                         </td>
-                        <td className="p-6 text-sm text-gray-500">
+                        <td className="p-6 text-sm text-[#6B7280]">
                           {new Date(area.creadoEn).toLocaleDateString('es-CO', {
                             day: '2-digit',
                             month: 'short',
@@ -338,17 +340,14 @@ export default function AreasResponsables() {
                         </td>
                         <td className="p-6">
                           <div className="flex items-center justify-end gap-3">
-                            <Button size="sm" variant="outline" onClick={() => handleView(area)}
-                              className="hover:bg-blue-50 hover:border-blue-400">
-                              <Eye className="h-4 w-4" />
+                            <Button size="sm" variant="ghost" onClick={() => handleView(area)}>
+                              <Eye className="h-4 w-4 text-[#2563EB]" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleEdit(area)}
-                              className="hover:bg-emerald-50 hover:border-emerald-400">
-                              <Edit className="h-4 w-4" />
+                            <Button size="sm" variant="ghost" onClick={() => handleEdit(area)}>
+                              <Edit className="h-4 w-4 text-[#4B5563]" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleDelete(area)}
-                              className="text-red-600 hover:bg-red-50 hover:border-red-400">
-                              <Trash2 className="h-4 w-4" />
+                            <Button size="sm" variant="ghost" onClick={() => handleDelete(area)}>
+                              <Trash2 className="h-4 w-4 text-[#EF4444]" />
                             </Button>
                           </div>
                         </td>
@@ -362,22 +361,22 @@ export default function AreasResponsables() {
         </Card>
       </div>
 
-      {/* Dialog Mejorado */}
+      {/* Dialog simple y limpio */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-2xl bg-white/95 backdrop-blur-lg border-2 border-indigo-100">
-          <DialogHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-xl -m-6 p-6 mb-6">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-              {dialogMode === 'create' && <><Plus className="h-7 w-7" /> Nueva Área</>}
-              {dialogMode === 'edit' && <><Edit className="h-7 w-7" /> Editar Área</>}
-              {dialogMode === 'view' && <><Eye className="h-7 w-7" /> Detalles del Área</>}
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+              {dialogMode === 'create' && <><Plus className="h-7 w-7 text-[#2563EB]" /> Nueva Área</>}
+              {dialogMode === 'edit' && <><Edit className="h-7 w-7 text-[#2563EB]" /> Editar Área</>}
+              {dialogMode === 'view' && <><Eye className="h-7 w-7 text-[#2563EB]" /> Detalles del Área</>}
             </DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="codigo" className="text-lg font-semibold flex items-center gap-2">
-                  <Hash className="h-5 w-5 text-indigo-600" /> Código *
+                <Label htmlFor="codigo" className="text-base font-medium">
+                  <Hash className="inline h-4 w-4 mr-1 text-[#2563EB]" /> Código *
                 </Label>
                 <Input
                   id="codigo"
@@ -385,25 +384,25 @@ export default function AreasResponsables() {
                   onChange={(e) => setFormData({ ...formData, codigo: e.target.value.toUpperCase() })}
                   placeholder="EJ: CAL, RRHH, SIS"
                   disabled={dialogMode === 'view'}
-                  className="mt-2 text-lg font-mono"
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label htmlFor="nombre" className="text-lg font-semibold">Nombre Completo *</Label>
+                <Label htmlFor="nombre" className="text-base font-medium">Nombre Completo *</Label>
                 <Input
                   id="nombre"
                   value={dialogMode === 'view' ? selectedArea?.nombre ?? '' : formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                   placeholder="Gestión de Calidad"
                   disabled={dialogMode === 'view'}
-                  className="mt-2 text-lg"
+                  className="mt-1"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="descripcion" className="text-lg font-semibold flex items-center gap-2">
-                <FileText className="h-5 w-5 text-purple-600" /> Descripción
+              <Label htmlFor="descripcion" className="text-base font-medium">
+                <FileText className="inline h-4 w-4 mr-1 text-[#2563EB]" /> Descripción
               </Label>
               <Textarea
                 id="descripcion"
@@ -412,18 +411,18 @@ export default function AreasResponsables() {
                 placeholder="Describe las funciones y responsabilidades de esta área..."
                 rows={4}
                 disabled={dialogMode === 'view'}
-                className="mt-2"
+                className="mt-1"
               />
             </div>
 
             {dialogMode === 'view' && selectedArea && (
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2 border">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2 border border-[#E5E7EB]">
                 <div className="flex justify-between">
-                  <span className="font-medium text-gray-600">Creado:</span>
+                  <span className="font-medium text-[#6B7280]">Creado:</span>
                   <span className="font-mono">{new Date(selectedArea.creadoEn).toLocaleString('es-CO')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-gray-600">Última actualización:</span>
+                  <span className="font-medium text-[#6B7280]">Última actualización:</span>
                   <span className="font-mono">{new Date(selectedArea.actualizadoEn).toLocaleString('es-CO')}</span>
                 </div>
               </div>
@@ -431,21 +430,16 @@ export default function AreasResponsables() {
           </div>
 
           <DialogFooter className="gap-3">
-            <Button variant="outline" size="lg" onClick={() => setShowDialog(false)} className="px-8">
-              <X className="mr-2 h-5 w-5" /> {dialogMode === 'view' ? 'Cerrar' : 'Cancelar'}
+            <Button variant="outline" onClick={() => setShowDialog(false)}>
+              {dialogMode === 'view' ? 'Cerrar' : 'Cancelar'}
             </Button>
             {dialogMode !== 'view' && (
               <Button 
-                size="lg" 
                 onClick={handleSave} 
                 disabled={saving}
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-10 font-bold"
+                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
               >
-                {saving ? (
-                  <>Guardando...</>
-                ) : (
-                  <><Save className="mr-2 h-5 w-5" /> Guardar Área</>
-                )}
+                {saving ? 'Guardando...' : <><Save className="mr-2 h-5 w-5" /> Guardar Área</>}
               </Button>
             )}
           </DialogFooter>

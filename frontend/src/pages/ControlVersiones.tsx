@@ -18,19 +18,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Search, Eye, Filter, FileText, Layers, Clock, Download } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Eye, Layers, Clock, Download, FileText, Calendar } from "lucide-react";
 import { documentoService } from "@/services/documento.service";
 import { versionDocumentoService, VersionDocumentoData } from "@/services/versionDocumento.service";
 import { toast } from "sonner";
-
-/**
- * ControlVersiones (componente con datos reales)
- *
- * - Indicadores arriba (resumen)
- * - Buscador + botón Filtrar (por fecha)
- * - Tabla de documentos con versiones reales
- * - Modal "Ver" con: info básica + historial de versiones real
- */
 
 type Documento = {
   id: string;
@@ -49,12 +41,10 @@ export default function ControlVersiones() {
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Documento | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<VersionDocumentoData | null>(null);
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
 
-  // Cargar documentos desde el API
   useEffect(() => {
     const fetchDocumentos = async () => {
       try {
@@ -68,14 +58,12 @@ export default function ControlVersiones() {
         setLoading(false);
       }
     };
-
     fetchDocumentos();
   }, []);
 
-  // Cargar versiones cuando se selecciona un documento
   useEffect(() => {
     const fetchVersions = async () => {
-      if (selectedDoc && selectedDoc.id) {
+      if (selectedDoc?.id) {
         try {
           setLoadingVersions(true);
           const versiones = await versionDocumentoService.getByDocumento(selectedDoc.id);
@@ -88,11 +76,9 @@ export default function ControlVersiones() {
         }
       }
     };
-
     fetchVersions();
   }, [selectedDoc?.id]);
 
-  // filtros
   const filtrados = useMemo(() => {
     return documentos.filter((doc) => {
       const term = search.trim().toLowerCase();
@@ -100,27 +86,20 @@ export default function ControlVersiones() {
         !term ||
         doc.nombreArchivo.toLowerCase().includes(term) ||
         doc.codigoDocumento?.toLowerCase().includes(term);
-      const matchesDate = !filterDate || doc.creadoEn.startsWith(filterDate);
+      const matchesDate = !filterDate || doc.actualizadoEn.startsWith(filterDate);
       return matchesSearch && matchesDate;
     });
   }, [documentos, search, filterDate]);
 
-  // indicadores (usados en tarjetas superiores)
   const totalDocumentos = documentos.length;
-  const totalVersiones = documentos.reduce((sum, doc) => {
-    // Aproximación: cada documento tiene al menos 1 versión
-    return sum + 1;
-  }, 0);
+  const totalVersiones = documentos.reduce((acc, doc) => acc + (doc.versiones?.length || 1), 0);
 
   const ultimoDocumento = documentos.reduce(
-    (last, cur) => (new Date(cur.actualizadoEn) > new Date(last.actualizadoEn) ? cur : last),
+    (last, cur) => (new Date(cur.actualizadoEn) > new Date(last?.actualizadoEn || "0") ? cur : last),
     documentos[0]
   );
 
-  const openDoc = (doc: Documento) => {
-    setSelectedDoc(doc);
-    setSelectedVersion(null);
-  };
+  const openDoc = (doc: Documento) => setSelectedDoc(doc);
 
   const handleDownload = async (versionId: string) => {
     try {
@@ -131,229 +110,263 @@ export default function ControlVersiones() {
     }
   };
 
+  const getEstadoColor = (estado: string) => {
+    switch (estado) {
+      case "aprobado": return "text-[#22C55E] bg-[#ECFDF5]";
+      case "en_revision": return "text-[#F59E0B] bg-[#FFF7ED]";
+      case "pendiente_aprobacion": return "text-[#F59E0B] bg-[#FFF7ED]";
+      default: return "text-[#6B7280] bg-gray-100";
+    }
+  };
+
+  const formatEstado = (estado?: string) => {
+    const s = estado ?? "";
+    if (!s) return "-";
+    const replaced = s.replace(/_/g, " ");
+    return replaced.charAt(0).toUpperCase() + replaced.slice(1).toLowerCase();
+  };
+
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">Control de Versiones</h1>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FA]">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-[#6B7280]">Cargando control de versiones...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Control de Versiones</h1>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Tarjetas resumen con indicadores */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white border rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-center">
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <p className="text-sm text-gray-500">Total Documentos</p>
-              <p className="text-2xl font-bold">{totalDocumentos}</p>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <Layers className="h-9 w-9 text-[#2563EB]" />
+                Control de Versiones
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Visualiza el historial completo de versiones de cada documento del sistema ISO 9001
+              </p>
             </div>
-            <FileText className="h-7 w-7 text-gray-500" />
           </div>
         </div>
 
-        <div className="bg-white border rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">Total Versiones</p>
-              <p className="text-2xl font-bold text-purple-600">{totalVersiones}</p>
-            </div>
-            <Layers className="h-7 w-7 text-purple-600" />
-          </div>
-        </div>
-
-        <div className="bg-white border rounded-lg p-4 shadow-sm">
-          <div>
-            <p className="text-sm text-gray-500">Último Actualizado</p>
-            <p className="text-base font-semibold truncate">
-              {ultimoDocumento?.nombreArchivo || "-"}
-            </p>
-            <p className="text-xs text-gray-400">
-              {ultimoDocumento?.actualizadoEn
-                ? new Date(ultimoDocumento.actualizadoEn).toLocaleDateString("es-ES")
-                : "-"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Buscador + Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="flex items-center gap-2 w-full sm:w-2/3">
-          <Input
-            placeholder="Buscar por nombre o código..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full"
-          />
-          <Button variant="outline">
-            <Search className="h-4 w-4 mr-1" /> Buscar
-          </Button>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" /> Filtrar
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72 p-3">
-              <label className="block text-sm text-gray-600 mb-1">Filtrar por fecha</label>
-              <Input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} />
-              <div className="mt-3 flex gap-2">
-                <Button variant="secondary" onClick={() => setFilterDate("")} className="w-full">
-                  Limpiar
-                </Button>
-                <Button className="w-full">Aplicar</Button>
+        {/* Tarjetas de resumen */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Total Documentos</CardTitle>
+                <FileText className="h-8 w-8 text-[#2563EB]" />
               </div>
-            </PopoverContent>
-          </Popover>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{totalDocumentos}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Documentos registrados</p>
+            </CardHeader>
+          </Card>
+
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Total Versiones</CardTitle>
+                <Layers className="h-8 w-8 text-[#22C55E]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{totalVersiones}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Historial completo</p>
+            </CardHeader>
+          </Card>
+
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Última Actualización</CardTitle>
+                <Clock className="h-8 w-8 text-[#F59E0B]" />
+              </div>
+              <div className="text-lg font-medium text-[#1E3A8A] mt-4 truncate">
+                {ultimoDocumento?.nombreArchivo || "Sin documentos"}
+              </div>
+              <p className="text-[#6B7280] text-sm mt-1">
+                {ultimoDocumento
+                  ? new Date(ultimoDocumento.actualizadoEn).toLocaleDateString("es-CO", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "-"}
+              </p>
+            </CardHeader>
+          </Card>
         </div>
-      </div>
 
-      {/* Tabla principal */}
-      <div className="bg-white rounded-lg shadow-md p-4 border">
-        <h2 className="text-lg font-semibold mb-4">Lista de Documentos</h2>
+        {/* Búsqueda y filtros */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="relative col-span-1 md:col-span-2">
+              <Search className="absolute left-3 top-3 h-5 w-5 text-[#6B7280]" />
+              <Input
+                placeholder="Buscar por nombre o código..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full md:w-auto flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Filtrar por fecha
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-4">
+                  <Input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                  />
+                  <Button variant="outline" onClick={() => setFilterDate("")} className="w-full">
+                    Limpiar filtro
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Código</TableHead>
-              <TableHead>Versión</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead className="text-center">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtrados.map((doc) => (
-              <TableRow key={doc.id}>
-                <TableCell>{doc.nombreArchivo}</TableCell>
-                <TableCell>{doc.codigoDocumento || "-"}</TableCell>
-                <TableCell>{doc.version || "1.0"}</TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${doc.estado === "aprobado"
-                      ? "bg-green-100 text-green-800"
-                      : doc.estado === "en_revision"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                      }`}
-                  >
-                    {doc.estado}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {new Date(doc.actualizadoEn).toLocaleDateString("es-ES")}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        onClick={() => openDoc(doc)}
-                        className="bg-gradient-to-r from-blue-600 to-blue-400 text-white hover:from-blue-700 hover:to-blue-500"
-                      >
-                        <Eye className="h-4 w-4 mr-1" /> Ver
-                      </Button>
-                    </DialogTrigger>
-
-                    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Detalles del Documento y Versiones</DialogTitle>
-                      </DialogHeader>
-
-                      <div className="mt-4 space-y-4">
-                        {/* Info básica */}
-                        <div className="bg-gray-50 border rounded-lg p-4 grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-sm text-gray-500">Nombre</p>
-                            <p className="font-semibold">{selectedDoc?.nombreArchivo}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Código</p>
-                            <p className="font-semibold">{selectedDoc?.codigoDocumento || "-"}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Versión Actual</p>
-                            <p className="font-semibold">{selectedDoc?.version || "1.0"}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Estado</p>
-                            <p className="font-semibold capitalize">{selectedDoc?.estado}</p>
-                          </div>
-                        </div>
-
-                        {/* Historial de versiones */}
-                        <div className="bg-white border rounded-lg p-4">
-                          <h4 className="font-semibold mb-3 flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Historial de versiones
-                          </h4>
-
-                          {loadingVersions ? (
-                            <div className="flex items-center justify-center py-8">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                            </div>
-                          ) : selectedDoc?.versiones && selectedDoc.versiones.length > 0 ? (
-                            <table className="w-full text-sm">
-                              <thead className="bg-gray-100">
-                                <tr>
-                                  <th className="p-2 text-left">Versión</th>
-                                  <th className="p-2 text-left">Fecha</th>
-                                  <th className="p-2 text-left">Cambios</th>
-                                  <th className="p-2 text-center">Acción</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {selectedDoc.versiones.map((v) => (
-                                  <tr key={v.id} className="hover:bg-gray-50 border-b">
-                                    <td className="p-2 font-medium">{v.versionString}</td>
-                                    <td className="p-2">
-                                      {new Date(v.subidoEn).toLocaleDateString("es-ES")}
-                                    </td>
-                                    <td className="p-2 text-gray-600">{v.cambios || "-"}</td>
-                                    <td className="p-2 text-center">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleDownload(v.id)}
-                                      >
-                                        <Download className="h-3 w-3 mr-1" />
-                                        Descargar
-                                      </Button>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          ) : (
-                            <p className="text-center py-8 text-gray-500">
-                              No hay versiones históricas disponibles
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtrados.length === 0 && (
+        {/* Tabla de documentos */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
+          <div className="bg-[#F1F5F9] px-6 py-4 border-b border-[#E5E7EB]">
+            <h2 className="text-xl font-semibold text-[#1E3A8A]">Lista de Documentos</h2>
+          </div>
+          <Table>
+            <TableHeader className="bg-[#F1F5F9]">
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                  No se encontraron documentos
-                </TableCell>
+                <TableHead className="text-[#1E3A8A]">Nombre</TableHead>
+                <TableHead className="text-[#1E3A8A]">Código</TableHead>
+                <TableHead className="text-[#1E3A8A]">Versión Actual</TableHead>
+                <TableHead className="text-[#1E3A8A]">Estado</TableHead>
+                <TableHead className="text-[#1E3A8A]">Última Actualización</TableHead>
+                <TableHead className="text-[#1E3A8A] text-right">Acciones</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filtrados.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-16 text-[#6B7280]">
+                    <FileText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                    No se encontraron documentos
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filtrados.map((doc) => (
+                  <TableRow key={doc.id} className="hover:bg-[#EFF6FF] transition-colors">
+                    <TableCell className="font-medium">{doc.nombreArchivo}</TableCell>
+                    <TableCell className="text-[#6B7280]">{doc.codigoDocumento || "-"}</TableCell>
+                    <TableCell>{doc.version || "1.0"}</TableCell>
+                    <TableCell>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getEstadoColor(doc.estado)}`}>
+                        {formatEstado(doc.estado)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-[#6B7280]">
+                      {new Date(doc.actualizadoEn).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="ghost" onClick={() => openDoc(doc)}>
+                            <Eye className="h-4 w-4 text-[#2563EB]" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+                              <Layers className="h-7 w-7 text-[#2563EB]" />
+                              Historial de Versiones - {selectedDoc?.nombreArchivo}
+                            </DialogTitle>
+                          </DialogHeader>
+
+                          <div className="space-y-6 py-4">
+                            {/* Información básica */}
+                            <div className="bg-[#F1F5F9] rounded-xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <p className="text-sm text-[#6B7280]">Código del Documento</p>
+                                <p className="font-mono font-semibold text-gray-900">{selectedDoc?.codigoDocumento || "-"}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-[#6B7280]">Versión Actual</p>
+                                <p className="font-semibold text-gray-900">{selectedDoc?.version || "1.0"}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-[#6B7280]">Estado</p>
+                                <p className={`font-semibold ${getEstadoColor(selectedDoc?.estado || "")}`}>
+                                  {formatEstado(selectedDoc?.estado)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-[#6B7280]">Última Actualización</p>
+                                <p className="font-semibold text-gray-900">
+                                  {selectedDoc && new Date(selectedDoc.actualizadoEn).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Historial de versiones */}
+                            <div className="bg-white rounded-xl border border-[#E5E7EB]">
+                              <div className="px-6 py-4 bg-[#F1F5F9] border-b border-[#E5E7EB]">
+                                <h3 className="font-semibold text-[#1E3A8A] flex items-center gap-2">
+                                  <Clock className="h-5 w-5" />
+                                  Historial Completo de Versiones
+                                </h3>
+                              </div>
+                              <div className="p-6">
+                                {loadingVersions ? (
+                                  <div className="flex justify-center py-12">
+                                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+                                  </div>
+                                ) : selectedDoc?.versiones && selectedDoc.versiones.length > 0 ? (
+                                  <div className="space-y-4">
+                                    {selectedDoc.versiones.map((v) => (
+                                      <div key={v.id} className="border border-[#E5E7EB] rounded-lg p-4 hover:bg-[#EFF6FF] transition-colors">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <p className="font-semibold text-lg">Versión {v.versionString}</p>
+                                            <p className="text-sm text-[#6B7280] mt-1">
+                                              Subida el {new Date(v.subidoEn).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                            </p>
+                                            {v.cambios && (
+                                              <p className="text-sm text-[#6B7280] mt-2 italic">"{v.cambios}"</p>
+                                            )}
+                                          </div>
+                                          <Button size="sm" variant="outline" onClick={() => handleDownload(v.id)}>
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Descargar
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-center py-12 text-[#6B7280]">
+                                    No hay historial de versiones disponible para este documento
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
