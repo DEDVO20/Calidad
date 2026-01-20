@@ -4,7 +4,7 @@ import { DocumentFormWithTipTap } from "@/components/documents/DocumentFormWithT
 import { documentoService } from "@/services/documento.service";
 import { uploadFileToSupabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, FileText } from "lucide-react";
 
 export default function CreateDocument() {
   const navigate = useNavigate();
@@ -16,34 +16,23 @@ export default function CreateDocument() {
     try {
       setError(null);
 
-      // Check if there's a file to upload
       const file = formData.get("archivo") as File | null;
 
       if (file) {
         setUploading(true);
         toast.info("Subiendo archivo a Supabase...");
 
-        // Upload file to Supabase Storage
         const timestamp = Date.now();
-        // Sanitize filename: remove accents, special chars, replace spaces with _
         const sanitizedName = file.name
           .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "") // Remove accents
-          .replace(/[^a-zA-Z0-9.-]/g, "_"); // Replace special chars/spaces with _
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-zA-Z0-9.-]/g, "_");
 
         const filename = `${timestamp}-${sanitizedName}`;
 
-        console.log("🚀 Debug Upload:", {
-          originalName: file.name,
-          generatedFilename: filename,
-          bucket: "documentos"
-        });
+        const { url } = await uploadFileToSupabase(file, filename, "documentos");
 
-        const { url, path } = await uploadFileToSupabase(file, filename, "documentos");
-
-        // Remove file from FormData and add Supabase metadata
         formData.delete("archivo");
-        // Use set instead of append to avoid arrays if the key already exists
         formData.set("nombreArchivo", file.name);
         formData.set("rutaAlmacenamiento", url);
         formData.set("tipoMime", file.type);
@@ -59,8 +48,7 @@ export default function CreateDocument() {
       toast.success("Documento creado exitosamente");
       setTimeout(() => navigate("/documentos"), 2000);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error desconocido";
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       setError(errorMessage);
       toast.error(errorMessage);
       setUploading(false);
@@ -68,40 +56,65 @@ export default function CreateDocument() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Crear Nuevo Documento</h1>
-        <p className="text-muted-foreground mt-2">
-          Complete el formulario para crear un documento
-        </p>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <FileText className="h-9 w-9 text-[#2563EB]" />
+                Crear Nuevo Documento
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Complete el formulario para registrar un nuevo documento en el sistema de calidad ISO 9001
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mensajes de estado */}
+        {error && (
+          <div className="bg-[#FEF2F2] border border-[#EF4444] rounded-xl p-6 flex items-start gap-4 shadow-sm">
+            <AlertCircle className="h-6 w-6 text-[#EF4444] flex-shrink-0" />
+            <div>
+              <p className="font-medium text-[#991B1B]">Error</p>
+              <p className="text-[#DC2626] mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-[#ECFDF5] border border-[#22C55E] rounded-xl p-6 flex items-start gap-4 shadow-sm">
+            <CheckCircle className="h-6 w-6 text-[#22C55E] flex-shrink-0" />
+            <div>
+              <p className="font-medium text-[#166534]">Éxito</p>
+              <p className="text-[#16A34A] mt-1">{success}</p>
+              <p className="text-[#15803D] mt-2">Redirigiendo a la lista de documentos...</p>
+            </div>
+          </div>
+        )}
+
+        {uploading && (
+          <div className="bg-[#EFF6FF] border border-[#2563EB] rounded-xl p-6 flex items-start gap-4 shadow-sm">
+            <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+            <div>
+              <p className="font-medium text-[#1E40AF]">Subiendo archivo...</p>
+              <p className="text-[#2563EB] mt-1">Por favor espera mientras se carga el documento a Supabase Storage</p>
+            </div>
+          </div>
+        )}
+
+        {/* Formulario */}
+        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <DocumentFormWithTipTap
+            onSubmit={handleSubmit}
+            onCancel={() => navigate("/documentos")}
+            mode="create"
+          />
+        </div>
       </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-destructive/10 border border-destructive text-destructive rounded-md flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 mt-0.5" />
-          <p>{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500 text-green-600 rounded-md flex items-start gap-3">
-          <CheckCircle className="w-5 h-5 mt-0.5" />
-          <p>{success}</p>
-        </div>
-      )}
-
-      {uploading && (
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500 text-blue-600 rounded-md flex items-start gap-3">
-          <div className="w-5 h-5 mt-0.5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-          <p>Subiendo archivo a Supabase Storage...</p>
-        </div>
-      )}
-
-      <DocumentFormWithTipTap
-        onSubmit={handleSubmit}
-        onCancel={() => navigate("/documentos")}
-        mode="create"
-      />
     </div>
   );
 }

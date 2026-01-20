@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, CheckCircle2 } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -60,18 +60,14 @@ export default function AccionesCorrectivasVerificadas() {
     try {
       const accionesVerificadas = await accionCorrectivaService.getVerificadas();
 
-      // Transformar los datos para el DataTable (adaptando a schema)
       const transformedData = accionesVerificadas.map((ac: AccionCorrectivaAPI, index: number) => {
         let fechaFormateada = "Sin fecha";
-        
-        // Prioridad: fechaVerificacion > fechaCompromiso
-        const fechaAUsar = ac.fechaVerificacion || ac.fechaCompromiso;
-        
+        const fechaAUsar = ac.fechaVerificacion || ac.fechaImplementacion || ac.fechaCompromiso;
+
         if (fechaAUsar) {
           try {
-            // La fecha viene en formato YYYY-MM-DD, convertir a DD/MM/YYYY
-            const [anio, mes, dia] = fechaAUsar.split('-');
-            fechaFormateada = `${dia}/${mes}/${anio}`;
+            const date = new Date(fechaAUsar);
+            fechaFormateada = date.toLocaleDateString("es-CO");
           } catch (e) {
             console.error("Error al formatear fecha:", e);
           }
@@ -93,7 +89,6 @@ export default function AccionesCorrectivasVerificadas() {
       setTotal(transformedData.length);
     } catch (error) {
       console.error("Error:", error);
-      // Datos de ejemplo en caso de error
       const ejemploData: AccionCorrectiva[] = [
         {
           id: 1,
@@ -135,156 +130,182 @@ export default function AccionesCorrectivasVerificadas() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Cargando...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-gray-700">
+            Cargando acciones verificadas...
+          </p>
+        </div>
       </div>
     );
   }
 
   const correctivas = accionesCorrectivas.filter(
-    (ac) => ac.tipo === "Correctiva" || ac.tipo === "correctiva"
+    (ac) => ac.tipo.toLowerCase() === "correctiva"
   ).length;
+
   const preventivas = accionesCorrectivas.filter(
-    (ac) => ac.tipo === "Preventiva" || ac.tipo === "preventiva"
+    (ac) => ac.tipo.toLowerCase() === "preventiva"
   ).length;
+
   const mejoras = accionesCorrectivas.filter(
-    (ac) => ac.tipo === "Mejora" || ac.tipo === "mejora"
+    (ac) => ac.tipo.toLowerCase() === "mejora"
   ).length;
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <CheckCircle2 className="h-6 w-6 text-green-600" />
-            Acciones Correctivas Verificadas
-          </h1>
-          <p className="text-muted-foreground">
-            {total} acción{total !== 1 ? "es" : ""} con eficacia verificada
-          </p>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <CheckCircle2 className="h-9 w-9 text-[#22C55E]" />
+                Acciones Correctivas Verificadas
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                {total} acción{total !== 1 ? "es" : ""} con eficacia verificada y comprobada
+              </p>
+              <Badge variant="secondary" className="mt-3 bg-white text-[#22C55E]">
+                Mejora continua lograda
+              </Badge>
+            </div>
+
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium shadow-sm"
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Nueva Acción Correctiva
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl text-[#1E3A8A]">
+                    Registrar Nueva Acción Correctiva
+                  </DialogTitle>
+                </DialogHeader>
+                <NuevasAccionesCorrectivas />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Nueva Acción Correctiva
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nueva Acción Correctiva</DialogTitle>
-            </DialogHeader>
-            <NuevasAccionesCorrectivas />
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Total Verificadas</CardDescription>
-            <CardTitle className="text-3xl">{total}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-muted-foreground">
-              Eficacia comprobada
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tarjetas de métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Correctivas</CardDescription>
-            <CardTitle className="text-3xl text-orange-600">
-              {correctivas}
+          {/* Total Verificadas - Verde éxito */}
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Total Verificadas</CardTitle>
+                <CheckCircle2 className="h-8 w-8 text-[#22C55E]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{total}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Eficacia comprobada</p>
+            </CardHeader>
+          </Card>
+
+          {/* Correctivas */}
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Correctivas</CardTitle>
+                <CheckCircle2 className="h-8 w-8 text-[#F59E0B]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{correctivas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Problemas resueltos</p>
+            </CardHeader>
+          </Card>
+
+          {/* Preventivas */}
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Preventivas</CardTitle>
+                <CheckCircle2 className="h-8 w-8 text-[#2563EB]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{preventivas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Riesgos evitados</p>
+            </CardHeader>
+          </Card>
+
+          {/* Mejoras */}
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Mejoras</CardTitle>
+                <CheckCircle2 className="h-8 w-8 text-[#22C55E]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{mejoras}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Optimizaciones aplicadas</p>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Card Informativa */}
+        <Card className="shadow-sm">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A]">
+              Información de Verificación de Eficacia
             </CardTitle>
+            <CardDescription className="text-[#6B7280]">
+              Las acciones verificadas cumplen con los requisitos de ISO 9001 (Cláusula 10.2)
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-orange-50 text-orange-700 border-orange-200"
-            >
-              Verificadas
-            </Badge>
+          <CardContent className="pt-6 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#22C55E] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Eficacia Comprobada</p>
+                <p className="text-[#6B7280]">Los resultados demuestran que la acción cumplió su objetivo sin recurrencia</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#2563EB] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Verificación Formal</p>
+                <p className="text-[#6B7280]">Validación por personal competente con evidencias documentadas</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#4B5563] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Conformidad ISO 9001</p>
+                <p className="text-[#6B7280]">Cumplimiento completo de requisitos de acciones correctivas</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#F59E0B] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Base para Mejora Continua</p>
+                <p className="text-[#6B7280]">Datos valiosos para análisis de tendencias y revisión por la dirección</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Preventivas</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">
-              {preventivas}
+        {/* Tabla */}
+        <Card className="shadow-sm overflow-hidden">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+              <CheckCircle2 className="h-7 w-7 text-[#22C55E]" />
+              Listado de Acciones Verificadas
             </CardTitle>
+            <CardDescription className="text-[#6B7280]">
+              Registro completo de acciones correctivas, preventivas y de mejora con eficacia confirmada
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-blue-50 text-blue-700 border-blue-200"
-            >
-              Verificadas
-            </Badge>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <DataTable data={accionesCorrectivas} />
+            </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Mejoras</CardDescription>
-            <CardTitle className="text-3xl text-green-600">
-              {mejoras}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-green-50 text-green-700 border-green-200"
-            >
-              Verificadas
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Información de Verificación</CardTitle>
-          <CardDescription>
-            Las acciones correctivas verificadas cumplen con:
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Eficacia Comprobada:</span> Los
-              resultados demuestran que la acción cumplió su objetivo
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Verificación Formal:</span>{" "}
-              Validación por personal autorizado con evidencias
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Conformidad ISO 9001:</span>{" "}
-              Cumplimiento de requisitos según Cláusula 10.2
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-yellow-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Mejora Continua:</span> Base para
-              análisis de eficacia del SGC
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="rounded-xl border bg-card">
-        <DataTable data={accionesCorrectivas} />
       </div>
     </div>
   );

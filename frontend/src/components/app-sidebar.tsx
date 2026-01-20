@@ -176,15 +176,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Mapa de Procesos",
-            url: "/procesos/MapaProcesos",
+            url: "/procesos/mapa",
+          },
+          {
+            title: "Diagrama",
+            url: "/procesos/diagrama",
           },
           {
             title: "Gestionar Procesos",
-            url: "/procesos/GestionarProcesos",
+            url: "/procesos/gestionar",
           },
           {
             title: "Instancias Activas",
-            url: "/procesos/InstanciasActivas",
+            url: "/procesos/instancias",
           },
         ],
       },

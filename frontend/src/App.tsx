@@ -59,6 +59,10 @@ import ReportesView from "./pages/reportes";
 import MatrizRiesgos from "./pages/riesgos/matriz";
 import ControlesRiesgos from "./pages/riesgos/controles";
 import TratamientoRiesgos from "./pages/riesgos/tratamiento";
+import GestionarProcesos from "./pages/procesos/GestionarProcesos";
+import MapaProcesos from "./pages/procesos/MapaProcesos";
+import InstanciasActivas from "./pages/procesos/InstanciasActivas";
+import MapaProcesosDiagrama from "./pages/procesos/MapaProcesosDiagrama";
 
 import { ProtectedLayout } from "./components/ProtectedLayout";
 import { AuthProvider } from "./context/AuthContext";
@@ -146,6 +150,11 @@ function App() {
             <Route path="/riesgos/matriz" element={<MatrizRiesgos />} />
             <Route path="/riesgos/controles" element={<ControlesRiesgos />} />
             <Route path="/riesgos/tratamiento" element={<TratamientoRiesgos />} />
+            {/* Procesos */}
+            <Route path="/procesos/gestionar" element={<GestionarProcesos />} />
+            <Route path="/procesos/mapa" element={<MapaProcesos />} />
+            <Route path="/procesos/instancias" element={<InstanciasActivas />} />
+            <Route path="/procesos/diagrama" element={<MapaProcesosDiagrama />} />
           </Route>
 
           {/* Catch-all */}

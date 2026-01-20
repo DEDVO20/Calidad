@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, CheckCircle } from "lucide-react";
+import { Plus, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -58,14 +58,13 @@ export default function AccionesCorrectivasCerradas() {
     try {
       const accionesCerradas = await accionCorrectivaService.getCerradas();
 
-      // Transformar los datos para el DataTable
       const transformedData = accionesCerradas.map((ac: AccionCorrectivaAPI, index: number) => {
         let fechaFormateada = "Sin fecha";
-        if (ac.fechaCompromiso) {
+        if (ac.fechaCompromiso || ac.fechaImplementacion) {
+          const fechaAUsar = ac.fechaImplementacion || ac.fechaCompromiso;
           try {
-            // La fecha viene en formato YYYY-MM-DD, convertir a DD/MM/YYYY
-            const [anio, mes, dia] = ac.fechaCompromiso.split('-');
-            fechaFormateada = `${dia}/${mes}/${anio}`;
+            const date = new Date(fechaAUsar!);
+            fechaFormateada = date.toLocaleDateString("es-CO");
           } catch (e) {
             console.error("Error al formatear fecha:", e);
           }
@@ -87,7 +86,6 @@ export default function AccionesCorrectivasCerradas() {
       setTotal(transformedData.length);
     } catch (error) {
       console.error("Error:", error);
-      // Datos de ejemplo en caso de error
       const ejemploData: AccionCorrectiva[] = [
         {
           id: 1,
@@ -119,149 +117,175 @@ export default function AccionesCorrectivasCerradas() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Cargando...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-gray-700">
+            Cargando acciones cerradas...
+          </p>
+        </div>
       </div>
     );
   }
 
   const correctivas = accionesCorrectivas.filter(
-    (ac) => ac.tipo === "Correctiva" || ac.tipo === "correctiva"
+    (ac) => ac.tipo.toLowerCase() === "correctiva"
   ).length;
+
   const preventivas = accionesCorrectivas.filter(
-    (ac) => ac.tipo === "Preventiva" || ac.tipo === "preventiva"
+    (ac) => ac.tipo.toLowerCase() === "preventiva"
   ).length;
+
   const verificadas = accionesCorrectivas.filter(
     (ac) => ac.gravedad === "Verificada"
   ).length;
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <CheckCircle className="h-6 w-6 text-green-500" />
-            Acciones Correctivas Cerradas
-          </h1>
-          <p className="text-muted-foreground">
-            {total} acción{total !== 1 ? "es" : ""} completamente implementada{total !== 1 ? "s" : ""}
-          </p>
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <CheckCircle className="h-9 w-9 text-[#22C55E]" />
+                Acciones Correctivas Cerradas
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                {total} acción{total !== 1 ? "es" : ""} completamente implementada{total !== 1 ? "s" : ""}
+              </p>
+              <Badge variant="secondary" className="mt-3 bg-white text-[#22C55E]">
+                Ciclo completado
+              </Badge>
+            </div>
+
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-medium shadow-sm"
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Nueva Acción Correctiva
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl text-[#1E3A8A]">
+                    Registrar Nueva Acción Correctiva
+                  </DialogTitle>
+                </DialogHeader>
+                <NuevasAccionesCorrectivas />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Nueva Acción Correctiva
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Nueva Acción Correctiva</DialogTitle>
-            </DialogHeader>
-            <NuevasAccionesCorrectivas />
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Total Cerradas</CardDescription>
-            <CardTitle className="text-3xl">{total}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-muted-foreground">
-              Acciones completadas
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tarjetas de métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Correctivas</CardDescription>
-            <CardTitle className="text-3xl text-orange-600">
-              {correctivas}
+          {/* Total Cerradas */}
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Total Cerradas</CardTitle>
+                <CheckCircle className="h-8 w-8 text-[#2563EB]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{total}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Implementación finalizada</p>
+            </CardHeader>
+          </Card>
+
+          {/* Correctivas */}
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Correctivas</CardTitle>
+                <CheckCircle className="h-8 w-8 text-[#F59E0B]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{correctivas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Problemas corregidos</p>
+            </CardHeader>
+          </Card>
+
+          {/* Preventivas */}
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Preventivas</CardTitle>
+                <CheckCircle className="h-8 w-8 text-[#2563EB]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{preventivas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Riesgos evitados</p>
+            </CardHeader>
+          </Card>
+
+          {/* Eficacia Verificada */}
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Eficacia Verificada</CardTitle>
+                <CheckCircle className="h-8 w-8 text-[#22C55E]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{verificadas}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Resultados comprobados</p>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Card Informativa */}
+        <Card className="shadow-sm">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A]">
+              Información de Registro
             </CardTitle>
+            <CardDescription className="text-[#6B7280]">
+              Las acciones correctivas cerradas representan el cierre completo del ciclo correctivo
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-orange-50 text-orange-700 border-orange-200"
-            >
-              Corrección
-            </Badge>
+          <CardContent className="pt-6 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#22C55E] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Implementación Completa</p>
+                <p className="text-[#6B7280]">Todas las actividades planificadas fueron ejecutadas según lo establecido</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#2563EB] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Documentación Completa</p>
+                <p className="text-[#6B7280]">Registro detallado de ejecución, resultados y evidencias</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="h-4 w-4 rounded-full bg-[#4B5563] mt-1 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-900">Historial para Análisis</p>
+                <p className="text-[#6B7280]">Disponibles para revisión de tendencias y mejora continua del SGC</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Preventivas</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">
-              {preventivas}
+        {/* Tabla */}
+        <Card className="shadow-sm overflow-hidden">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+              <CheckCircle className="h-7 w-7 text-[#22C55E]" />
+              Listado de Acciones Cerradas
             </CardTitle>
+            <CardDescription className="text-[#6B7280]">
+              Registro histórico de acciones correctivas, preventivas y de mejora finalizadas
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-blue-50 text-blue-700 border-blue-200"
-            >
-              Prevención
-            </Badge>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <DataTable data={accionesCorrectivas} />
+            </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Eficacia Verificada</CardDescription>
-            <CardTitle className="text-3xl text-green-600">
-              {verificadas}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-green-50 text-green-700 border-green-200"
-            >
-              Verificadas
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Información de Registro</CardTitle>
-          <CardDescription>
-            Las acciones correctivas cerradas son aquellas que:
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Implementadas:</span> Todas las
-              acciones planificadas fueron ejecutadas según lo programado
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Documentadas:</span> Registro
-              completo de implementación y resultados
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5" />
-            <div>
-              <span className="font-medium">Historial:</span> Disponibles para
-              análisis de mejora continua
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="rounded-xl border bg-card">
-        <DataTable data={accionesCorrectivas} />
       </div>
     </div>
   );

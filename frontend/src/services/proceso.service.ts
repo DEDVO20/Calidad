@@ -5,6 +5,9 @@ export interface Proceso {
   codigo: string;
   nombre: string;
   descripcion?: string;
+  inicio?: string; // punto o etapa donde inicia el proceso
+  fechaInicio?: string; // fecha en que inicia o aplica el proceso
+  sitio?: string; // sitio o ubicación asociada al proceso
   tipo?: string;
   objetivo?: string;
   alcance?: string;
@@ -17,6 +20,23 @@ export interface Proceso {
     nombre: string;
     primerApellido: string;
   };
+  // Nuevos campos para gestión avanzada
+  responsableNombre?: string;
+  etapas?: Array<{
+    id?: string;
+    nombre: string;
+    descripcion?: string;
+    responsableId?: string;
+    responsableNombre?: string;
+    orden?: number;
+  }>;
+  puntosControl?: Array<{
+    id?: string;
+    nombre: string;
+    criterio?: string;
+    frecuencia?: string;
+    indicadorId?: string;
+  }>;
 }
 
 const getAuthHeaders = () => {

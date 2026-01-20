@@ -13,11 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search,
-  X,
-  Edit,
-  Trash2,
-  Eye,
-  Users,
   RefreshCw,
   Plus,
   FileSpreadsheet,
@@ -25,7 +20,10 @@ import {
   UserX,
   Building2,
   Mail,
-  Shield,
+  Users,
+  Eye,
+  Edit,
+  Trash2,
   CheckCircle,
   XCircle,
 } from "lucide-react";
@@ -40,12 +38,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface Usuario {
   id: string;
@@ -95,24 +87,18 @@ export default function ListaUsuarios() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
       const response = await fetch("/api/usuarios", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error("Error al obtener usuarios");
-      }
+      if (!response.ok) throw new Error("Error al obtener usuarios");
 
       const data = await response.json();
       setUsuarios(Array.isArray(data) ? data : []);
       setTotal(Array.isArray(data) ? data.length : 0);
     } catch (error) {
       console.error("Error:", error);
-
-      // Datos de ejemplo para desarrollo
+      // Datos de ejemplo
       const ejemploData: Usuario[] = [
         {
           id: "1",
@@ -124,11 +110,7 @@ export default function ListaUsuarios() {
           correoElectronico: "juan.perez@sgc.com",
           nombreUsuario: "jperez",
           activo: true,
-          area: {
-            id: "a1",
-            codigo: "CAL",
-            nombre: "Gestión de Calidad",
-          },
+          area: { id: "a1", codigo: "CAL", nombre: "Gestión de Calidad" },
           creadoEn: "2024-01-15T10:30:00",
           actualizadoEn: "2024-10-20T14:20:00",
         },
@@ -141,11 +123,7 @@ export default function ListaUsuarios() {
           correoElectronico: "maria.gonzalez@sgc.com",
           nombreUsuario: "mgonzalez",
           activo: true,
-          area: {
-            id: "a2",
-            codigo: "RRHH",
-            nombre: "Recursos Humanos",
-          },
+          area: { id: "a2", codigo: "RRHH", nombre: "Recursos Humanos" },
           creadoEn: "2024-02-20T09:15:00",
           actualizadoEn: "2024-10-18T11:45:00",
         },
@@ -157,11 +135,7 @@ export default function ListaUsuarios() {
           correoElectronico: "carlos.rodriguez@sgc.com",
           nombreUsuario: "crodriguez",
           activo: false,
-          area: {
-            id: "a3",
-            codigo: "SIS",
-            nombre: "Sistemas y Tecnología",
-          },
+          area: { id: "a3", codigo: "SIS", nombre: "Sistemas y Tecnología" },
           creadoEn: "2024-03-10T16:00:00",
           actualizadoEn: "2024-09-25T08:30:00",
         },
@@ -176,7 +150,6 @@ export default function ListaUsuarios() {
   const filtrarUsuarios = () => {
     let resultado = [...usuarios];
 
-    // Filtrar por búsqueda
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       resultado = resultado.filter(
@@ -186,16 +159,13 @@ export default function ListaUsuarios() {
           user.correoElectronico.toLowerCase().includes(term) ||
           user.nombreUsuario.toLowerCase().includes(term) ||
           user.documento.toString().includes(term) ||
-          user.area?.nombre.toLowerCase().includes(term),
+          user.area?.nombre.toLowerCase().includes(term) ||
+          user.area?.codigo.toLowerCase().includes(term)
       );
     }
 
-    // Filtrar por estado
-    if (filtroEstado === "activos") {
-      resultado = resultado.filter((user) => user.activo);
-    } else if (filtroEstado === "inactivos") {
-      resultado = resultado.filter((user) => !user.activo);
-    }
+    if (filtroEstado === "activos") resultado = resultado.filter((u) => u.activo);
+    if (filtroEstado === "inactivos") resultado = resultado.filter((u) => !u.activo);
 
     setUsuariosFiltrados(resultado);
   };
@@ -216,71 +186,50 @@ export default function ListaUsuarios() {
       const token = localStorage.getItem("token");
       const response = await fetch(`/api/usuarios/${usuario.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error("Error al eliminar usuario");
-      }
+      if (!response.ok) throw new Error("Error al eliminar usuario");
 
-      toast.success(`Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
+      toast.success(`Usuario "${usuario.nombreUsuario}" eliminado`);
       await fetchUsuarios();
       closeDialog();
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Error al eliminar el usuario. Por favor intente nuevamente.");
+      toast.error("Error al eliminar el usuario");
     }
   };
 
   const handleToggleEstado = async (id: string, nuevoEstado: boolean) => {
+    setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: nuevoEstado } : u));
+
     try {
       const token = localStorage.getItem("token");
-
-      // Actualización optimista en la UI
-      setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: nuevoEstado } : u));
-
       const response = await fetch(`/api/usuarios/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ activo: nuevoEstado }),
       });
 
-      if (!response.ok) {
-        throw new Error("Error al actualizar estado");
-      }
+      if (!response.ok) throw new Error("Error al actualizar estado");
 
-      const action = nuevoEstado ? "activado" : "desactivado";
-      toast.success(`Usuario ${action} correctamente`);
-
+      toast.success(`Usuario ${nuevoEstado ? "activado" : "desactivado"}`);
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Error al cambiar el estado. Revertiendo...");
-      // Revertir cambio en UI si falla
+      toast.error("Error al cambiar el estado");
       setUsuarios(prev => prev.map(u => u.id === id ? { ...u, activo: !nuevoEstado } : u));
     }
   };
 
   const getNombreCompleto = (usuario: Usuario) => {
-    const partes = [
-      usuario.nombre,
-      usuario.segundoNombre,
-      usuario.primerApellido,
-      usuario.segundoApellido,
-    ].filter(Boolean);
+    const partes = [usuario.nombre, usuario.segundoNombre, usuario.primerApellido, usuario.segundoApellido].filter(Boolean);
     return partes.join(" ");
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto text-blue-500" />
-          <p className="text-gray-600">Cargando usuarios...</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FA]">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-[#2563EB] border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-[#6B7280]">Cargando usuarios...</p>
         </div>
       </div>
     );
@@ -290,139 +239,106 @@ export default function ListaUsuarios() {
   const usuariosInactivos = usuarios.filter((u) => !u.activo).length;
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 pt-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Users className="h-7 w-7 text-blue-600" />
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <Users className="h-9 w-9 text-[#2563EB]" />
+                Gestión de Usuarios
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Administra usuarios, roles y permisos del sistema de calidad ISO 9001
+              </p>
             </div>
-            Gestión de Usuarios
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Administra usuarios, roles y permisos del sistema
-          </p>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => navigate("/usuarios/importar")}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Importar Usuarios
+              </Button>
+              <Button
+                onClick={() => navigate("/NuevoUsuario")}
+                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Nuevo Usuario
+              </Button>
+              <Button variant="outline" onClick={fetchUsuarios} disabled={loading}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                Actualizar
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={() => navigate("/usuarios/importar")}
-            variant="outline"
-            className="hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200"
-          >
-            <FileSpreadsheet className="w-4 h-4 mr-2" />
-            Importar Usuarios
-          </Button>
-          <Button
-            onClick={() => navigate("/NuevoUsuario")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Usuario
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchUsuarios}
-            disabled={loading}
-          >
-            <RefreshCw
-              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            />
-            Actualizar
-          </Button>
+
+        {/* Tarjetas de métricas - Fondos pastel */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Total Usuarios</CardTitle>
+                <Users className="h-8 w-8 text-[#2563EB]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{total}</div>
+              <p className="text-[#6B7280] text-sm mt-1">Registrados en el sistema</p>
+            </CardHeader>
+          </Card>
+
+          <Card className="bg-[#ECFDF5] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Usuarios Activos</CardTitle>
+                <UserCheck className="h-8 w-8 text-[#22C55E]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{usuariosActivos}</div>
+              <p className="text-[#6B7280] text-sm mt-1">
+                {total > 0 ? `${Math.round((usuariosActivos / total) * 100)}% del total` : "0%"}
+              </p>
+            </CardHeader>
+          </Card>
+
+          <Card className="bg-[#FFF7ED] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Usuarios Inactivos</CardTitle>
+                <UserX className="h-8 w-8 text-[#F59E0B]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">{usuariosInactivos}</div>
+              <p className="text-[#6B7280] text-sm mt-1">
+                {total > 0 ? `${Math.round((usuariosInactivos / total) * 100)}% del total` : "0%"}
+              </p>
+            </CardHeader>
+          </Card>
+
+          <Card className="bg-[#E0EDFF] border border-[#E5E7EB] shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[#1E3A8A]">Con Área Asignada</CardTitle>
+                <Building2 className="h-8 w-8 text-[#2563EB]" />
+              </div>
+              <div className="text-4xl font-bold text-[#1E3A8A] mt-4">
+                {usuarios.filter(u => u.area).length}
+              </div>
+              <p className="text-[#6B7280] text-sm mt-1">Usuarios vinculados a un área</p>
+            </CardHeader>
+          </Card>
         </div>
-      </div>
 
-      {/* Tarjetas de resumen */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <CardDescription className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Total Usuarios
-            </CardDescription>
-            <CardTitle className="text-4xl font-bold">{total}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-gray-600">Registrados en el sistema</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-md transition-shadow border-green-100">
-          <CardHeader className="pb-3">
-            <CardDescription className="flex items-center gap-2 text-green-600">
-              <UserCheck className="w-4 h-4" />
-              Usuarios Activos
-            </CardDescription>
-            <CardTitle className="text-4xl font-bold text-green-600">
-              {usuariosActivos}
+        {/* Búsqueda y filtros */}
+        <Card className="shadow-sm">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-xl text-[#1E3A8A] flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Búsqueda y Filtros
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-green-50 text-green-700 border-green-200"
-            >
-              {((usuariosActivos / total) * 100 || 0).toFixed(0)}% del total
-            </Badge>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-md transition-shadow border-red-100">
-          <CardHeader className="pb-3">
-            <CardDescription className="flex items-center gap-2 text-red-600">
-              <UserX className="w-4 h-4" />
-              Usuarios Inactivos
-            </CardDescription>
-            <CardTitle className="text-4xl font-bold text-red-600">
-              {usuariosInactivos}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-red-50 text-red-700 border-red-200"
-            >
-              {((usuariosInactivos / total) * 100 || 0).toFixed(0)}% del total
-            </Badge>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-md transition-shadow border-purple-100">
-          <CardHeader className="pb-3">
-            <CardDescription className="flex items-center gap-2 text-purple-600">
-              <Shield className="w-4 h-4" />
-              Con Roles
-            </CardDescription>
-            <CardTitle className="text-4xl font-bold text-purple-600">
-              {total}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge
-              variant="outline"
-              className="bg-purple-50 text-purple-700 border-purple-200"
-            >
-              Roles asignados
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Barra de búsqueda y filtros */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Search className="w-4 h-4" />
-            Búsqueda y Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-5 w-5 text-[#6B7280]" />
                 <Input
                   placeholder="Buscar por nombre, usuario, email, documento o área..."
                   value={searchTerm}
@@ -430,366 +346,215 @@ export default function ListaUsuarios() {
                   className="pl-10"
                 />
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={filtroEstado === "todos" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFiltroEstado("todos")}
-              >
-                Todos
-              </Button>
-              <Button
-                variant={filtroEstado === "activos" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFiltroEstado("activos")}
-                className={
-                  filtroEstado === "activos"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : ""
-                }
-              >
-                <UserCheck className="w-4 h-4 mr-1" />
-                Activos
-              </Button>
-              <Button
-                variant={filtroEstado === "inactivos" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFiltroEstado("inactivos")}
-                className={
-                  filtroEstado === "inactivos"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : ""
-                }
-              >
-                <UserX className="w-4 h-4 mr-1" />
-                Inactivos
-              </Button>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600">
-            Mostrando {usuariosFiltrados.length} de {total} usuarios
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Tabla de usuarios */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b bg-gray-50">
-              <tr>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Usuario
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Documento
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Área
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Contacto
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Estado
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-semibold text-gray-700 text-sm">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuariosFiltrados.map((usuario) => (
-                <tr
-                  key={usuario.id}
-                  className="border-b transition-colors hover:bg-gray-50"
+              <div className="flex gap-2">
+                <Button
+                  variant={filtroEstado === "todos" ? "default" : "outline"}
+                  onClick={() => setFiltroEstado("todos")}
+                  className={filtroEstado === "todos" ? "bg-[#2563EB] hover:bg-[#1D4ED8]" : ""}
                 >
-                  <td className="p-4 align-middle">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
-                        {usuario.nombre.charAt(0)}
-                        {usuario.primerApellido.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-medium">
-                          {getNombreCompleto(usuario)}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          @{usuario.nombreUsuario}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 align-middle">
-                    <span className="font-mono text-sm">
-                      {usuario.documento.toLocaleString()}
-                    </span>
-                  </td>
-                  <td className="p-4 align-middle">
-                    {usuario.area ? (
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-gray-400" />
-                        <div>
-                          <div className="font-medium text-sm">
-                            {usuario.area.nombre}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {usuario.area.codigo}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">Sin área</span>
-                    )}
-                  </td>
-                  <td className="p-4 align-middle">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="w-3 h-3 text-gray-400" />
-                        <span className="text-gray-700">
-                          {usuario.correoElectronico}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 align-middle">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={usuario.activo}
-                        onCheckedChange={(checked) => handleToggleEstado(usuario.id, checked)}
-                        className={usuario.activo ? "data-[state=checked]:bg-green-600" : "data-[state=checked]:bg-gray-200"}
-                      />
-                      <span className={`text-sm ${usuario.activo ? "text-green-700 font-medium" : "text-gray-500"}`}>
-                        {usuario.activo ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4 align-middle">
-                    <div className="flex gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
-                              onClick={() => openDialog("ver", usuario)}
-                            >
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Ver detalles</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200"
-                              onClick={() => navigate(`/usuarios/${usuario.id}/editar`)}
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Editar usuario</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                              onClick={() => openDialog("eliminar", usuario)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Eliminar usuario</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {usuariosFiltrados.length === 0 && (
-            <div className="text-center py-16">
-              <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">
-                No se encontraron usuarios
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {searchTerm
-                  ? `No hay usuarios que coincidan con "${searchTerm}"`
-                  : "No hay usuarios registrados en el sistema"}
-              </p>
-              {searchTerm && (
-                <Button variant="outline" onClick={() => setSearchTerm("")}>
-                  Limpiar búsqueda
+                  Todos
                 </Button>
-              )}
+                <Button
+                  variant={filtroEstado === "activos" ? "default" : "outline"}
+                  onClick={() => setFiltroEstado("activos")}
+                  className={filtroEstado === "activos" ? "bg-[#22C55E] hover:bg-green-700" : ""}
+                >
+                  <UserCheck className="mr-1 h-4 w-4" />
+                  Activos
+                </Button>
+                <Button
+                  variant={filtroEstado === "inactivos" ? "default" : "outline"}
+                  onClick={() => setFiltroEstado("inactivos")}
+                  className={filtroEstado === "inactivos" ? "bg-[#EF4444] hover:bg-red-700" : ""}
+                >
+                  <UserX className="mr-1 h-4 w-4" />
+                  Inactivos
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
-      </Card>
+            <p className="text-sm text-[#6B7280] mt-4">
+              Mostrando {usuariosFiltrados.length} de {total} usuarios
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Dialog de detalles */}
-      <AlertDialog
-        open={dialogState.open && dialogState.type === "ver"}
-        onOpenChange={closeDialog}
-      >
-        <AlertDialogContent className="max-w-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-blue-600" />
-              Detalles del Usuario
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {dialogState.usuario && (
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-2xl">
-                      {dialogState.usuario.nombre.charAt(0)}
-                      {dialogState.usuario.primerApellido.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {getNombreCompleto(dialogState.usuario)}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        @{dialogState.usuario.nombreUsuario}
-                      </p>
-                    </div>
-                    <div className="ml-auto">
-                      {dialogState.usuario.activo ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Activo
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-100 text-red-800 border-red-200">
-                          <XCircle className="w-3 h-3 mr-1" />
-                          Inactivo
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Documento</p>
-                      <p className="font-mono font-semibold text-gray-900">
-                        {dialogState.usuario.documento.toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">
-                        Correo Electrónico
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {dialogState.usuario.correoElectronico}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Área</p>
-                      <p className="text-sm font-medium text-gray-900">
-                        {dialogState.usuario.area?.nombre || "Sin área"}
-                      </p>
-                      {dialogState.usuario.area && (
-                        <p className="text-xs text-gray-600">
-                          {dialogState.usuario.area.codigo}
+        {/* Tabla de usuarios */}
+        <Card className="shadow-sm overflow-hidden">
+          <CardHeader className="bg-[#F1F5F9]">
+            <CardTitle className="text-2xl text-[#1E3A8A]">Listado de Usuarios</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#F1F5F9] border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Usuario</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Documento</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Área</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Contacto</th>
+                    <th className="text-left p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider">Estado</th>
+                    <th className="text-right p-6 text-sm font-semibold text-[#1E3A8A] uppercase tracking-wider pr-10">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-[#E5E7EB]">
+                  {usuariosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-16 text-[#6B7280]">
+                        <Users className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                        <p className="text-lg font-medium">
+                          {searchTerm ? `No se encontraron resultados para "${searchTerm}"` : "No hay usuarios registrados"}
                         </p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">
-                        Fecha de Registro
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {new Date(
-                          dialogState.usuario.creadoEn,
-                        ).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
+                        {searchTerm && (
+                          <Button variant="outline" onClick={() => setSearchTerm("")} className="mt-4">
+                            Limpiar búsqueda
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ) : (
+                    usuariosFiltrados.map((usuario) => (
+                      <tr key={usuario.id} className="hover:bg-[#EFF6FF] transition-colors">
+                        <td className="p-6">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-[#2563EB] flex items-center justify-center text-white font-bold">
+                              {usuario.nombre.charAt(0).toUpperCase()}
+                              {usuario.primerApellido.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">{getNombreCompleto(usuario)}</div>
+                              <div className="text-sm text-[#6B7280]">@{usuario.nombreUsuario}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-6 text-[#6B7280] font-mono">{usuario.documento.toLocaleString()}</td>
+                        <td className="p-6">
+                          {usuario.area ? (
+                            <div>
+                              <div className="font-medium text-gray-900">{usuario.area.nombre}</div>
+                              <div className="text-sm text-[#6B7280]">[{usuario.area.codigo}]</div>
+                            </div>
+                          ) : (
+                            <span className="text-[#6B7280] italic">Sin área</span>
+                          )}
+                        </td>
+                        <td className="p-6 text-[#6B7280]">{usuario.correoElectronico}</td>
+                        <td className="p-6">
+                          <div className="flex items-center gap-3">
+                            <Switch
+                              checked={usuario.activo}
+                              onCheckedChange={(checked) => handleToggleEstado(usuario.id, checked)}
+                            />
+                            <span className={usuario.activo ? "text-[#22C55E] font-medium" : "text-[#6B7280]"}>
+                              {usuario.activo ? "Activo" : "Inactivo"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-6">
+                          <div className="flex items-center justify-end gap-3">
+                            <Button size="sm" variant="ghost" onClick={() => openDialog("ver", usuario)}>
+                              <Eye className="h-4 w-4 text-[#2563EB]" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => navigate(`/usuarios/${usuario.id}/editar`)}>
+                              <Edit className="h-4 w-4 text-[#4B5563]" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => openDialog("eliminar", usuario)}>
+                              <Trash2 className="h-4 w-4 text-[#EF4444]" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Dialog Ver Detalles */}
+        <AlertDialog open={dialogState.open && dialogState.type === "ver"} onOpenChange={closeDialog}>
+          <AlertDialogContent className="sm:max-w-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+                <Eye className="h-7 w-7 text-[#2563EB]" />
+                Detalles del Usuario
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            {dialogState.usuario && (
+              <div className="space-y-6 py-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-2xl font-bold">
+                    {dialogState.usuario.nombre.charAt(0).toUpperCase()}
+                    {dialogState.usuario.primerApellido.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">{getNombreCompleto(dialogState.usuario)}</h3>
+                    <p className="text-[#6B7280]">@{dialogState.usuario.nombreUsuario}</p>
+                  </div>
+                  <Badge className={dialogState.usuario.activo ? "bg-[#ECFDF5] text-[#22C55E]" : "bg-gray-100 text-gray-600"}>
+                    {dialogState.usuario.activo ? "Activo" : "Inactivo"}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#F1F5F9] rounded-lg p-6">
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Documento</p>
+                    <p className="font-mono font-semibold">{dialogState.usuario.documento.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Correo Electrónico</p>
+                    <p className="font-medium">{dialogState.usuario.correoElectronico}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Área</p>
+                    <p className="font-medium">
+                      {dialogState.usuario.area ? `${dialogState.usuario.area.nombre} [${dialogState.usuario.area.codigo}]` : "Sin área"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#6B7280]">Fecha de Registro</p>
+                    <p className="font-medium">
+                      {new Date(dialogState.usuario.creadoEn).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })}
+                    </p>
                   </div>
                 </div>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cerrar</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              </div>
+            )}
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cerrar</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      {/* Dialog de eliminación */}
-      <AlertDialog
-        open={dialogState.open && dialogState.type === "eliminar"}
-        onOpenChange={closeDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-600" />
-              ¿Eliminar usuario?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              {dialogState.usuario && (
-                <>
-                  <div className="bg-gray-50 p-3 rounded-lg space-y-1">
-                    <p className="font-semibold text-gray-900">
-                      {getNombreCompleto(dialogState.usuario)}
+        {/* Dialog Eliminar */}
+        <AlertDialog open={dialogState.open && dialogState.type === "eliminar"} onOpenChange={closeDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-[#1E3A8A]">¿Eliminar usuario?</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-4">
+                {dialogState.usuario && (
+                  <>
+                    <div className="bg-[#F1F5F9] p-4 rounded-lg">
+                      <p className="font-semibold text-gray-900">{getNombreCompleto(dialogState.usuario)}</p>
+                      <p className="text-sm text-[#6B7280]">@{dialogState.usuario.nombreUsuario}</p>
+                      <p className="text-sm text-[#6B7280]">Documento: {dialogState.usuario.documento}</p>
+                    </div>
+                    <p className="text-[#EF4444] font-medium">
+                      Esta acción es permanente y no se puede deshacer.
                     </p>
-                    <p className="text-sm text-gray-600">
-                      Usuario: @{dialogState.usuario.nombreUsuario}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Documento: {dialogState.usuario.documento}
-                    </p>
-                  </div>
-                  <p className="text-red-600 font-medium">
-                    ⚠️ Esta acción eliminará permanentemente el usuario del
-                    sistema.
-                  </p>
-                  <p className="text-sm">
-                    El usuario ya no podrá acceder al sistema y toda su
-                    información será eliminada.
-                  </p>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleEliminar}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar Usuario
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleEliminar} className="bg-[#EF4444] hover:bg-red-700">
+                Eliminar Usuario
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }

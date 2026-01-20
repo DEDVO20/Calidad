@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   UserPlus,
   ArrowLeft,
@@ -85,9 +86,7 @@ export default function NuevosUsuarios() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("/api/areas", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -111,9 +110,7 @@ export default function NuevosUsuarios() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("/api/roles", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -151,52 +148,28 @@ export default function NuevosUsuarios() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.documento.trim()) {
-      newErrors.documento = "El documento es obligatorio";
-    } else if (!/^\d+$/.test(formData.documento)) {
-      newErrors.documento = "El documento debe contener solo números";
-    }
+    if (!formData.documento.trim()) newErrors.documento = "El documento es obligatorio";
+    else if (!/^\d+$/.test(formData.documento)) newErrors.documento = "El documento debe contener solo números";
 
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es obligatorio";
-    }
+    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio";
+    if (!formData.primerApellido.trim()) newErrors.primerApellido = "El primer apellido es obligatorio";
 
-    if (!formData.primerApellido.trim()) {
-      newErrors.primerApellido = "El primer apellido es obligatorio";
-    }
-
-    if (!formData.correoElectronico.trim()) {
-      newErrors.correoElectronico = "El correo electrónico es obligatorio";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correoElectronico)) {
+    if (!formData.correoElectronico.trim()) newErrors.correoElectronico = "El correo electrónico es obligatorio";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correoElectronico))
       newErrors.correoElectronico = "El correo electrónico no es válido";
-    }
 
-    if (!formData.nombreUsuario.trim()) {
-      newErrors.nombreUsuario = "El nombre de usuario es obligatorio";
-    } else if (formData.nombreUsuario.length < 3) {
-      newErrors.nombreUsuario = "El nombre de usuario debe tener al menos 3 caracteres";
-    }
+    if (!formData.nombreUsuario.trim()) newErrors.nombreUsuario = "El nombre de usuario es obligatorio";
+    else if (formData.nombreUsuario.length < 3) newErrors.nombreUsuario = "El nombre de usuario debe tener al menos 3 caracteres";
 
-    if (!formData.contrasena) {
-      newErrors.contrasena = "La contraseña es obligatoria";
-    } else if (formData.contrasena.length < 6) {
-      newErrors.contrasena = "La contraseña debe tener al menos 6 caracteres";
-    }
+    if (!formData.contrasena) newErrors.contrasena = "La contraseña es obligatoria";
+    else if (formData.contrasena.length < 6) newErrors.contrasena = "La contraseña debe tener al menos 6 caracteres";
 
-    if (!formData.confirmarContrasena) {
-      newErrors.confirmarContrasena = "Debe confirmar la contraseña";
-    } else if (formData.contrasena !== formData.confirmarContrasena) {
+    if (!formData.confirmarContrasena) newErrors.confirmarContrasena = "Debe confirmar la contraseña";
+    else if (formData.contrasena !== formData.confirmarContrasena)
       newErrors.confirmarContrasena = "Las contraseñas no coinciden";
-    }
 
-    if (!formData.areaId) {
-      newErrors.areaId = "Debe seleccionar un área";
-    }
-
-    // Validar roles
-    if (selectedRoleIds.length === 0) {
-      newErrors.roles = "Debe seleccionar al menos un rol";
-    }
+    if (!formData.areaId) newErrors.areaId = "Debe seleccionar un área";
+    if (selectedRoleIds.length === 0) newErrors.roles = "Debe seleccionar al menos un rol";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -204,16 +177,11 @@ export default function NuevosUsuarios() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
-
     try {
       const token = localStorage.getItem("token");
-
       const dataToSend = {
         documento: parseInt(formData.documento, 10),
         nombre: formData.nombre.trim(),
@@ -225,7 +193,7 @@ export default function NuevosUsuarios() {
         contrasena: formData.contrasena,
         areaId: formData.areaId,
         activo: formData.activo,
-        rolIds: selectedRoleIds, // Enviar roles
+        rolIds: selectedRoleIds,
       };
 
       const response = await fetch("/api/usuarios", {
@@ -241,31 +209,17 @@ export default function NuevosUsuarios() {
 
       if (response.ok) {
         toast.success(`Usuario "${formData.nombreUsuario}" creado exitosamente`);
-
-        // Limpiar formulario
         setFormData({
-          documento: "",
-          nombre: "",
-          segundoNombre: "",
-          primerApellido: "",
-          segundoApellido: "",
-          correoElectronico: "",
-          nombreUsuario: "",
-          contrasena: "",
-          confirmarContrasena: "",
-          areaId: "",
-          activo: true,
+          documento: "", nombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "",
+          correoElectronico: "", nombreUsuario: "", contrasena: "", confirmarContrasena: "", areaId: "", activo: true,
         });
         setSelectedRoleIds([]);
-
-        // Redirigir a lista de usuarios después de 2 segundos
         setTimeout(() => navigate("/usuarios"), 2000);
       } else {
         throw new Error(result.message || "Error al crear el usuario");
       }
     } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error.message || "Error al crear el usuario. Por favor intente nuevamente.");
+      toast.error(error.message || "Error al crear el usuario");
     } finally {
       setLoading(false);
     }
@@ -274,33 +228,16 @@ export default function NuevosUsuarios() {
   const handleCancel = () => {
     if (window.confirm("¿Está seguro de que desea cancelar? Se perderán todos los cambios.")) {
       setFormData({
-        documento: "",
-        nombre: "",
-        segundoNombre: "",
-        primerApellido: "",
-        segundoApellido: "",
-        correoElectronico: "",
-        nombreUsuario: "",
-        contrasena: "",
-        confirmarContrasena: "",
-        areaId: "",
-        activo: true,
+        documento: "", nombre: "", segundoNombre: "", primerApellido: "", segundoApellido: "",
+        correoElectronico: "", nombreUsuario: "", contrasena: "", confirmarContrasena: "", areaId: "", activo: true,
       });
       setSelectedRoleIds([]);
       setErrors({});
     }
   };
 
-
-
   const toggleRole = (id: string) => {
-    setSelectedRoleIds(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(r => r !== id);
-      } else {
-        return [...prev, id];
-      }
-    });
+    setSelectedRoleIds(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
     if (errors.roles) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -313,13 +250,9 @@ export default function NuevosUsuarios() {
   const generarNombreUsuario = () => {
     const nombre = formData.nombre.toLowerCase().trim();
     const apellido = formData.primerApellido.toLowerCase().trim();
-
     if (nombre && apellido) {
-      // Generar username en formato: primera letra del nombre + apellido
       const username = `${nombre.charAt(0)}${apellido}`.replace(/[^a-z0-9]/g, '');
       setFormData(prev => ({ ...prev, nombreUsuario: username }));
-
-      // Limpiar error si existe
       if (errors.nombreUsuario) {
         setErrors(prev => {
           const newErrors = { ...prev };
@@ -327,7 +260,6 @@ export default function NuevosUsuarios() {
           return newErrors;
         });
       }
-
       toast.success(`Nombre de usuario generado: ${username}`);
     } else {
       toast.error("Ingresa nombre y apellido primero");
@@ -335,245 +267,222 @@ export default function NuevosUsuarios() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-6 pt-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <UserPlus className="h-7 w-7 text-blue-600" />
+    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+
+        {/* Header Profesional */}
+        <div className="bg-[#E0EDFF] rounded-2xl shadow-sm border border-[#E5E7EB] p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] flex items-center gap-3">
+                <UserPlus className="h-9 w-9 text-[#2563EB]" />
+                Nuevo Usuario
+              </h1>
+              <p className="text-[#6B7280] mt-2 text-lg">
+                Complete el formulario para registrar un nuevo usuario en el sistema de calidad ISO 9001
+              </p>
             </div>
-            Nuevo Usuario
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Complete el formulario para registrar un nuevo usuario en el sistema
-          </p>
+            <Button
+              variant="outline"
+              onClick={() => window.history.back()}
+              className="text-[#6B7280] border-[#E5E7EB] hover:bg-[#EFF6FF]"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" size-="sm" onClick={() => window.history.back()}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver
-        </Button>
-      </div>
 
-      {/* Formulario */}
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Información del Usuario
-            </CardTitle>
-            <CardDescription>
-              Los campos marcados con asterisco (*) son obligatorios
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Información Personal */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-                Datos Personales
-              </h3>
+        {/* Formulario */}
+        <form onSubmit={handleSubmit}>
+          <Card className="shadow-sm border-[#E5E7EB]">
+            <CardHeader className="bg-[#F1F5F9] border-b border-[#E5E7EB]">
+              <CardTitle className="text-2xl text-[#1E3A8A] flex items-center gap-3">
+                <Users className="h-6 w-6 text-[#2563EB]" />
+                Información del Usuario
+              </CardTitle>
+              <CardDescription className="text-[#6B7280]">
+                Los campos marcados con <span className="text-red-500">*</span> son obligatorios
+              </CardDescription>
+            </CardHeader>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Documento */}
-                <div className="space-y-2">
-                  <label htmlFor="documento" className="text-sm font-medium text-gray-700">
-                    Documento <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="documento"
-                    name="documento"
-                    type="text"
-                    placeholder="Ej: 12345678"
-                    value={formData.documento}
-                    onChange={handleInputChange}
-                    className={errors.documento ? "border-red-500" : ""}
-                  />
-                  {errors.documento && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.documento}
-                    </p>
-                  )}
-                </div>
+            <CardContent className="space-y-8 pt-6">
 
-                {/* Nombre */}
-                <div className="space-y-2">
-                  <label htmlFor="nombre" className="text-sm font-medium text-gray-700">
-                    Primer Nombre <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="nombre"
-                    name="nombre"
-                    type="text"
-                    placeholder="Ej: Juan"
-                    value={formData.nombre}
-                    onChange={handleInputChange}
-                    className={errors.nombre ? "border-red-500" : ""}
-                  />
-                  {errors.nombre && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.nombre}
-                    </p>
-                  )}
-                </div>
+              {/* Datos Personales */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#1E3A8A] flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-[#2563EB]" />
+                  Datos Personales
+                </h3>
 
-                {/* Segundo Nombre */}
-                <div className="space-y-2">
-                  <label htmlFor="segundoNombre" className="text-sm font-medium text-gray-700">
-                    Segundo Nombre
-                  </label>
-                  <Input
-                    id="segundoNombre"
-                    name="segundoNombre"
-                    type="text"
-                    placeholder="Ej: Carlos"
-                    value={formData.segundoNombre}
-                    onChange={handleInputChange}
-                  />
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="documento">
+                      Documento <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="documento"
+                      name="documento"
+                      placeholder="Ej: 12345678"
+                      value={formData.documento}
+                      onChange={handleInputChange}
+                      className={errors.documento ? "border-red-500" : ""}
+                    />
+                    {errors.documento && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.documento}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Primer Apellido */}
-                <div className="space-y-2">
-                  <label htmlFor="primerApellido" className="text-sm font-medium text-gray-700">
-                    Primer Apellido <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    id="primerApellido"
-                    name="primerApellido"
-                    type="text"
-                    placeholder="Ej: Pérez"
-                    value={formData.primerApellido}
-                    onChange={handleInputChange}
-                    className={errors.primerApellido ? "border-red-500" : ""}
-                  />
-                  {errors.primerApellido && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.primerApellido}
-                    </p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nombre">
+                      Primer Nombre <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="nombre"
+                      name="nombre"
+                      placeholder="Ej: Juan"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      className={errors.nombre ? "border-red-500" : ""}
+                    />
+                    {errors.nombre && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.nombre}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Segundo Apellido */}
-                <div className="space-y-2">
-                  <label htmlFor="segundoApellido" className="text-sm font-medium text-gray-700">
-                    Segundo Apellido
-                  </label>
-                  <Input
-                    id="segundoApellido"
-                    name="segundoApellido"
-                    type="text"
-                    placeholder="Ej: García"
-                    value={formData.segundoApellido}
-                    onChange={handleInputChange}
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="segundoNombre">Segundo Nombre</Label>
+                    <Input
+                      id="segundoNombre"
+                      name="segundoNombre"
+                      placeholder="Ej: Carlos"
+                      value={formData.segundoNombre}
+                      onChange={handleInputChange}
+                    />
+                  </div>
 
-                {/* Área */}
-                <div className="space-y-2">
-                  <label htmlFor="areaId" className="text-sm font-medium text-gray-700">
-                    Área <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="primerApellido">
+                      Primer Apellido <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="primerApellido"
+                      name="primerApellido"
+                      placeholder="Ej: Pérez"
+                      value={formData.primerApellido}
+                      onChange={handleInputChange}
+                      className={errors.primerApellido ? "border-red-500" : ""}
+                    />
+                    {errors.primerApellido && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.primerApellido}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="segundoApellido">Segundo Apellido</Label>
+                    <Input
+                      id="segundoApellido"
+                      name="segundoApellido"
+                      placeholder="Ej: García"
+                      value={formData.segundoApellido}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="areaId">
+                      Área <span className="text-red-500">*</span>
+                    </Label>
                     <select
                       id="areaId"
                       name="areaId"
                       value={formData.areaId}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.areaId ? "border-red-500" : "border-gray-300"
-                        }`}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563EB] ${errors.areaId ? "border-red-500" : "border-[#E5E7EB]"}`}
                     >
                       <option value="">Seleccione un área</option>
                       {areas.map((area) => (
                         <option key={area.id} value={area.id}>
-                          {area.nombre} ({area.codigo})
+                          [{area.codigo}] {area.nombre}
                         </option>
                       ))}
                     </select>
+                    {errors.areaId && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.areaId}
+                      </p>
+                    )}
                   </div>
-                  {errors.areaId && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.areaId}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Selección de Roles */}
-            <div className="space-y-4 pt-6 border-t">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-purple-600" />
-                Asignación de Roles
-              </h3>
+              {/* Asignación de Roles */}
+              <div className="space-y-4 pt-6 border-t border-[#E5E7EB]">
+                <h3 className="text-lg font-semibold text-[#1E3A8A] flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-[#2563EB]" />
+                  Asignación de Roles
+                </h3>
 
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">
-                  Roles <span className="text-red-500">*</span>
-                </label>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {roles.map((rol) => (
-                    <Card
+                    <div
                       key={rol.id}
-                      className={`cursor-pointer transition-all hover:shadow-md ${selectedRoleIds.includes(rol.id)
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
-                        : 'hover:border-gray-400'
-                        }`}
                       onClick={() => toggleRole(rol.id)}
+                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${selectedRoleIds.includes(rol.id)
+                        ? "bg-[#E0EDFF] border-[#2563EB]"
+                        : "bg-white border-[#E5E7EB] hover:bg-[#EFF6FF]"
+                        }`}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedRoleIds.includes(rol.id)}
-                            onChange={() => toggleRole(rol.id)}
-                            className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900">{rol.nombre}</div>
-                            <div className="text-xs text-gray-600 mt-0.5">
-                              {rol.clave}
-                            </div>
-                            {rol.descripcion && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                {rol.descripcion}
-                              </div>
-                            )}
-                          </div>
-                          {selectedRoleIds.includes(rol.id) && (
-                            <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedRoleIds.includes(rol.id)}
+                          onChange={() => toggleRole(rol.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-1 h-4 w-4 text-[#2563EB] rounded focus:ring-[#2563EB]"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{rol.nombre}</div>
+                          <div className="text-sm text-[#6B7280]">{rol.clave}</div>
+                          {rol.descripcion && (
+                            <div className="text-sm text-[#6B7280] mt-1">{rol.descripcion}</div>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
+                        {selectedRoleIds.includes(rol.id) && (
+                          <CheckCircle className="h-5 w-5 text-[#2563EB]" />
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
 
                 {errors.roles && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                  <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
                     {errors.roles}
                   </p>
                 )}
 
-                {/* Mostrar roles seleccionados como badges */}
                 {selectedRoleIds.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-sm font-medium text-gray-700 mb-2">
-                      Roles seleccionados: ({selectedRoleIds.length})
+                  <div>
+                    <p className="text-sm font-medium text-[#6B7280] mb-2">
+                      Roles seleccionados ({selectedRoleIds.length})
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {selectedRoleIds.map((id) => {
                         const rol = roles.find(r => r.id === id);
                         return rol ? (
-                          <Badge key={id} className="bg-blue-100 text-blue-800 border-blue-200">
+                          <Badge key={id} className="bg-[#E0EDFF] text-[#2563EB]">
                             {rol.nombre}
                           </Badge>
                         ) : null;
@@ -582,88 +491,65 @@ export default function NuevosUsuarios() {
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Información de Cuenta */}
-            <div className="space-y-4 pt-6 border-t">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-600" />
-                Información de Cuenta
-              </h3>
+              {/* Información de Cuenta */}
+              <div className="space-y-4 pt-6 border-t border-[#E5E7EB]">
+                <h3 className="text-lg font-semibold text-[#1E3A8A] flex items-center gap-2">
+                  <User className="h-5 w-5 text-[#2563EB]" />
+                  Información de Cuenta
+                </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Correo Electrónico */}
-                <div className="space-y-2">
-                  <label htmlFor="correoElectronico" className="text-sm font-medium text-gray-700">
-                    Correo Electrónico <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="correoElectronico">
+                      Correo Electrónico <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="correoElectronico"
                       name="correoElectronico"
                       type="email"
-                      placeholder="Ej: juan.perez@sgc.com"
+                      placeholder="Ej: juan.perez@empresa.com"
                       value={formData.correoElectronico}
                       onChange={handleInputChange}
-                      className={`pl-10 ${errors.correoElectronico ? "border-red-500" : ""}`}
+                      className={errors.correoElectronico ? "border-red-500" : ""}
                     />
+                    {errors.correoElectronico && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.correoElectronico}
+                      </p>
+                    )}
                   </div>
-                  {errors.correoElectronico && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.correoElectronico}
-                    </p>
-                  )}
-                </div>
 
-                {/* Nombre de Usuario */}
-                <div className="space-y-2">
-                  <label htmlFor="nombreUsuario" className="text-sm font-medium text-gray-700">
-                    Nombre de Usuario <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="nombreUsuario">
+                      Nombre de Usuario <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex gap-2">
                       <Input
                         id="nombreUsuario"
                         name="nombreUsuario"
-                        type="text"
                         placeholder="Ej: jperez"
                         value={formData.nombreUsuario}
                         onChange={handleInputChange}
-                        className={`pl-10 ${errors.nombreUsuario ? "border-red-500" : ""}`}
+                        className={`flex-1 ${errors.nombreUsuario ? "border-red-500" : ""}`}
                       />
+                      <Button type="button" variant="outline" onClick={generarNombreUsuario}>
+                        <Sparkles className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={generarNombreUsuario}
-                      className="flex items-center gap-2"
-                      title="Generar nombre de usuario automáticamente"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      Generar
-                    </Button>
+                    {errors.nombreUsuario && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.nombreUsuario}
+                      </p>
+                    )}
                   </div>
-                  {errors.nombreUsuario && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.nombreUsuario}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500">
-                    💡 Usa el botón "Generar" para crear un nombre de usuario automáticamente
-                  </p>
-                </div>
 
-                {/* Contraseña */}
-                <div className="space-y-2">
-                  <label htmlFor="contrasena" className="text-sm font-medium text-gray-700">
-                    Contraseña <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="contrasena">
+                      Contraseña <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="contrasena"
                       name="contrasena"
@@ -671,24 +557,20 @@ export default function NuevosUsuarios() {
                       placeholder="Mínimo 6 caracteres"
                       value={formData.contrasena}
                       onChange={handleInputChange}
-                      className={`pl-10 ${errors.contrasena ? "border-red-500" : ""}`}
+                      className={errors.contrasena ? "border-red-500" : ""}
                     />
+                    {errors.contrasena && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.contrasena}
+                      </p>
+                    )}
                   </div>
-                  {errors.contrasena && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.contrasena}
-                    </p>
-                  )}
-                </div>
 
-                {/* Confirmar Contraseña */}
-                <div className="space-y-2">
-                  <label htmlFor="confirmarContrasena" className="text-sm font-medium text-gray-700">
-                    Confirmar Contraseña <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmarContrasena">
+                      Confirmar Contraseña <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="confirmarContrasena"
                       name="confirmarContrasena"
@@ -696,65 +578,70 @@ export default function NuevosUsuarios() {
                       placeholder="Repita la contraseña"
                       value={formData.confirmarContrasena}
                       onChange={handleInputChange}
-                      className={`pl-10 ${errors.confirmarContrasena ? "border-red-500" : ""}`}
+                      className={errors.confirmarContrasena ? "border-red-500" : ""}
                     />
+                    {errors.confirmarContrasena && (
+                      <p className="text-sm text-[#EF4444] flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.confirmarContrasena}
+                      </p>
+                    )}
                   </div>
-                  {errors.confirmarContrasena && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.confirmarContrasena}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
 
-            {/* Estado */}
-            <div className="space-y-4 pt-6 border-t">
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="activo"
-                  name="activo"
-                  checked={formData.activo}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="activo" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Usuario Activo
-                  <Badge variant="outline" className={formData.activo ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-700 border-gray-200"}>
+              {/* Estado del usuario */}
+              <div className="pt-6 border-t border-[#E5E7EB]">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="activo"
+                    name="activo"
+                    checked={formData.activo}
+                    onChange={handleInputChange}
+                    className="h-5 w-5 text-[#2563EB] rounded focus:ring-[#2563EB]"
+                  />
+                  <Label htmlFor="activo" className="font-medium cursor-pointer">
+                    Usuario Activo
+                  </Label>
+                  <Badge className={formData.activo ? "bg-[#ECFDF5] text-[#22C55E]" : "bg-gray-100 text-gray-600"}>
                     {formData.activo ? "Activo" : "Inactivo"}
                   </Badge>
-                </label>
+                </div>
+                <p className="text-sm text-[#6B7280] mt-2">
+                  Los usuarios activos pueden iniciar sesión en el sistema
+                </p>
               </div>
-              <p className="text-sm text-gray-500">
-                Los usuarios activos pueden iniciar sesión en el sistema
-              </p>
-            </div>
 
-            {/* Botones */}
-            <div className="flex gap-3 pt-6 border-t">
-              <Button type="submit" disabled={loading} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Guardar Usuario
-                  </>
-                )}
-              </Button>
-              <Button type="button" variant="outline" onClick={handleCancel} disabled={loading} className="flex-1">
-                <X className="w-4 h-4 mr-2" />
-                Cancelar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
+              {/* Botones de acción */}
+              <div className="flex gap-4 pt-6 border-t border-[#E5E7EB]">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm"
+                >
+                  {loading ? "Guardando..." : (
+                    <>
+                      <Save className="mr-2 h-5 w-5" />
+                      Guardar Usuario
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={loading}
+                  className="flex-1 border-[#E5E7EB] hover:bg-[#EFF6FF]"
+                >
+                  <X className="mr-2 h-5 w-5" />
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
     </div>
   );
 }
