@@ -63,6 +63,8 @@ import GestionarProcesos from "./pages/procesos/GestionarProcesos";
 import MapaProcesos from "./pages/procesos/MapaProcesos";
 import InstanciasActivas from "./pages/procesos/InstanciasActivas";
 import MapaProcesosDiagrama from "./pages/procesos/MapaProcesosDiagrama";
+import Configuracion from "./pages/Configuracion";
+import Seguridad from "./pages/Seguridad";
 
 import { ProtectedLayout } from "./components/ProtectedLayout";
 import { AuthProvider } from "./context/AuthContext";
@@ -155,6 +157,12 @@ function App() {
             <Route path="/procesos/mapa" element={<MapaProcesos />} />
             <Route path="/procesos/instancias" element={<InstanciasActivas />} />
             <Route path="/procesos/diagrama" element={<MapaProcesosDiagrama />} />
+
+            {/* Configuracion y seguridad */}
+            <Route path="/configuracion" element={<Configuracion />} />
+            <Route path="/seguridad" element={<Seguridad/>} />
+            
+
           </Route>
 
           {/* Catch-all */}

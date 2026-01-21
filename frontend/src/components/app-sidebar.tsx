@@ -16,6 +16,8 @@ import {
   BookOpen,
   CheckSquare,
   FileX,
+  Settings,
+
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
@@ -103,6 +105,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         badgeVariant: "default" as const,
       },
       {
+        title: "Configuración",
+        icon: Settings,
+        url: "/configuracion",
+      },
+      {
+        title: "Seguridad",
+        icon: Shield,
+        url: "/seguridad",
+      },
+      
+      {
         title: "Áreas",
         url: "#",
         icon: Building2,
@@ -169,6 +182,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
         ],
       },
+      
+
       {
         title: "Procesos",
         url: "#",
@@ -328,6 +343,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
+        
         title: "Capacitaciones",
         icon: GraduationCap,
         url: "#",
@@ -364,6 +380,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
   };
+  
 
   return (
     <Sidebar collapsible="icon" {...props} className="border-r border-sidebar-border bg-gradient-to-b from-sidebar to-sidebar/95">
